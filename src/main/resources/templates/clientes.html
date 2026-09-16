@@ -1,0 +1,862 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Rescate Vial CR | Clientes</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
+
+    <link rel="stylesheet" href="/css/clientes.css">
+</head>
+
+<body>
+
+    <div class="app-layout">
+
+        <!-- SIDEBAR -->
+        <aside class="sidebar" id="sidebar">
+
+            <div class="sidebar-header">
+
+                <div class="brand-icon">
+                    <i class="bi bi-truck"></i>
+                </div>
+
+                <div class="brand-text">
+                    <h1>Rescate Vial CR</h1>
+                    <span>Gestión de Asistencia Vial</span>
+                </div>
+
+                <button class="close-sidebar" id="closeSidebar">
+                    <i class="bi bi-x-lg"></i>
+                </button>
+
+            </div>
+
+            <nav class="sidebar-nav">
+
+                <div class="nav-section">
+                    <span class="nav-title">PRINCIPAL</span>
+
+                    <a href="/dashboard" class="nav-link">
+                        <i class="bi bi-grid-1x2-fill"></i>
+                        <span>Dashboard</span>
+                    </a>
+                </div>
+
+                <div class="nav-section">
+
+                    <span class="nav-title">OPERACIONES</span>
+
+                    <a href="#" class="nav-link">
+                        <i class="bi bi-exclamation-triangle"></i>
+                        <span>Incidentes</span>
+                        <span class="nav-badge">4</span>
+                    </a>
+
+                    <a href="#" class="nav-link">
+                        <i class="bi bi-send"></i>
+                        <span>Despacho</span>
+                    </a>
+
+                    <a href="#" class="nav-link">
+                        <i class="bi bi-truck-front"></i>
+                        <span>Unidades</span>
+                    </a>
+
+                    <a href="#" class="nav-link">
+                        <i class="bi bi-camera"></i>
+                        <span>Evidencias</span>
+                    </a>
+
+                </div>
+
+                <div class="nav-section">
+
+                    <span class="nav-title">GESTIÓN</span>
+
+                    <a href="/clientes" class="nav-link active">
+                        <i class="bi bi-people-fill"></i>
+                        <span>Clientes</span>
+                    </a>
+
+                    <a href="#" class="nav-link">
+                        <i class="bi bi-car-front"></i>
+                        <span>Vehículos</span>
+                    </a>
+
+                    <a href="#" class="nav-link">
+                        <i class="bi bi-person-badge"></i>
+                        <span>Personal</span>
+                    </a>
+
+                    <a href="#" class="nav-link">
+                        <i class="bi bi-tools"></i>
+                        <span>Talleres</span>
+                    </a>
+
+                </div>
+
+                <div class="nav-section">
+
+                    <span class="nav-title">SERVICIOS</span>
+
+                    <a href="#" class="nav-link">
+                        <i class="bi bi-clipboard-check"></i>
+                        <span>Inspecciones</span>
+                    </a>
+
+                    <a href="#" class="nav-link">
+                        <i class="bi bi-wrench-adjustable"></i>
+                        <span>Reparaciones</span>
+                    </a>
+
+                    <a href="#" class="nav-link">
+                        <i class="bi bi-box-seam"></i>
+                        <span>Repuestos</span>
+                    </a>
+
+                </div>
+
+                <div class="nav-section">
+
+                    <span class="nav-title">FINANZAS</span>
+
+                    <a href="#" class="nav-link">
+                        <i class="bi bi-receipt"></i>
+                        <span>Facturación</span>
+                    </a>
+
+                    <a href="#" class="nav-link">
+                        <i class="bi bi-credit-card"></i>
+                        <span>Pagos</span>
+                    </a>
+
+                </div>
+
+                <div class="nav-section">
+
+                    <span class="nav-title">CONTROL</span>
+
+                    <a href="#" class="nav-link">
+                        <i class="bi bi-clock-history"></i>
+                        <span>Historial</span>
+                    </a>
+
+                </div>
+
+            </nav>
+
+            <div class="sidebar-footer">
+
+                <div class="system-status">
+
+                    <span class="status-dot"></span>
+
+                    <div>
+                        <strong>Sistema operativo</strong>
+                        <span>Todos los servicios activos</span>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </aside>
+
+        <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+
+        <!-- CONTENIDO PRINCIPAL -->
+        <div class="main-content">
+
+            <!-- TOPBAR -->
+            <header class="topbar">
+
+                <div class="topbar-left">
+
+                    <button class="menu-button" id="menuButton">
+                        <i class="bi bi-list"></i>
+                    </button>
+
+                    <div>
+                        <h2>Clientes</h2>
+                        <span>Administración de clientes</span>
+                    </div>
+
+                </div>
+
+                <div class="topbar-right">
+
+                    <button class="topbar-action">
+                        <i class="bi bi-bell"></i>
+                        <span class="notification-dot"></span>
+                    </button>
+
+                    <div class="user-divider"></div>
+
+                    <div class="user-profile">
+
+                        <div class="user-avatar">
+                            AD
+                        </div>
+
+                        <div class="user-info">
+                            <strong>Administrador</strong>
+                            <span>Administrador del sistema</span>
+                        </div>
+
+                        <i class="bi bi-chevron-down user-arrow"></i>
+
+                    </div>
+
+                </div>
+
+            </header>
+
+
+            <!-- CONTENIDO CLIENTES -->
+            <main class="page-content">
+
+                <!-- ENCABEZADO -->
+                <section class="page-heading">
+
+                    <div>
+                        <span class="section-label">GESTIÓN</span>
+                        <h2>Gestión de clientes</h2>
+
+                        <p>
+                            Consulte, registre y administre los clientes
+                            del sistema de asistencia vial.
+                        </p>
+                    </div>
+
+                    <button class="btn-primary-custom" id="btnNuevoCliente">
+                        <i class="bi bi-person-plus"></i>
+                        Nuevo cliente
+                    </button>
+
+                </section>
+
+
+                <!-- ESTADÍSTICAS -->
+                <section class="client-stats">
+
+                    <article class="summary-card">
+
+                        <div class="summary-icon primary">
+                            <i class="bi bi-people"></i>
+                        </div>
+
+                        <div>
+                            <span>Total de clientes</span>
+                            <strong>248</strong>
+                            <small>Registrados en el sistema</small>
+                        </div>
+
+                    </article>
+
+
+                    <article class="summary-card">
+
+                        <div class="summary-icon success">
+                            <i class="bi bi-person-check"></i>
+                        </div>
+
+                        <div>
+                            <span>Clientes activos</span>
+                            <strong>241</strong>
+                            <small>Actualmente habilitados</small>
+                        </div>
+
+                    </article>
+
+
+                    <article class="summary-card">
+
+                        <div class="summary-icon warning">
+                            <i class="bi bi-car-front"></i>
+                        </div>
+
+                        <div>
+                            <span>Vehículos asociados</span>
+                            <strong>327</strong>
+                            <small>Vehículos registrados</small>
+                        </div>
+
+                    </article>
+
+                </section>
+
+
+                <!-- PANEL PRINCIPAL -->
+                <section class="content-card">
+
+                    <div class="content-card-header">
+
+                        <div>
+                            <span class="section-label">REGISTROS</span>
+                            <h3>Clientes registrados</h3>
+                        </div>
+
+                        <div class="table-tools">
+
+                            <div class="search-box">
+                                <i class="bi bi-search"></i>
+
+                                <input type="text" id="buscarCliente"
+                                    placeholder="Buscar por nombre, identificación...">
+                            </div>
+
+                            <select id="filtroEstado" class="filter-select">
+                                <option value="todos">Todos los estados</option>
+                                <option value="activo">Activos</option>
+                                <option value="inactivo">Inactivos</option>
+                            </select>
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- TABLA -->
+                    <div class="table-responsive">
+
+                        <table class="clients-table">
+
+                            <thead>
+                                <tr>
+                                    <th>IDENTIFICACIÓN</th>
+                                    <th>CLIENTE</th>
+                                    <th>TELÉFONO</th>
+                                    <th>CORREO</th>
+                                    <th>VEHÍCULOS</th>
+                                    <th>ESTADO</th>
+                                    <th>ACCIONES</th>
+                                </tr>
+                            </thead>
+
+                            <tbody id="tablaClientes">
+
+                                <tr data-estado="activo">
+
+                                    <td>
+                                        <strong>1-1111-1111</strong>
+                                    </td>
+
+                                    <td>
+                                        <div class="client-cell">
+
+                                            <div class="client-avatar">
+                                                JM
+                                            </div>
+
+                                            <div>
+                                                <strong>Juan Mora Rodríguez</strong>
+                                                <span>Cliente desde 2025</span>
+                                            </div>
+
+                                        </div>
+                                    </td>
+
+                                    <td>
+                                        <i class="bi bi-telephone"></i>
+                                        8888-1111
+                                    </td>
+
+                                    <td>
+                                        juan.mora@email.com
+                                    </td>
+
+                                    <td>
+                                        <span class="vehicle-count">
+                                            2 vehículos
+                                        </span>
+                                    </td>
+
+                                    <td>
+                                        <span class="status-badge active-status">
+                                            Activo
+                                        </span>
+                                    </td>
+
+                                    <td>
+                                        <div class="action-buttons">
+
+                                            <button class="action-btn view" title="Ver cliente">
+                                                <i class="bi bi-eye"></i>
+                                            </button>
+
+                                            <button class="action-btn edit" title="Editar cliente">
+                                                <i class="bi bi-pencil"></i>
+                                            </button>
+
+                                        </div>
+                                    </td>
+
+                                </tr>
+
+
+                                <tr data-estado="activo">
+
+                                    <td>
+                                        <strong>2-0789-0456</strong>
+                                    </td>
+
+                                    <td>
+                                        <div class="client-cell">
+
+                                            <div class="client-avatar">
+                                                MA
+                                            </div>
+
+                                            <div>
+                                                <strong>María Arias Solano</strong>
+                                                <span>Cliente desde 2025</span>
+                                            </div>
+
+                                        </div>
+                                    </td>
+
+                                    <td>
+                                        <i class="bi bi-telephone"></i>
+                                        8700-2244
+                                    </td>
+
+                                    <td>
+                                        maria.arias@email.com
+                                    </td>
+
+                                    <td>
+                                        <span class="vehicle-count">
+                                            1 vehículo
+                                        </span>
+                                    </td>
+
+                                    <td>
+                                        <span class="status-badge active-status">
+                                            Activo
+                                        </span>
+                                    </td>
+
+                                    <td>
+                                        <div class="action-buttons">
+
+                                            <button class="action-btn view" title="Ver cliente">
+                                                <i class="bi bi-eye"></i>
+                                            </button>
+
+                                            <button class="action-btn edit" title="Editar cliente">
+                                                <i class="bi bi-pencil"></i>
+                                            </button>
+
+                                        </div>
+                                    </td>
+
+                                </tr>
+
+
+                                <tr data-estado="activo">
+
+                                    <td>
+                                        <strong>1-1456-0987</strong>
+                                    </td>
+
+                                    <td>
+                                        <div class="client-cell">
+
+                                            <div class="client-avatar">
+                                                CR
+                                            </div>
+
+                                            <div>
+                                                <strong>Carlos Rodríguez Vega</strong>
+                                                <span>Cliente desde 2026</span>
+                                            </div>
+
+                                        </div>
+                                    </td>
+
+                                    <td>
+                                        <i class="bi bi-telephone"></i>
+                                        8321-5678
+                                    </td>
+
+                                    <td>
+                                        carlos.rodriguez@email.com
+                                    </td>
+
+                                    <td>
+                                        <span class="vehicle-count">
+                                            3 vehículos
+                                        </span>
+                                    </td>
+
+                                    <td>
+                                        <span class="status-badge active-status">
+                                            Activo
+                                        </span>
+                                    </td>
+
+                                    <td>
+                                        <div class="action-buttons">
+
+                                            <button class="action-btn view" title="Ver cliente">
+                                                <i class="bi bi-eye"></i>
+                                            </button>
+
+                                            <button class="action-btn edit" title="Editar cliente">
+                                                <i class="bi bi-pencil"></i>
+                                            </button>
+
+                                        </div>
+                                    </td>
+
+                                </tr>
+
+
+                                <tr data-estado="inactivo">
+
+                                    <td>
+                                        <strong>3-0333-0721</strong>
+                                    </td>
+
+                                    <td>
+                                        <div class="client-cell">
+
+                                            <div class="client-avatar inactive-avatar">
+                                                AL
+                                            </div>
+
+                                            <div>
+                                                <strong>Ana López Castro</strong>
+                                                <span>Cliente desde 2024</span>
+                                            </div>
+
+                                        </div>
+                                    </td>
+
+                                    <td>
+                                        <i class="bi bi-telephone"></i>
+                                        7012-3456
+                                    </td>
+
+                                    <td>
+                                        ana.lopez@email.com
+                                    </td>
+
+                                    <td>
+                                        <span class="vehicle-count">
+                                            1 vehículo
+                                        </span>
+                                    </td>
+
+                                    <td>
+                                        <span class="status-badge inactive-status">
+                                            Inactivo
+                                        </span>
+                                    </td>
+
+                                    <td>
+                                        <div class="action-buttons">
+
+                                            <button class="action-btn view" title="Ver cliente">
+                                                <i class="bi bi-eye"></i>
+                                            </button>
+
+                                            <button class="action-btn edit" title="Editar cliente">
+                                                <i class="bi bi-pencil"></i>
+                                            </button>
+
+                                        </div>
+                                    </td>
+
+                                </tr>
+
+
+                                <tr data-estado="activo">
+
+                                    <td>
+                                        <strong>1-0921-0643</strong>
+                                    </td>
+
+                                    <td>
+                                        <div class="client-cell">
+
+                                            <div class="client-avatar">
+                                                DS
+                                            </div>
+
+                                            <div>
+                                                <strong>Daniel Sánchez Rojas</strong>
+                                                <span>Cliente desde 2026</span>
+                                            </div>
+
+                                        </div>
+                                    </td>
+
+                                    <td>
+                                        <i class="bi bi-telephone"></i>
+                                        8990-1122
+                                    </td>
+
+                                    <td>
+                                        daniel.sanchez@email.com
+                                    </td>
+
+                                    <td>
+                                        <span class="vehicle-count">
+                                            2 vehículos
+                                        </span>
+                                    </td>
+
+                                    <td>
+                                        <span class="status-badge active-status">
+                                            Activo
+                                        </span>
+                                    </td>
+
+                                    <td>
+                                        <div class="action-buttons">
+
+                                            <button class="action-btn view" title="Ver cliente">
+                                                <i class="bi bi-eye"></i>
+                                            </button>
+
+                                            <button class="action-btn edit" title="Editar cliente">
+                                                <i class="bi bi-pencil"></i>
+                                            </button>
+
+                                        </div>
+                                    </td>
+
+                                </tr>
+
+                            </tbody>
+
+                        </table>
+
+                    </div>
+
+
+                    <!-- PIE TABLA -->
+                    <div class="table-footer">
+
+                        <span>
+                            Mostrando <strong id="cantidadVisible">5</strong>
+                            clientes de 248 registrados
+                        </span>
+
+                        <div class="pagination-custom">
+
+                            <button disabled>
+                                <i class="bi bi-chevron-left"></i>
+                            </button>
+
+                            <button class="active">
+                                1
+                            </button>
+
+                            <button>
+                                2
+                            </button>
+
+                            <button>
+                                3
+                            </button>
+
+                            <span>...</span>
+
+                            <button>
+                                50
+                            </button>
+
+                            <button>
+                                <i class="bi bi-chevron-right"></i>
+                            </button>
+
+                        </div>
+
+                    </div>
+
+                </section>
+
+            </main>
+
+        </div>
+
+    </div>
+
+
+    <!-- ==================================
+     MODAL NUEVO CLIENTE
+     ================================== -->
+
+    <div class="custom-modal" id="modalCliente">
+
+        <div class="modal-backdrop-custom" id="modalBackdrop"></div>
+
+        <div class="modal-panel">
+
+            <div class="modal-header-custom">
+
+                <div>
+
+                    <span class="section-label">
+                        NUEVO REGISTRO
+                    </span>
+
+                    <h3>Registrar cliente</h3>
+
+                    <p>
+                        Complete la información del nuevo cliente.
+                    </p>
+
+                </div>
+
+                <button class="modal-close" id="cerrarModal">
+                    <i class="bi bi-x-lg"></i>
+                </button>
+
+            </div>
+
+
+            <form id="formCliente">
+
+                <div class="form-grid">
+
+                    <div class="form-group-custom">
+
+                        <label for="identificacion">
+                            Identificación
+                        </label>
+
+                        <input type="text" id="identificacion" placeholder="Ej: 1-1111-1111" required>
+
+                    </div>
+
+
+                    <div class="form-group-custom">
+
+                        <label for="nombre">
+                            Nombre
+                        </label>
+
+                        <input type="text" id="nombre" placeholder="Nombre" required>
+
+                    </div>
+
+
+                    <div class="form-group-custom">
+
+                        <label for="primerApellido">
+                            Primer apellido
+                        </label>
+
+                        <input type="text" id="primerApellido" placeholder="Primer apellido" required>
+
+                    </div>
+
+
+                    <div class="form-group-custom">
+
+                        <label for="segundoApellido">
+                            Segundo apellido
+                        </label>
+
+                        <input type="text" id="segundoApellido" placeholder="Segundo apellido">
+
+                    </div>
+
+
+                    <div class="form-group-custom">
+
+                        <label for="telefono">
+                            Teléfono
+                        </label>
+
+                        <input type="tel" id="telefono" placeholder="8888-8888" required>
+
+                    </div>
+
+
+                    <div class="form-group-custom">
+
+                        <label for="correo">
+                            Correo electrónico
+                        </label>
+
+                        <input type="email" id="correo" placeholder="cliente@email.com" required>
+
+                    </div>
+
+
+                    <div class="form-group-custom full-width">
+
+                        <label for="direccion">
+                            Dirección
+                        </label>
+
+                        <textarea id="direccion" rows="3"
+                            placeholder="Provincia, cantón, distrito y otras señas"></textarea>
+
+                    </div>
+
+
+                    <div class="form-group-custom">
+
+                        <label for="estado">
+                            Estado
+                        </label>
+
+                        <select id="estado">
+
+                            <option value="activo">
+                                Activo
+                            </option>
+
+                            <option value="inactivo">
+                                Inactivo
+                            </option>
+
+                        </select>
+
+                    </div>
+
+                </div>
+
+
+                <div class="modal-actions">
+
+                    <button type="button" class="btn-secondary-custom" id="cancelarCliente">
+
+                        Cancelar
+
+                    </button>
+
+                    <button type="submit" class="btn-primary-custom">
+
+                        <i class="bi bi-check-lg"></i>
+                        Guardar cliente
+
+                    </button>
+
+                </div>
+
+            </form>
+
+        </div>
+
+    </div>
+
+
+    <script src="/js/clientes.js"></script>
+
+</body>
+
+</html>

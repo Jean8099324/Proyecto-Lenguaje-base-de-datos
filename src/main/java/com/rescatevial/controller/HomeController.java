@@ -20,4 +20,9 @@ public class HomeController {
     public String dashboard() {
         return "dashboard";
     }
+
+    @GetMapping("/clientes")
+    public String clientes() {
+        return "clientes";
+    }
 }
