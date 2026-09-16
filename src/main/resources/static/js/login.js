@@ -17,8 +17,7 @@ document.addEventListener("DOMContentLoaded", function () {
         icon.classList.toggle("bi-eye-slash", isPassword);
     });
 
-    // Evitar que el formulario se envíe por ahora.
-    // La autenticación real se agregará posteriormente.
+    // Navegación temporal mientras no existe autenticación real
     loginForm.addEventListener("submit", function (event) {
         event.preventDefault();
 
@@ -29,7 +28,9 @@ document.addEventListener("DOMContentLoaded", function () {
             return;
         }
 
-        console.log("Formulario listo para futura autenticación.");
+        // Posteriormente será reemplazado por Spring Security
+        // y validación de usuarios.
+        window.location.href = "/dashboard";
     });
 
 });

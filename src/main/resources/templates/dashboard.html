@@ -1,0 +1,609 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Rescate Vial CR | Dashboard</title>
+
+    <!-- Bootstrap -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css"
+          rel="stylesheet">
+
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet"
+          href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
+
+    <!-- CSS propio -->
+    <link rel="stylesheet" href="/css/dashboard.css">
+</head>
+
+<body>
+
+<div class="app-layout">
+
+    <!-- =========================
+         MENÚ LATERAL
+         ========================= -->
+    <aside class="sidebar" id="sidebar">
+
+        <div class="sidebar-header">
+
+            <div class="brand-icon">
+                <i class="bi bi-truck"></i>
+            </div>
+
+            <div class="brand-text">
+                <h1>Rescate Vial CR</h1>
+                <span>Gestión de Asistencia Vial</span>
+            </div>
+
+            <button class="close-sidebar" id="closeSidebar">
+                <i class="bi bi-x-lg"></i>
+            </button>
+
+        </div>
+
+
+        <nav class="sidebar-nav">
+
+            <!-- PRINCIPAL -->
+            <div class="nav-section">
+
+                <span class="nav-title">PRINCIPAL</span>
+
+                <a href="/dashboard" class="nav-link active">
+                    <i class="bi bi-grid-1x2-fill"></i>
+                    <span>Dashboard</span>
+                </a>
+
+            </div>
+
+
+            <!-- OPERACIONES -->
+            <div class="nav-section">
+
+                <span class="nav-title">OPERACIONES</span>
+
+                <a href="#" class="nav-link">
+                    <i class="bi bi-exclamation-triangle"></i>
+                    <span>Incidentes</span>
+                    <span class="nav-badge">4</span>
+                </a>
+
+                <a href="#" class="nav-link">
+                    <i class="bi bi-send"></i>
+                    <span>Despacho</span>
+                </a>
+
+                <a href="#" class="nav-link">
+                    <i class="bi bi-truck-front"></i>
+                    <span>Unidades</span>
+                </a>
+
+                <a href="#" class="nav-link">
+                    <i class="bi bi-camera"></i>
+                    <span>Evidencias</span>
+                </a>
+
+            </div>
+
+
+            <!-- GESTIÓN -->
+            <div class="nav-section">
+
+                <span class="nav-title">GESTIÓN</span>
+
+                <a href="#" class="nav-link">
+                    <i class="bi bi-people"></i>
+                    <span>Clientes</span>
+                </a>
+
+                <a href="#" class="nav-link">
+                    <i class="bi bi-car-front"></i>
+                    <span>Vehículos</span>
+                </a>
+
+                <a href="#" class="nav-link">
+                    <i class="bi bi-person-badge"></i>
+                    <span>Personal</span>
+                </a>
+
+                <a href="#" class="nav-link">
+                    <i class="bi bi-tools"></i>
+                    <span>Talleres</span>
+                </a>
+
+            </div>
+
+
+            <!-- SERVICIOS -->
+            <div class="nav-section">
+
+                <span class="nav-title">SERVICIOS</span>
+
+                <a href="#" class="nav-link">
+                    <i class="bi bi-clipboard-check"></i>
+                    <span>Inspecciones</span>
+                </a>
+
+                <a href="#" class="nav-link">
+                    <i class="bi bi-wrench-adjustable"></i>
+                    <span>Reparaciones</span>
+                </a>
+
+                <a href="#" class="nav-link">
+                    <i class="bi bi-box-seam"></i>
+                    <span>Repuestos</span>
+                </a>
+
+            </div>
+
+
+            <!-- FINANZAS -->
+            <div class="nav-section">
+
+                <span class="nav-title">FINANZAS</span>
+
+                <a href="#" class="nav-link">
+                    <i class="bi bi-receipt"></i>
+                    <span>Facturación</span>
+                </a>
+
+                <a href="#" class="nav-link">
+                    <i class="bi bi-credit-card"></i>
+                    <span>Pagos</span>
+                </a>
+
+            </div>
+
+
+            <!-- HISTORIAL -->
+            <div class="nav-section">
+
+                <span class="nav-title">CONTROL</span>
+
+                <a href="#" class="nav-link">
+                    <i class="bi bi-clock-history"></i>
+                    <span>Historial</span>
+                </a>
+
+            </div>
+
+        </nav>
+
+
+        <div class="sidebar-footer">
+
+            <div class="system-status">
+                <span class="status-dot"></span>
+
+                <div>
+                    <strong>Sistema operativo</strong>
+                    <span>Todos los servicios activos</span>
+                </div>
+            </div>
+
+        </div>
+
+    </aside>
+
+
+    <!-- Fondo móvil -->
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+
+    <!-- =========================
+         CONTENIDO PRINCIPAL
+         ========================= -->
+    <div class="main-content">
+
+        <!-- HEADER -->
+        <header class="topbar">
+
+            <div class="topbar-left">
+
+                <button class="menu-button" id="menuButton">
+                    <i class="bi bi-list"></i>
+                </button>
+
+                <div>
+                    <h2>Dashboard</h2>
+                    <span>Panel general de operaciones</span>
+                </div>
+
+            </div>
+
+
+            <div class="topbar-right">
+
+                <button class="topbar-action" title="Notificaciones">
+                    <i class="bi bi-bell"></i>
+                    <span class="notification-dot"></span>
+                </button>
+
+                <div class="user-divider"></div>
+
+                <div class="user-profile">
+
+                    <div class="user-avatar">
+                        AD
+                    </div>
+
+                    <div class="user-info">
+                        <strong>Administrador</strong>
+                        <span>Administrador del sistema</span>
+                    </div>
+
+                    <i class="bi bi-chevron-down user-arrow"></i>
+
+                </div>
+
+            </div>
+
+        </header>
+
+
+        <!-- CONTENIDO -->
+        <main class="dashboard-content">
+
+            <!-- ENCABEZADO -->
+            <section class="welcome-section">
+
+                <div>
+                    <span class="section-label">RESUMEN OPERATIVO</span>
+                    <h2>Buenos días, Administrador</h2>
+                    <p>
+                        Aquí tiene un resumen del estado actual
+                        de las operaciones de Rescate Vial CR.
+                    </p>
+                </div>
+
+                <button class="btn-new-incident">
+                    <i class="bi bi-plus-lg"></i>
+                    Nuevo incidente
+                </button>
+
+            </section>
+
+
+            <!-- TARJETAS -->
+            <section class="stats-grid">
+
+                <article class="stat-card">
+
+                    <div class="stat-icon danger">
+                        <i class="bi bi-exclamation-triangle"></i>
+                    </div>
+
+                    <div class="stat-content">
+                        <span>Incidentes activos</span>
+                        <strong>4</strong>
+
+                        <small>
+                            <i class="bi bi-arrow-up"></i>
+                            2 nuevos hoy
+                        </small>
+                    </div>
+
+                </article>
+
+
+                <article class="stat-card">
+
+                    <div class="stat-icon success">
+                        <i class="bi bi-truck-front"></i>
+                    </div>
+
+                    <div class="stat-content">
+                        <span>Unidades disponibles</span>
+                        <strong>8</strong>
+
+                        <small class="neutral">
+                            de 12 unidades
+                        </small>
+                    </div>
+
+                </article>
+
+
+                <article class="stat-card">
+
+                    <div class="stat-icon warning">
+                        <i class="bi bi-clock"></i>
+                    </div>
+
+                    <div class="stat-content">
+                        <span>En atención</span>
+                        <strong>3</strong>
+
+                        <small class="neutral">
+                            servicios en curso
+                        </small>
+                    </div>
+
+                </article>
+
+
+                <article class="stat-card">
+
+                    <div class="stat-icon primary">
+                        <i class="bi bi-people"></i>
+                    </div>
+
+                    <div class="stat-content">
+                        <span>Clientes registrados</span>
+                        <strong>248</strong>
+
+                        <small>
+                            <i class="bi bi-arrow-up"></i>
+                            6 este mes
+                        </small>
+                    </div>
+
+                </article>
+
+            </section>
+
+
+            <!-- ÁREA CENTRAL -->
+            <section class="dashboard-grid">
+
+                <!-- INCIDENTES RECIENTES -->
+                <article class="dashboard-card incidents-card">
+
+                    <div class="card-header-custom">
+
+                        <div>
+                            <span class="section-label">OPERACIONES</span>
+                            <h3>Incidentes recientes</h3>
+                        </div>
+
+                        <a href="#">
+                            Ver todos
+                            <i class="bi bi-arrow-right"></i>
+                        </a>
+
+                    </div>
+
+
+                    <div class="table-responsive">
+
+                        <table class="incidents-table">
+
+                            <thead>
+                            <tr>
+                                <th>INCIDENTE</th>
+                                <th>UBICACIÓN</th>
+                                <th>TIPO</th>
+                                <th>ESTADO</th>
+                                <th>HORA</th>
+                            </tr>
+                            </thead>
+
+                            <tbody>
+
+                            <tr>
+                                <td>
+                                    <strong>#RV-1024</strong>
+                                </td>
+
+                                <td>
+                                    <i class="bi bi-geo-alt"></i>
+                                    San José
+                                </td>
+
+                                <td>Colisión</td>
+
+                                <td>
+                                    <span class="status-badge attending">
+                                        En atención
+                                    </span>
+                                </td>
+
+                                <td>10:42 AM</td>
+                            </tr>
+
+
+                            <tr>
+                                <td>
+                                    <strong>#RV-1023</strong>
+                                </td>
+
+                                <td>
+                                    <i class="bi bi-geo-alt"></i>
+                                    Heredia
+                                </td>
+
+                                <td>Avería</td>
+
+                                <td>
+                                    <span class="status-badge dispatched">
+                                        Despachado
+                                    </span>
+                                </td>
+
+                                <td>09:55 AM</td>
+                            </tr>
+
+
+                            <tr>
+                                <td>
+                                    <strong>#RV-1022</strong>
+                                </td>
+
+                                <td>
+                                    <i class="bi bi-geo-alt"></i>
+                                    Alajuela
+                                </td>
+
+                                <td>Neumático</td>
+
+                                <td>
+                                    <span class="status-badge pending">
+                                        Pendiente
+                                    </span>
+                                </td>
+
+                                <td>09:21 AM</td>
+                            </tr>
+
+
+                            <tr>
+                                <td>
+                                    <strong>#RV-1021</strong>
+                                </td>
+
+                                <td>
+                                    <i class="bi bi-geo-alt"></i>
+                                    Cartago
+                                </td>
+
+                                <td>Grúa</td>
+
+                                <td>
+                                    <span class="status-badge completed">
+                                        Finalizado
+                                    </span>
+                                </td>
+
+                                <td>08:47 AM</td>
+                            </tr>
+
+                            </tbody>
+
+                        </table>
+
+                    </div>
+
+                </article>
+
+
+                <!-- ESTADO DE UNIDADES -->
+                <article class="dashboard-card units-card">
+
+                    <div class="card-header-custom">
+
+                        <div>
+                            <span class="section-label">FLOTA</span>
+                            <h3>Estado de unidades</h3>
+                        </div>
+
+                        <button class="more-button">
+                            <i class="bi bi-three-dots"></i>
+                        </button>
+
+                    </div>
+
+
+                    <div class="unit-summary">
+
+                        <div class="unit-chart">
+                            <div>
+                                <strong>12</strong>
+                                <span>Total</span>
+                            </div>
+                        </div>
+
+
+                        <div class="unit-legend">
+
+                            <div class="legend-item">
+                                <span class="legend-color available"></span>
+                                <span>Disponibles</span>
+                                <strong>8</strong>
+                            </div>
+
+                            <div class="legend-item">
+                                <span class="legend-color busy"></span>
+                                <span>En servicio</span>
+                                <strong>3</strong>
+                            </div>
+
+                            <div class="legend-item">
+                                <span class="legend-color maintenance"></span>
+                                <span>Mantenimiento</span>
+                                <strong>1</strong>
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </article>
+
+            </section>
+
+
+            <!-- ACCESOS RÁPIDOS -->
+            <section class="quick-section">
+
+                <div class="section-heading">
+                    <span class="section-label">ACCESOS RÁPIDOS</span>
+                    <h3>Gestión del sistema</h3>
+                </div>
+
+
+                <div class="quick-grid">
+
+                    <a href="#" class="quick-card">
+                        <i class="bi bi-people"></i>
+
+                        <div>
+                            <strong>Clientes</strong>
+                            <span>Gestionar clientes</span>
+                        </div>
+
+                        <i class="bi bi-chevron-right"></i>
+                    </a>
+
+
+                    <a href="#" class="quick-card">
+                        <i class="bi bi-car-front"></i>
+
+                        <div>
+                            <strong>Vehículos</strong>
+                            <span>Control de vehículos</span>
+                        </div>
+
+                        <i class="bi bi-chevron-right"></i>
+                    </a>
+
+
+                    <a href="#" class="quick-card">
+                        <i class="bi bi-person-badge"></i>
+
+                        <div>
+                            <strong>Personal</strong>
+                            <span>Conductores y técnicos</span>
+                        </div>
+
+                        <i class="bi bi-chevron-right"></i>
+                    </a>
+
+
+                    <a href="#" class="quick-card">
+                        <i class="bi bi-tools"></i>
+
+                        <div>
+                            <strong>Talleres</strong>
+                            <span>Gestionar talleres</span>
+                        </div>
+
+                        <i class="bi bi-chevron-right"></i>
+                    </a>
+
+                </div>
+
+            </section>
+
+        </main>
+
+    </div>
+
+</div>
+
+<script src="/js/dashboard.js"></script>
+
+</body>
+</html>
