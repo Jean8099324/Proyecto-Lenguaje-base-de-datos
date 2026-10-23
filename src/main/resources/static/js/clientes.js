@@ -1,216 +1,66 @@
-document.addEventListener("DOMContentLoaded", function () {
-
-    // =========================
-    // MENÚ LATERAL
-    // =========================
-
+﻿document.addEventListener("DOMContentLoaded", () => {
     const sidebar = document.getElementById("sidebar");
-    const menuButton = document.getElementById("menuButton");
-    const closeSidebar = document.getElementById("closeSidebar");
-    const sidebarOverlay = document.getElementById("sidebarOverlay");
-
-    function abrirSidebar() {
-        sidebar.classList.add("open");
-        sidebarOverlay.classList.add("show");
-    }
-
-    function cerrarSidebar() {
-        sidebar.classList.remove("open");
-        sidebarOverlay.classList.remove("show");
-    }
-
-    if (menuButton) {
-        menuButton.addEventListener("click", abrirSidebar);
-    }
-
-    if (closeSidebar) {
-        closeSidebar.addEventListener("click", cerrarSidebar);
-    }
-
-    if (sidebarOverlay) {
-        sidebarOverlay.addEventListener("click", cerrarSidebar);
-    }
-
-    window.addEventListener("resize", function () {
-
-        if (window.innerWidth > 1050) {
-            cerrarSidebar();
-        }
-
+    const overlay = document.getElementById("sidebarOverlay");
+    const closeSidebar = () => {
+        sidebar?.classList.remove("open");
+        overlay?.classList.remove("show");
+    };
+    document.getElementById("menuButton")?.addEventListener("click", () => {
+        sidebar?.classList.add("open");
+        overlay?.classList.add("show");
     });
+    document.getElementById("closeSidebar")?.addEventListener("click", closeSidebar);
+    overlay?.addEventListener("click", closeSidebar);
+    window.addEventListener("resize", () => { if (window.innerWidth > 1050) closeSidebar(); });
 
-
-    // =========================
-    // MODAL NUEVO CLIENTE
-    // =========================
-
-    const modalCliente = document.getElementById("modalCliente");
-    const btnNuevoCliente = document.getElementById("btnNuevoCliente");
-    const cerrarModal = document.getElementById("cerrarModal");
-    const cancelarCliente = document.getElementById("cancelarCliente");
-    const modalBackdrop = document.getElementById("modalBackdrop");
-    const formCliente = document.getElementById("formCliente");
-
-    function abrirModalCliente() {
-
-        modalCliente.classList.add("show");
-
+    const modal = document.getElementById("modalCliente");
+    const showModal = () => {
+        modal?.classList.add("show");
         document.body.style.overflow = "hidden";
-
-    }
-
-    function cerrarModalCliente() {
-
-        modalCliente.classList.remove("show");
-
+    };
+    const hideModal = () => {
+        modal?.classList.remove("show");
         document.body.style.overflow = "";
-
-    }
-
-    btnNuevoCliente.addEventListener("click", abrirModalCliente);
-
-    cerrarModal.addEventListener("click", cerrarModalCliente);
-
-    cancelarCliente.addEventListener("click", cerrarModalCliente);
-
-    modalBackdrop.addEventListener("click", cerrarModalCliente);
-
-
-    // =========================
-    // GUARDADO TEMPORAL
-    // =========================
-
-    formCliente.addEventListener("submit", function (event) {
-
-        event.preventDefault();
-
-        const identificacion =
-            document.getElementById("identificacion").value.trim();
-
-        const nombre =
-            document.getElementById("nombre").value.trim();
-
-        const primerApellido =
-            document.getElementById("primerApellido").value.trim();
-
-        const segundoApellido =
-            document.getElementById("segundoApellido").value.trim();
-
-        const telefono =
-            document.getElementById("telefono").value.trim();
-
-        const correo =
-            document.getElementById("correo").value.trim();
-
-        if (
-            identificacion === "" ||
-            nombre === "" ||
-            primerApellido === "" ||
-            telefono === "" ||
-            correo === ""
-        ) {
-            return;
-        }
-
-        /*
-         * Guardado temporal.
-         *
-         * Posteriormente este formulario enviará los datos
-         * al backend de Spring Boot y finalmente Oracle
-         * realizará el registro mediante la lógica
-         * correspondiente.
-         */
-
-        alert(
-            "Cliente registrado temporalmente.\n\n" +
-            nombre + " " +
-            primerApellido + " " +
-            segundoApellido
-        );
-
-        formCliente.reset();
-
-        cerrarModalCliente();
-
+    };
+    document.getElementById("btnNuevoCliente")?.addEventListener("click", showModal);
+    document.getElementById("cerrarModal")?.addEventListener("click", hideModal);
+    document.getElementById("cancelarCliente")?.addEventListener("click", hideModal);
+    document.getElementById("modalBackdrop")?.addEventListener("click", hideModal);
+    if (document.getElementById("modalAbierto")?.value === "true") showModal();
+    document.addEventListener("keydown", event => {
+        if (event.key === "Escape" && modal?.classList.contains("show")) hideModal();
     });
 
-
-    // =========================
-    // BUSCADOR
-    // =========================
-
-    const buscarCliente = document.getElementById("buscarCliente");
-    const filtroEstado = document.getElementById("filtroEstado");
-    const filasClientes = document.querySelectorAll("#tablaClientes tr");
-    const cantidadVisible = document.getElementById("cantidadVisible");
-
-    function filtrarClientes() {
-
-        const texto =
-            buscarCliente.value.toLowerCase().trim();
-
-        const estado =
-            filtroEstado.value;
-
-        let visibles = 0;
-
-        filasClientes.forEach(function (fila) {
-
-            const contenido =
-                fila.textContent.toLowerCase();
-
-            const estadoFila =
-                fila.dataset.estado;
-
-            const coincideTexto =
-                contenido.includes(texto);
-
-            const coincideEstado =
-                estado === "todos" ||
-                estado === estadoFila;
-
-            if (coincideTexto && coincideEstado) {
-
-                fila.style.display = "";
-
-                visibles++;
-
-            } else {
-
-                fila.style.display = "none";
-
+    document.querySelectorAll("[data-cliente-id]").forEach(button => {
+        button.addEventListener("click", async () => {
+            try {
+                const response = await fetch(`/clientes/${button.dataset.clienteId}/detalle`);
+                if (!response.ok) throw new Error("No se pudo cargar el cliente.");
+                const cliente = await response.json();
+                alert(`${cliente.nombre}\nUsuario: ${cliente.username}\nTeléfono: ${cliente.telefono}\nCorreo: ${cliente.correo}\nVehículos: ${cliente.vehiculos}\nEstado: ${cliente.estado}`);
+            } catch (error) {
+                alert(error.message);
             }
-
         });
-
-        cantidadVisible.textContent = visibles;
-
-    }
-
-    buscarCliente.addEventListener(
-        "input",
-        filtrarClientes
-    );
-
-    filtroEstado.addEventListener(
-        "change",
-        filtrarClientes
-    );
-
-
-    // =========================
-    // CERRAR MODAL CON ESC
-    // =========================
-
-    document.addEventListener("keydown", function (event) {
-
-        if (
-            event.key === "Escape" &&
-            modalCliente.classList.contains("show")
-        ) {
-            cerrarModalCliente();
-        }
-
     });
 
+    const search = document.getElementById("buscarCliente");
+    const stateFilter = document.getElementById("filtroEstado");
+    const rows = document.querySelectorAll("#tablaClientes tr[data-estado]");
+    const visibleCount = document.getElementById("cantidadVisible");
+    const filterRows = () => {
+        const text = search?.value.toLowerCase().trim() ?? "";
+        const state = stateFilter?.value ?? "todos";
+        let visible = 0;
+        rows.forEach(row => {
+            const matches = row.textContent.toLowerCase().includes(text)
+                && (state === "todos" || row.dataset.estado === state);
+            row.style.display = matches ? "" : "none";
+            if (matches) visible++;
+        });
+        if (visibleCount) visibleCount.textContent = visible;
+    };
+    search?.addEventListener("input", filterRows);
+    stateFilter?.addEventListener("change", filterRows);
+    filterRows();
 });
