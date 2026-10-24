@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
 
 <head>
     <meta charset="UTF-8">
@@ -231,6 +231,15 @@
                         <i class="bi bi-chevron-down user-arrow"></i>
 
                     </div>
+
+                    <!-- Cerrar sesión de forma segura con Spring Security -->
+                    <form th:action="@{/logout}" method="post" class="logout-form" style="margin: 0;">
+                        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                        <button type="submit" class="topbar-action" title="Cerrar sesión" aria-label="Cerrar sesión">
+                            <i class="bi bi-box-arrow-right"></i>
+                            <span class="visually-hidden">Cerrar sesión</span>
+                        </button>
+                    </form>
 
                 </div>
 
