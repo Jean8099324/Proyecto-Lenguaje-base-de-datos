@@ -854,6 +854,61 @@ textarea {
     font-weight: 600;
 }
 
+/* Selector visual redondo para los roles; sigue permitiendo seleccionar varios. */
+.role-choice-list {
+    margin: 0.35rem 0;
+}
+
+.role-choice {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.55rem;
+    margin: 0;
+    cursor: pointer;
+    font-weight: 500;
+}
+
+.role-choice input {
+    position: absolute;
+    opacity: 0;
+    width: 1px !important;
+    height: 1px !important;
+    margin: 0;
+}
+
+.role-choice-dot {
+    width: 20px;
+    height: 20px;
+    border: 2px solid #9aa9b8;
+    border-radius: 50%;
+    display: inline-grid;
+    place-items: center;
+    flex: 0 0 20px;
+    pointer-events: none;
+}
+
+.role-choice input:checked + .role-choice-dot {
+    border-color: #ed3445;
+}
+
+.role-choice input:checked + .role-choice-dot::after {
+    content: "";
+    width: 10px;
+    height: 10px;
+    background: #ed3445;
+    border-radius: 50%;
+}
+
+.role-choice input:focus-visible {
+    outline: 3px solid rgb(237 52 69 / 22%);
+    outline-offset: 2px;
+}
+
+.role-choice:focus-within .role-choice-dot {
+    outline: 3px solid rgb(237 52 69 / 22%);
+    outline-offset: 2px;
+}
+
 .form-group-custom input,
 .form-group-custom select,
 .form-group-custom textarea {

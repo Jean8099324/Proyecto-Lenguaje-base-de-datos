@@ -15,6 +15,26 @@
     if (document.getElementById("modalAbierto")?.value === "true") show();
     document.addEventListener("keydown", event => { if (event.key === "Escape") hide(); });
     const search = document.getElementById("buscarUsuario");
+    // Cada rol mantiene su propio checkbox; al enviar, se recopilan los seleccionados
+    // bajo el nombre que espera el modelo Usuario en el backend.
+    document.querySelectorAll("#formUsuario").forEach(form => {
+        form.addEventListener("submit", event => {
+            form.querySelectorAll("input[name='rolesNombresSeleccionados']").forEach(input => input.remove());
+            const selectedRoles = [...form.querySelectorAll(".role-access-toggle:checked")];
+            if (selectedRoles.length === 0) {
+                event.preventDefault();
+                alert("Seleccione al menos un rol de acceso.");
+                return;
+            }
+            selectedRoles.forEach(toggle => {
+                const value = document.createElement("input");
+                value.type = "hidden";
+                value.name = "rolesNombresSeleccionados";
+                value.value = toggle.value;
+                form.appendChild(value);
+            });
+        });
+    });
     const rows = [...document.querySelectorAll("#tablaUsuarios tr")].filter(row => row.cells.length === 11);
     const visible = document.getElementById("cantidadVisible");
     const filter = () => {
