@@ -152,6 +152,32 @@ a {
     font-size: 16px;
 }
 
+.nav-link.under-construction::after {
+    content: "🚧";
+    margin-left: auto;
+    font-size: 12px;
+}
+
+.construction-action-marker {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    color: #d99500;
+    background: #fff;
+    border-radius: 50%;
+    font-size: 12px;
+}
+
+.construction-profile-marker {
+    color: #d99500;
+    font-size: 14px;
+}
+
+.construction-inline {
+    color: #d99500;
+    font-size: 12px;
+}
+
 .nav-link:hover {
     background: rgba(255,255,255,0.06);
     color: white;
@@ -776,6 +802,11 @@ a {
 .quick-card > i:last-child {
     color: #a4adb6;
     font-size: 11px;
+}
+
+.quick-card.under-construction > i:last-child {
+    color: #d99500;
+    font-size: 17px;
 }
 
 /* =========================

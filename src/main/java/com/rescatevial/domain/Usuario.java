@@ -1,67 +1,76 @@
 package com.rescatevial.domain;
 
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.ManyToMany;
+import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
+import java.io.Serializable;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.HashSet;
+import lombok.Data;
+import lombok.ToString;
 
-public class Usuario {
+@Data
+@Entity
+@Table(name = "FIDE_USUARIOS_TB")
+public class Usuario implements Serializable {
+
+    private static final long serialVersionUID = 1L;
+
+    @Id
+    @Column(name = "ID_USUARIO")
     @Positive
     private Long id;
-    @NotBlank @Size(max = 100)
+    @NotBlank @Size(max = 100) @Column(name = "NOMBRE", nullable = false, length = 100)
     private String nombre;
-    @NotBlank @Size(max = 100)
+    @NotBlank @Size(max = 100) @Column(name = "PRIMER_APELLIDO", nullable = false, length = 100)
     private String primerApellido;
-    @Size(max = 100)
+    @Size(max = 100) @Column(name = "SEGUNDO_APELLIDO", length = 100)
     private String segundoApellido;
+    @Column(name = "FECHA_NACIMIENTO")
     private LocalDate fechaNacimiento;
-    @NotBlank @Size(max = 100)
+    @NotBlank @Size(max = 100) @Column(name = "USERNAME", nullable = false, length = 100)
     private String username;
-    @NotBlank @Size(min = 8, max = 100)
+    @Pattern(regexp = "^$|.{8,512}$", message = "La contraseña debe tener al menos 8 caracteres.")
+    @Column(name = "PASSWORD", nullable = false, length = 512)
+    @ToString.Exclude
     private String password;
+    @Column(name = "FECHA_CREACION", insertable = false, updatable = false)
     private LocalDateTime fechaCreacion;
+    @Column(name = "FECHA_MODIFICACION", insertable = false, updatable = false)
     private LocalDateTime fechaModificacion;
+    @Column(name = "FECHA_ELIMINACION", insertable = false, updatable = false)
     private LocalDateTime fechaEliminacion;
-    @NotNull @Positive
+    @NotNull @Positive @Column(name = "ID_TIPO_USUARIO", nullable = false)
     private Long tipoUsuario;
-    @NotNull @Positive
+    @NotNull @Positive @Column(name = "ID_ESTADO", nullable = false)
     private Long estado;
+    @Transient
     private String tipoUsuarioNombre;
+    @Transient
     private String estadoNombre;
+    @Transient
+    private Set<String> rolesNombresSeleccionados = new HashSet<>();
 
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
-    public String getNombre() { return nombre; }
-    public void setNombre(String nombre) { this.nombre = nombre; }
-    public String getPrimerApellido() { return primerApellido; }
-    public void setPrimerApellido(String primerApellido) { this.primerApellido = primerApellido; }
-    public String getSegundoApellido() { return segundoApellido; }
-    public void setSegundoApellido(String segundoApellido) { this.segundoApellido = segundoApellido; }
-    public LocalDate getFechaNacimiento() { return fechaNacimiento; }
-    public void setFechaNacimiento(LocalDate fechaNacimiento) { this.fechaNacimiento = fechaNacimiento; }
-    public String getUsername() { return username; }
-    public void setUsername(String username) { this.username = username; }
-    public String getPassword() { return password; }
-    public void setPassword(String password) { this.password = password; }
-    public LocalDateTime getFechaCreacion() { return fechaCreacion; }
-    public void setFechaCreacion(LocalDateTime fechaCreacion) { this.fechaCreacion = fechaCreacion; }
-    public LocalDateTime getFechaModificacion() { return fechaModificacion; }
-    public void setFechaModificacion(LocalDateTime fechaModificacion) { this.fechaModificacion = fechaModificacion; }
-    public LocalDateTime getFechaEliminacion() { return fechaEliminacion; }
-    public void setFechaEliminacion(LocalDateTime fechaEliminacion) { this.fechaEliminacion = fechaEliminacion; }
-    public Long getTipoUsuario() { return tipoUsuario; }
-    public void setTipoUsuario(Long tipoUsuario) { this.tipoUsuario = tipoUsuario; }
-    public Long getEstado() { return estado; }
-    public void setEstado(Long estado) { this.estado = estado; }
-    public String getTipoUsuarioNombre() { return tipoUsuarioNombre; }
-    public void setTipoUsuarioNombre(String tipoUsuarioNombre) { this.tipoUsuarioNombre = tipoUsuarioNombre; }
-    public String getEstadoNombre() { return estadoNombre; }
-    public void setEstadoNombre(String estadoNombre) { this.estadoNombre = estadoNombre; }
-    public String getNombreCompleto() {
-        return String.join(" ", nombre == null ? "" : nombre,
-                primerApellido == null ? "" : primerApellido,
-                segundoApellido == null ? "" : segundoApellido).trim().replaceAll("\\s+", " ");
-    }
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(
+            name = "FIDE_USUARIOS_ROLES_TB",
+            joinColumns = @JoinColumn(name = "ID_USUARIO"),
+            inverseJoinColumns = @JoinColumn(name = "ID_ROL")
+    )
+    private Set<Rol> roles = new HashSet<>();
+
 }

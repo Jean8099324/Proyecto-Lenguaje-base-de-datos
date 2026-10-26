@@ -15,7 +15,7 @@
     if (document.getElementById("modalAbierto")?.value === "true") show();
     document.addEventListener("keydown", event => { if (event.key === "Escape") hide(); });
     const search = document.getElementById("buscarUsuario");
-    const rows = [...document.querySelectorAll("#tablaUsuarios tr")].filter(row => row.cells.length === 10);
+    const rows = [...document.querySelectorAll("#tablaUsuarios tr")].filter(row => row.cells.length === 11);
     const visible = document.getElementById("cantidadVisible");
     const filter = () => {
         const query = search?.value.toLowerCase().trim() ?? "";
