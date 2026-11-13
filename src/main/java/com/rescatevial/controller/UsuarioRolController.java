@@ -1,6 +1,5 @@
 package com.rescatevial.controller;
 
-import com.rescatevial.domain.Usuario;
 import com.rescatevial.service.UsuarioService;
 import java.util.List;
 import org.springframework.stereotype.Controller;

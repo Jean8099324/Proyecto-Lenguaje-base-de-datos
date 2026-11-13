@@ -1,6 +1,5 @@
 package com.rescatevial.repository;
 
-import com.rescatevial.domain.Estado;
 import com.rescatevial.domain.TipoUsuario;
 import java.sql.Types;
 import java.util.List;
@@ -20,7 +19,9 @@ public class TipoUsuarioRepository {
     }
 
     public List<TipoUsuario> findAllActivos() {
-        var llamada = new SimpleJdbcCall(jdbc).withProcedureName("FIDE_OBTENER_TIPOS_USUARIOS_SP")
+        var llamada = new SimpleJdbcCall(jdbc)
+                .withCatalogName("FIDE_PROYECTO_FINAL_RESCATE_VIAL_CR_PCK")
+                .withProcedureName("FIDE_OBTENER_TIPOS_USUARIOS_SP")
                 .withoutProcedureColumnMetaDataAccess()
                 .declareParameters(new SqlOutParameter("P_RESULTADO", Types.REF_CURSOR, (rs, fila) -> {
                     TipoUsuario tipo = new TipoUsuario();

@@ -19,7 +19,9 @@ public class EstadoRepository {
     }
 
     public List<Estado> findAll() {
-        var llamada = new SimpleJdbcCall(jdbc).withProcedureName("FIDE_OBTENER_ESTADOS_SP")
+        var llamada = new SimpleJdbcCall(jdbc)
+                .withCatalogName("FIDE_PROYECTO_FINAL_RESCATE_VIAL_CR_PCK")
+                .withProcedureName("FIDE_OBTENER_ESTADOS_SP")
                 .withoutProcedureColumnMetaDataAccess()
                 .declareParameters(new SqlOutParameter("P_RESULTADO", Types.REF_CURSOR, (rs, fila) -> {
                     Estado estado = new Estado();

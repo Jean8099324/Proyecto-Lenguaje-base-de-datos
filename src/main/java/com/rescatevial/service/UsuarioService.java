@@ -75,7 +75,7 @@ public class UsuarioService {
 
     private static java.util.Set<String> rolesSeleccionados(java.util.Set<String> nombres) {
         if (nombres == null) return java.util.Set.of();
-        return nombres.stream().filter(java.util.Objects::nonNull).map(String::trim)
+        return nombres.stream().filter(nombre -> nombre != null).map(nombre -> nombre.trim())
                 .filter(nombre -> !nombre.isBlank())
                 .map(nombre -> nombre.toUpperCase(java.util.Locale.ROOT))
                 .collect(java.util.stream.Collectors.toSet());
@@ -91,7 +91,7 @@ public class UsuarioService {
                 usuarioRepository.removeRoleFromUser(usuario.getId(), rol.getId());
             }
         }
-        var idsActuales = usuario.getRoles().stream().map(Rol::getId).collect(java.util.stream.Collectors.toSet());
+        var idsActuales = usuario.getRoles().stream().map(rol -> rol.getId()).collect(java.util.stream.Collectors.toSet());
         for (Long idRol : idsSeleccionados) {
             if (!idsActuales.contains(idRol)) {
                 usuarioRepository.assignRoleToUser(usuario.getId(), idRol);
@@ -124,7 +124,7 @@ public class UsuarioService {
 
     @Transactional(readOnly = true)
     public List<String> getRolesNombres() {
-        return usuarioRepository.findAllRoles().stream().map(Rol::getNombre).toList();
+        return usuarioRepository.findAllRoles().stream().map(rol -> rol.getNombre()).toList();
     }
 
     @Transactional

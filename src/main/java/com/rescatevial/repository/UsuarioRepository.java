@@ -9,7 +9,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.LinkedHashSet;
-import org.springframework.dao.DuplicateKeyException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.SqlOutParameter;
 import org.springframework.jdbc.core.SqlParameter;
@@ -27,6 +26,7 @@ public class UsuarioRepository {
     public UsuarioRepository(JdbcTemplate jdbc) {
         this.jdbc = jdbc;
         this.insertarUsuario = new SimpleJdbcCall(jdbc)
+                .withCatalogName("FIDE_PROYECTO_FINAL_RESCATE_VIAL_CR_PCK")
                 .withProcedureName("FIDE_INSERTAR_USUARIOS_SP")
                 .withoutProcedureColumnMetaDataAccess()
                 .declareParameters(
@@ -39,6 +39,7 @@ public class UsuarioRepository {
                         new SqlParameter("P_TIPO_USUARIO", Types.NUMERIC),
                         new SqlParameter("P_ESTADO", Types.NUMERIC));
         this.actualizarUsuario = new SimpleJdbcCall(jdbc)
+                .withCatalogName("FIDE_PROYECTO_FINAL_RESCATE_VIAL_CR_PCK")
                 .withProcedureName("FIDE_ACTUALIZAR_USUARIO_SP")
                 .withoutProcedureColumnMetaDataAccess()
                 .declareParameters(
@@ -56,6 +57,7 @@ public class UsuarioRepository {
     public Optional<Usuario> findByUsernameAndActivoTrue(String username) {
         // El procedimiento devuelve los datos necesarios para construir los atributos de sesión al autenticar.
         var call = new SimpleJdbcCall(jdbc)
+                .withCatalogName("FIDE_PROYECTO_FINAL_RESCATE_VIAL_CR_PCK")
                 .withProcedureName("FIDE_OBTENER_USUARIO_POR_USERNAME_ESTADO_ACTIVO_SP")
                 .withoutProcedureColumnMetaDataAccess()
                 .declareParameters(new SqlParameter("P_USERNAME", Types.VARCHAR),
@@ -78,6 +80,7 @@ public class UsuarioRepository {
 
     public Optional<Usuario> findByUsername(String username) {
         var call = new SimpleJdbcCall(jdbc)
+                .withCatalogName("FIDE_PROYECTO_FINAL_RESCATE_VIAL_CR_PCK")
                 .withProcedureName("FIDE_OBTENER_USUARIO_POR_USERNAME_SP")
                 .withoutProcedureColumnMetaDataAccess()
                 .declareParameters(new SqlParameter("P_USERNAME", Types.VARCHAR),
@@ -95,6 +98,7 @@ public class UsuarioRepository {
 
     public Optional<Usuario> findById(Long id) {
         var call = new SimpleJdbcCall(jdbc)
+                .withCatalogName("FIDE_PROYECTO_FINAL_RESCATE_VIAL_CR_PCK")
                 .withProcedureName("FIDE_OBTENER_USUARIO_POR_ID_USUARIO_SP")
                 .withoutProcedureColumnMetaDataAccess()
                 .declareParameters(new SqlParameter("P_ID_USUARIO", Types.NUMERIC),
@@ -111,7 +115,9 @@ public class UsuarioRepository {
     }
 
     public List<Usuario> findByActivoTrue() {
-        var call = new SimpleJdbcCall(jdbc).withProcedureName("FIDE_OBTENER_USUARIOS_ACTIVOS_SP")
+        var call = new SimpleJdbcCall(jdbc)
+                .withCatalogName("FIDE_PROYECTO_FINAL_RESCATE_VIAL_CR_PCK")
+                .withProcedureName("FIDE_OBTENER_USUARIOS_ACTIVOS_SP")
                 .withoutProcedureColumnMetaDataAccess()
                 .declareParameters(new SqlOutParameter("P_RESULTADO", Types.REF_CURSOR,
                         (rs, row) -> mapUsuario(rs)));
@@ -119,7 +125,9 @@ public class UsuarioRepository {
     }
 
     public List<Usuario> findAll() {
-        var call = new SimpleJdbcCall(jdbc).withProcedureName("FIDE_OBTENER_USUARIOS_SP")
+        var call = new SimpleJdbcCall(jdbc)
+                .withCatalogName("FIDE_PROYECTO_FINAL_RESCATE_VIAL_CR_PCK")
+                .withProcedureName("FIDE_OBTENER_USUARIOS_SP")
                 .withoutProcedureColumnMetaDataAccess()
                 .declareParameters(new SqlOutParameter("P_RESULTADO", Types.REF_CURSOR,
                         (rs, row) -> mapUsuario(rs)));
@@ -127,7 +135,9 @@ public class UsuarioRepository {
     }
 
     public List<String> findAllUsernames() {
-        var call = new SimpleJdbcCall(jdbc).withProcedureName("FIDE_OBTENER_USUARIOS_SP")
+        var call = new SimpleJdbcCall(jdbc)
+                .withCatalogName("FIDE_PROYECTO_FINAL_RESCATE_VIAL_CR_PCK")
+                .withProcedureName("FIDE_OBTENER_USUARIOS_SP")
                 .withoutProcedureColumnMetaDataAccess()
                 .declareParameters(new SqlOutParameter("P_RESULTADO", Types.REF_CURSOR,
                         (rs, row) -> rs.getString("USERNAME")));
@@ -135,7 +145,9 @@ public class UsuarioRepository {
     }
 
     public List<Rol> findRolesByUserId(Long userId) {
-        var call = new SimpleJdbcCall(jdbc).withProcedureName("FIDE_OBTENER_ROLES_ACTIVOS_POR_ID_USUARIO_SP")
+        var call = new SimpleJdbcCall(jdbc)
+                .withCatalogName("FIDE_PROYECTO_FINAL_RESCATE_VIAL_CR_PCK")
+                .withProcedureName("FIDE_OBTENER_ROLES_ACTIVOS_POR_ID_USUARIO_SP")
                 .withoutProcedureColumnMetaDataAccess()
                 .declareParameters(new SqlParameter("P_ID_USUARIO", Types.NUMERIC),
                         new SqlOutParameter("P_RESULTADO", Types.REF_CURSOR,
@@ -150,6 +162,7 @@ public class UsuarioRepository {
 
     public List<Rol> findAllRoles() {
         var call = new SimpleJdbcCall(jdbc)
+                .withCatalogName("FIDE_PROYECTO_FINAL_RESCATE_VIAL_CR_PCK")
                 .withProcedureName("FIDE_OBTENER_ROLES_SP")
                 .withoutProcedureColumnMetaDataAccess()
                 .declareParameters(new SqlOutParameter("P_RESULTADO", Types.REF_CURSOR,
@@ -159,6 +172,7 @@ public class UsuarioRepository {
 
     public Optional<Long> findRoleIdByName(String nombreRol) {
         var call = new SimpleJdbcCall(jdbc)
+                .withCatalogName("FIDE_PROYECTO_FINAL_RESCATE_VIAL_CR_PCK")
                 .withProcedureName("FIDE_OBTENER_ID_ROL_POR_NOMBRE_ROL_SP")
                 .withoutProcedureColumnMetaDataAccess()
                 .declareParameters(new SqlParameter("P_NOMBRE_ROL", Types.VARCHAR),
@@ -168,37 +182,33 @@ public class UsuarioRepository {
     }
 
     public void assignRoleToUser(Long userId, Long roleId) {
-        // Igual que Powerlete, la relación usuario-rol se mantiene directamente desde el repositorio.
-        // Si ya existe (activa o inactiva), reactivarla evita un INSERT duplicado por la PK compuesta.
-        int actualizadas = jdbc.update(
-                "UPDATE FIDE_USUARIOS_ROLES_TB SET ID_ESTADO = 1 WHERE ID_USUARIO = ? AND ID_ROL = ?",
-                userId, roleId);
-        if (actualizadas == 0) {
-            try {
-                jdbc.update("INSERT INTO FIDE_USUARIOS_ROLES_TB (ID_USUARIO, ID_ROL, ID_ESTADO) VALUES (?, ?, 1)",
-                        userId, roleId);
-            } catch (DuplicateKeyException ex) {
-                // Otra operación pudo crear la relación entre la comprobación y el INSERT.
-                jdbc.update("UPDATE FIDE_USUARIOS_ROLES_TB SET ID_ESTADO = 1 WHERE ID_USUARIO = ? AND ID_ROL = ?",
-                        userId, roleId);
-            }
-        }
-
-        Integer activas = jdbc.queryForObject(
-                "SELECT COUNT(*) FROM FIDE_USUARIOS_ROLES_TB WHERE ID_USUARIO = ? AND ID_ROL = ? AND ID_ESTADO = 1",
-                Integer.class, userId, roleId);
-        if (activas == null || activas == 0) {
-            throw new IllegalStateException("No se pudo activar el rol " + roleId + " para el usuario " + userId);
-        }
+        var call = new SimpleJdbcCall(jdbc)
+                .withCatalogName("FIDE_PROYECTO_FINAL_RESCATE_VIAL_CR_PCK")
+                .withProcedureName("FIDE_ASIGNAR_ROL_A_USUARIO_SP")
+                .withoutProcedureColumnMetaDataAccess()
+                .declareParameters(
+                        new SqlParameter("P_ID_USUARIO", Types.NUMERIC),
+                        new SqlParameter("P_ID_ROL", Types.NUMERIC));
+        call.execute(new MapSqlParameterSource()
+                .addValue("P_ID_USUARIO", userId)
+                .addValue("P_ID_ROL", roleId));
     }
 
     public void removeRoleFromUser(Long userId, Long roleId) {
-        jdbc.update("UPDATE FIDE_USUARIOS_ROLES_TB SET ID_ESTADO = 2 WHERE ID_USUARIO = ? AND ID_ROL = ?",
-                userId, roleId);
+        var call = new SimpleJdbcCall(jdbc)
+                .withCatalogName("FIDE_PROYECTO_FINAL_RESCATE_VIAL_CR_PCK")
+                .withProcedureName("FIDE_ELIMINAR_ROL_DE_USUARIO_SP")
+                .withoutProcedureColumnMetaDataAccess()
+                .declareParameters(
+                        new SqlParameter("P_ID_USUARIO", Types.NUMERIC),
+                        new SqlParameter("P_ID_ROL", Types.NUMERIC));
+        call.execute(new MapSqlParameterSource()
+                .addValue("P_ID_USUARIO", userId)
+                .addValue("P_ID_ROL", roleId));
     }
-
     public void deleteById(Long userId) {
         var call = new SimpleJdbcCall(jdbc)
+                .withCatalogName("FIDE_PROYECTO_FINAL_RESCATE_VIAL_CR_PCK")
                 .withProcedureName("FIDE_ELIMINAR_USUARIO_SP")
                 .withoutProcedureColumnMetaDataAccess()
                 .declareParameters(new SqlParameter("P_ID_USUARIO", Types.NUMERIC));
@@ -256,10 +266,6 @@ public class UsuarioRepository {
 
     private static java.time.LocalDateTime toLocalDateTime(Timestamp value) {
         return value == null ? null : value.toLocalDateTime();
-    }
-
-    private static Timestamp toTimestamp(java.time.LocalDateTime value) {
-        return value == null ? null : Timestamp.valueOf(value);
     }
 
     private static Timestamp toTimestamp(LocalDate value) {
