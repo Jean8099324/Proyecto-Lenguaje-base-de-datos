@@ -283,7 +283,6 @@ public class UsuarioRepository {
         usuario.setPassword(rs.getString("PASSWORD"));
         usuario.setFechaCreacion(toLocalDateTime(rs.getTimestamp("FECHA_CREACION")));
         usuario.setFechaModificacion(toLocalDateTime(rs.getTimestamp("FECHA_MODIFICACION")));
-        usuario.setFechaEliminacion(toLocalDateTime(rs.getTimestamp("FECHA_ELIMINACION")));
         usuario.setTipoUsuario(rs.getLong("ID_TIPO_USUARIO"));
         usuario.setTipoUsuarioNombre(rs.getString("NOMBRE_TIPO_USUARIO"));
         usuario.setEstado(rs.getLong("ID_ESTADO"));
