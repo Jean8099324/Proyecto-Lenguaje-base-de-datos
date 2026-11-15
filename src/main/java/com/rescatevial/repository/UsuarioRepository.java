@@ -3,6 +3,8 @@ package com.rescatevial.repository;
 import com.rescatevial.domain.Usuario;
 import com.rescatevial.domain.Rol;
 import java.sql.Timestamp;
+import java.time.Instant;
+import java.time.OffsetDateTime;
 import java.sql.Types;
 import java.time.LocalDate;
 import java.util.List;
@@ -264,8 +266,9 @@ public class UsuarioRepository {
         return value == null ? null : value.toLocalDate();
     }
 
-    private static java.time.LocalDateTime toLocalDateTime(Timestamp value) {
-        return value == null ? null : value.toLocalDateTime();
+    private static Instant toInstant(java.sql.ResultSet rs, String column) throws java.sql.SQLException {
+        OffsetDateTime value = rs.getObject(column, OffsetDateTime.class);
+        return value == null ? null : value.toInstant();
     }
 
     private static Timestamp toTimestamp(LocalDate value) {
@@ -281,8 +284,8 @@ public class UsuarioRepository {
         usuario.setFechaNacimiento(toLocalDate(rs.getDate("FECHA_NACIMIENTO")));
         usuario.setUsername(rs.getString("USERNAME"));
         usuario.setPassword(rs.getString("PASSWORD"));
-        usuario.setFechaCreacion(toLocalDateTime(rs.getTimestamp("FECHA_CREACION")));
-        usuario.setFechaModificacion(toLocalDateTime(rs.getTimestamp("FECHA_MODIFICACION")));
+        usuario.setFechaCreacion(toInstant(rs, "FECHA_CREACION"));
+        usuario.setFechaModificacion(toInstant(rs, "FECHA_MODIFICACION"));
         usuario.setTipoUsuario(rs.getLong("ID_TIPO_USUARIO"));
         usuario.setTipoUsuarioNombre(rs.getString("NOMBRE_TIPO_USUARIO"));
         usuario.setEstado(rs.getLong("ID_ESTADO"));

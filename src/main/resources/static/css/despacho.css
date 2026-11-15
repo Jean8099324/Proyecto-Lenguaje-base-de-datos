@@ -1,0 +1,40 @@
+.dispatch-page { font-family: "Segoe UI", Arial, sans-serif; }
+.dispatch-summary { display: grid; grid-template-columns: repeat(2, minmax(0, 260px)); gap: 14px; margin-bottom: 18px; }
+.dispatch-summary article { display: flex; align-items: center; gap: 13px; padding: 14px 16px; border: 1px solid var(--border); border-radius: 12px; background: #fff; }
+.summary-icon { display: grid; place-items: center; width: 40px; height: 40px; border-radius: 10px; font-size: 19px; }
+.summary-icon.pending { color: #a75d00; background: #fff4df; }
+.summary-icon.available { color: #147448; background: #e9f7f0; }
+.dispatch-summary span { display: block; color: #40566b; font-size: 11px; font-weight: 600; text-transform: uppercase; }
+.dispatch-summary strong { color: var(--primary); font-size: 22px; font-weight: 600; }
+.dispatch-card { padding: 0; overflow: hidden; }
+.dispatch-card-header { display: flex; align-items: center; justify-content: space-between; gap: 20px; padding: 18px 20px; border-bottom: 1px solid var(--border); }
+.dispatch-card-header h3 { margin: 2px 0 0; color: var(--primary); font-size: 17px; font-weight: 600; }
+.dispatch-search { position: relative; width: min(330px, 100%); }
+.dispatch-search i { position: absolute; top: 50%; left: 12px; color: var(--muted); transform: translateY(-50%); }
+.dispatch-search input { width: 100%; height: 38px; padding: 0 12px 0 36px; border: 1px solid var(--border); border-radius: 8px; color: var(--text); background: #fff; font-size: 13px; }
+.dispatch-list { display: grid; gap: 12px; padding: 16px; }
+.dispatch-item { display: grid; grid-template-columns: minmax(0, 1.6fr) minmax(280px, .7fr); border: 1px solid var(--border); border-radius: 11px; overflow: hidden; background: #fff; }
+.dispatch-incident { padding: 15px 17px; }
+.incident-number { display: flex; align-items: baseline; gap: 8px; margin-bottom: 11px; }
+.incident-number span, .incident-facts span, .incident-location-dispatch span, .dispatch-assignment label { color: #40566b; font-size: 11px; font-weight: 600; text-transform: uppercase; }
+.incident-number strong { color: var(--primary); font-size: 16px; font-weight: 600; }
+.incident-facts { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
+.incident-facts span, .incident-location-dispatch span { display: block; margin-bottom: 3px; }
+.incident-facts strong, .incident-location-dispatch strong { color: #6c7885; font-size: 13px; font-weight: 400; line-height: 1.35; }
+.incident-location-dispatch { margin-top: 11px; padding: 9px 11px; border-radius: 8px; background: #f8fafc; }
+.dispatch-incident > p { margin: 9px 0 0; color: #6c7885; font-size: 13px; line-height: 1.4; }
+.dispatch-assignment { display: flex; flex-direction: column; justify-content: center; padding: 14px 16px; border-left: 1px solid var(--border); background: #f8fafc; }
+.dispatch-assignment label { margin: 0 0 4px; }
+.dispatch-assignment select, .dispatch-assignment textarea { width: 100%; border: 1px solid var(--border); border-radius: 8px; color: var(--text); background: #fff; font-size: 13px; }
+.dispatch-assignment select { height: 38px; padding: 0 10px; margin-bottom: 10px; }
+.dispatch-assignment textarea { min-height: 54px; padding: 8px 10px; resize: vertical; }
+.assignment-actions { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-top: 11px; }
+.assignment-actions a { color: var(--primary-light); font-size: 12px; font-weight: 600; }
+.assignment-actions button { min-height: 38px; border: 0; border-radius: 8px; padding: 0 13px; color: #fff; background: var(--accent); font-size: 13px; font-weight: 600; cursor: pointer; }
+.assignment-actions button:disabled { cursor: not-allowed; opacity: .5; }
+.dispatch-empty { padding: 46px 20px; text-align: center; }
+.dispatch-empty i { color: #6c7885; font-size: 30px; }
+.dispatch-empty h3 { margin: 10px 0 4px; color: var(--primary); font-size: 16px; }
+.dispatch-empty p { margin: 0; color: var(--muted); font-size: 13px; }
+@media (max-width: 1050px) { .dispatch-item { grid-template-columns: 1fr; } .dispatch-assignment { border-top: 1px solid var(--border); border-left: 0; } }
+@media (max-width: 700px) { .dispatch-summary { grid-template-columns: 1fr; } .dispatch-card-header { align-items: stretch; flex-direction: column; } .dispatch-search { width: 100%; } .incident-facts { grid-template-columns: 1fr 1fr; } .assignment-actions { align-items: stretch; flex-direction: column; } .assignment-actions button { width: 100%; } }

@@ -7,7 +7,7 @@ import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import java.io.Serializable;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.HashSet;
 import java.util.Set;
 import lombok.Data;
@@ -32,9 +32,9 @@ public class Usuario implements Serializable {
     @Pattern(regexp = "^$|.{8,512}$", message = "La contraseña debe tener al menos 8 caracteres.")
     @ToString.Exclude
     private String password;
-    private LocalDateTime fechaCreacion;
-    private LocalDateTime fechaModificacion;
-    private LocalDateTime fechaEliminacion;
+    private Instant fechaCreacion;
+    private Instant fechaModificacion;
+    private Instant fechaEliminacion;
     @NotNull @Positive
     private Long tipoUsuario;
     @NotNull @Positive

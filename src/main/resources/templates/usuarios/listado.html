@@ -35,9 +35,9 @@
                         <td th:text="${usuario.fechaNacimiento != null ? #temporals.format(usuario.fechaNacimiento, 'dd/MM/yyyy') : '—'}">—</td>
                         <td th:text="${usuario.username}">usuario</td>
                         <td aria-label="Contraseña oculta">••••••••</td>
-                        <td th:text="${usuario.fechaCreacion != null ? #temporals.format(usuario.fechaCreacion, 'dd/MM/yyyy HH:mm') : '—'}">—</td>
-                        <td th:text="${usuario.fechaModificacion != null ? #temporals.format(usuario.fechaModificacion, 'dd/MM/yyyy HH:mm') : '—'}">—</td>
-                        <td th:text="${usuario.fechaEliminacion != null ? #temporals.format(usuario.fechaEliminacion, 'dd/MM/yyyy HH:mm') : '—'}">—</td>
+                        <td th:text="${usuario.fechaCreacion != null ? #temporals.format(usuario.fechaCreacion.atZone(T(java.time.ZoneId).of('America/Costa_Rica')), 'dd/MM/yyyy HH:mm') : '—'}">—</td>
+                        <td th:text="${usuario.fechaModificacion != null ? #temporals.format(usuario.fechaModificacion.atZone(T(java.time.ZoneId).of('America/Costa_Rica')), 'dd/MM/yyyy HH:mm') : '—'}">—</td>
+                        <td th:text="${usuario.fechaEliminacion != null ? #temporals.format(usuario.fechaEliminacion.atZone(T(java.time.ZoneId).of('America/Costa_Rica')), 'dd/MM/yyyy HH:mm') : '—'}">—</td>
                         <td th:text="${usuario.tipoUsuarioNombre}">CLIENTE</td>
                         <td th:text="${usuario.estadoNombre}">ACTIVO</td>
                         <td><a class="action-btn edit" title="Editar usuario" th:href="@{/usuarios/modificar/{id}(id=${usuario.id})}"><i class="bi bi-pencil-square"></i></a></td>
