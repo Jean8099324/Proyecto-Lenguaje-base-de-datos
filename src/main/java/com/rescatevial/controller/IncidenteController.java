@@ -102,11 +102,19 @@ public class IncidenteController {
                     ? "Incidente registrado correctamente." : "Incidente actualizado correctamente.");
         } catch (Exception ex) {
             redirect.addFlashAttribute("mensajeError", "No se pudo guardar el incidente: " + ex.getMessage());
-            redirect.addFlashAttribute("incidenteForm", incidente);
-            redirect.addFlashAttribute("modalAbierto", incidente.getId() == null);
-            if (incidente.getId() != null) return "redirect:/incidentes/modificar/" + incidente.getId();
+            return prepararFormularioConError(incidente, ex.getMessage(), redirect);
         }
         return "redirect:/incidentes/listado";
+    }
+
+    private String prepararFormularioConError(Incidente incidente, String mensaje, RedirectAttributes redirect) {
+        redirect.addFlashAttribute("mensajeError", "No se pudo guardar el incidente: " + mensaje);
+        redirect.addFlashAttribute("incidenteForm", incidente);
+        if (incidente.getId() == null) {
+            redirect.addFlashAttribute("modalAbierto", true);
+            return "redirect:/incidentes/listado";
+        }
+        return "redirect:/incidentes/modificar/" + incidente.getId();
     }
 
     @PostMapping("/desactivar/{id}")

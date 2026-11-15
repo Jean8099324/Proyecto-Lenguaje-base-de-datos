@@ -439,9 +439,9 @@
 
                             </div>
 
-                            <a href="#" aria-disabled="true" onclick="return false;" title="En construcción">
+                            <a href="/incidentes/listado">
                                 Ver todos
-                                <i class="bi bi-cone-striped"></i>
+                                <i class="bi bi-arrow-right"></i>
                             </a>
 
                         </div>
@@ -453,7 +453,7 @@
                                 <thead>
 
                                     <tr>
-                                        <th>INCIDENTE</th>
+                                        <th>#INCIDENTE</th>
                                         <th>UBICACIÓN</th>
                                         <th>TIPO</th>
                                         <th>ESTADO</th>
@@ -467,7 +467,7 @@
                                     <!-- Registros reales consultados desde Oracle -->
                                     <tr th:each="incidente : ${incidentesRecientes}">
                                         <td>
-                                            <strong th:text="${'#RV-' + incidente.id}">#RV-1</strong>
+                                            <strong th:text="${incidente.id}">1</strong>
                                         </td>
                                         <td>
                                             <i class="bi bi-geo-alt"></i>

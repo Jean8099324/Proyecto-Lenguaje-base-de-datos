@@ -11,19 +11,20 @@
 </head>
 <body>
 <div class="app-layout">
-    <aside class="sidebar">
-        <div class="sidebar-header"><div class="brand-icon"><i class="bi bi-truck"></i></div><div class="brand-text"><h1>Rescate Vial CR</h1><span>Gestión de Asistencia Vial</span></div></div>
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header"><div class="brand-icon"><i class="bi bi-truck"></i></div><div class="brand-text"><h1>Rescate Vial CR</h1><span>Gestión de Asistencia Vial</span></div><button type="button" class="close-sidebar" id="closeSidebar" aria-label="Cerrar men?"><i class="bi bi-x-lg"></i></button></div>
         <nav class="sidebar-nav"><div class="nav-section"><span class="nav-title">PRINCIPAL</span><a href="/dashboard" class="nav-link"><i class="bi bi-grid-1x2-fill"></i><span>Dashboard</span></a></div><div class="nav-section"><span class="nav-title">OPERACIONES</span><a href="/incidentes/listado" class="nav-link active"><i class="bi bi-exclamation-triangle"></i><span>Incidentes</span></a><a href="/despacho" class="nav-link"><i class="bi bi-send"></i><span>Despacho</span></a></div></nav>
     </aside>
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
     <div class="main-content">
         <header class="topbar">
-            <div class="topbar-left"><div><h2>Detalle de incidente</h2><span>Información completa del reporte</span></div></div>
+            <div class="topbar-left"><button type="button" class="menu-button" id="menuButton" aria-label="Abrir men?"><i class="bi bi-list"></i></button><div><h2>Detalle de incidente</h2><span>Información completa del reporte</span></div></div>
             <div class="topbar-right"><div class="user-profile"><div class="user-avatar" th:text="${session.inicialesUsuario != null ? session.inicialesUsuario : 'U'}">U</div><div class="user-info"><strong th:text="${session.nombreUsuario != null ? session.nombreUsuario : #authentication.name}">Usuario</strong><span th:text="${session.usernameUsuario != null ? session.usernameUsuario : #authentication.name}">usuario</span></div></div><form th:action="@{/logout}" method="post"><input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"><button type="submit" class="topbar-action" title="Cerrar sesión"><i class="bi bi-box-arrow-right"></i></button></form></div>
         </header>
         <main class="page-content">
             <section class="page-heading incident-detail-heading"><div><span class="section-label">OPERACIONES</span><h2>Detalle de incidente</h2><p>Consultar toda la información, historial y relaciones.</p></div><div class="detail-heading-actions"><a href="/incidentes/listado" class="btn-secondary-custom"><i class="bi bi-arrow-left"></i> Volver</a><a th:href="@{/incidentes/modificar/{id}(id=${incidente.id})}" class="btn-primary-custom"><i class="bi bi-pencil-square"></i> Editar</a></div></section>
             <section class="content-card incident-detail-card"><div class="incident-detail-body">
-                <section class="detail-section incident-identity"><div><span>Consecutivo del incidente</span><strong th:text="${'#' + #numbers.formatInteger(incidente.id, 6)}">#000001</strong></div><div><span>Fecha y hora del reporte</span><strong class="incident-datetime"><span th:text="${incidente.fechaReporte != null ? #temporals.format(incidente.fechaReporte, 'dd/MM/yyyy') : 'Sin registrar'}">Fecha</span><span th:text="${incidente.horaReporte != null and !incidente.horaReporte.isBlank() ? incidente.horaReporte : ''}">Hora</span></strong></div></section>
+                <section class="detail-section incident-identity"><div><span>Consecutivo del incidente</span><strong th:text="${incidente.id}">1</strong></div><div><span>Fecha y hora del reporte</span><strong class="incident-datetime"><span th:text="${incidente.fechaReporte != null ? #temporals.format(incidente.fechaReporte, 'dd/MM/yyyy') : 'Sin registrar'}">Fecha</span><span th:text="${incidente.horaReporte != null and !incidente.horaReporte.isBlank() ? incidente.horaReporte : ''}">Hora</span></strong></div></section>
 
                 <section class="detail-section"><h3><i class="bi bi-person-lines-fill"></i> Información de contacto</h3><div class="reporter-cards" th:if="${!#lists.isEmpty(contactos)}"><article class="reporter-card" th:each="contacto : ${contactos}"><strong th:text="${contacto.nombreCompleto}">Nombre del contacto</strong><div class="reporter-contact"><span th:if="${contacto.telefono != null and !contacto.telefono.isBlank()}"><i class="bi bi-telephone"></i><a th:href="${'tel:' + contacto.telefono}" th:text="${contacto.telefono}">Teléfono</a></span><span th:if="${contacto.correo != null and !contacto.correo.isBlank()}"><i class="bi bi-envelope"></i><a th:href="${'mailto:' + contacto.correo}" th:text="${contacto.correo}">Correo</a></span></div></article></div><p class="detail-empty" th:if="${#lists.isEmpty(contactos)}">No se registró información de contacto.</p></section>
 
@@ -37,6 +38,7 @@
             </div></section>
         </main>
     </div>
+<script src="/js/sidebar.js"></script>
 </div>
 </body>
 </html>

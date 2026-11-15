@@ -76,6 +76,9 @@ public class IncidenteService {
         });
     }
     @Transactional public void guardar(Incidente incidente) {
+        if (repository.existsActiveIncidentForVehicle(incidente.getIdVehiculo(), incidente.getId())) {
+            throw new IllegalStateException("El vehículo seleccionado ya tiene un incidente en proceso.");
+        }
         if (incidente.getId() == null) repository.insert(incidente); else repository.update(incidente);
     }
     @Transactional public void desactivar(Long id) { repository.deactivate(id); }

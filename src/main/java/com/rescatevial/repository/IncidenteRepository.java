@@ -47,6 +47,20 @@ public class IncidenteRepository {
         return IncidenteRepository.<Incidente>cursor(result).stream().findFirst();
     }
 
+    public boolean existsActiveIncidentForVehicle(Long vehicleId, Long excludedIncidentId) {
+        Integer count = jdbc.queryForObject("""
+                SELECT COUNT(*)
+                  FROM FIDE_INCIDENTES_TB i
+                  JOIN FIDE_ESTADOS_TB e ON e.ID_ESTADO = i.ID_ESTADO
+                 WHERE i.ID_VEHICULO = ?
+                   AND UPPER(TRIM(e.NOMBRE_ESTADO)) IN (
+                       'REPORTADO', 'ASIGNADO', 'UNIDAD EN CAMINO', 'EN ATENCION', 'TRASLADO'
+                   )
+                   AND (? IS NULL OR i.ID_INCIDENTE <> ?)
+                """, Integer.class, vehicleId, excludedIncidentId, excludedIncidentId);
+        return count != null && count > 0;
+    }
+
     public void insert(Incidente incidente) {
         var call = new SimpleJdbcCall(jdbc).withCatalogName("FIDE_PROYECTO_FINAL_RESCATE_VIAL_CR_PCK")
                 .withProcedureName("FIDE_INSERTAR_INCIDENTES_SP").withoutProcedureColumnMetaDataAccess()
