@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Rescate Vial CR | Datos de contacto</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css" rel="stylesheet">
+<link rel="stylesheet" href="/css/usuarios.css">
+</head>
+<body>
+<div class="app-layout">
+<aside class="sidebar" id="sidebar">
+ <div class="sidebar-header">
+  <div class="brand-icon"><i class="bi bi-truck"></i></div>
+  <div class="brand-text"><h1>Rescate Vial CR</h1><span>Gestión de Asistencia Vial</span></div>
+  <button type="button" class="close-sidebar" id="closeSidebar"><i class="bi bi-x-lg"></i></button>
+ </div>
+ <nav class="sidebar-nav">
+  <div class="nav-section"><span class="nav-title">PRINCIPAL</span>
+   <a class="nav-link" href="/dashboard"><i class="bi bi-grid-1x2-fill"></i><span>Dashboard</span></a></div>
+  <div class="nav-section"><span class="nav-title">GESTIÓN</span>
+   <a class="nav-link" href="/usuarios/listado"><i class="bi bi-person-badge"></i><span>Usuarios</span></a>
+   <a class="nav-link" href="/usuarios/roles"><i class="bi bi-person-lock"></i><span>Roles de usuario</span></a>
+   <a class="nav-link" href="/clientes"><i class="bi bi-people"></i><span>Clientes</span></a>
+   <a class="nav-link" href="/vehiculos"><i class="bi bi-car-front"></i><span>Vehículos</span></a>
+   <a class="nav-link" href="/personal"><i class="bi bi-person-workspace"></i><span>Personal</span></a>
+   <a class="nav-link" href="/contactos"><i class="bi bi-person-lines-fill"></i><span>Contactos</span></a>
+   <a class="nav-link active" href="/datos-contacto"><i class="bi bi-envelope-at"></i><span>Datos de contacto</span></a>
+  </div>
+ </nav>
+ <div class="sidebar-footer"><div class="system-status"><span class="status-dot"></span>
+  <div><strong>Sistema operativo</strong><span>Teléfonos, correos y direcciones</span></div>
+ </div></div>
+</aside>
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+<div class="main-content">
+<header class="topbar">
+ <div class="topbar-left"><button type="button" class="menu-button" id="menuButton"><i class="bi bi-list"></i></button>
+  <div><h2>Datos de contacto</h2><span>Administración de usuarios</span></div></div>
+ <div class="topbar-right"><div class="user-divider"></div>
+  <div class="user-profile"><div class="user-avatar" th:text="${session.inicialesUsuario != null ? session.inicialesUsuario : 'U'}">U</div>
+   <div class="user-info"><strong th:text="${session.nombreUsuario != null ? session.nombreUsuario : #authentication.name}">Usuario</strong>
+   <span th:text="${session.usernameUsuario != null ? session.usernameUsuario : #authentication.name}">usuario</span></div></div>
+  <form th:action="@{/logout}" method="post"><button type="submit" class="topbar-action" title="Cerrar sesión"><i class="bi bi-box-arrow-right"></i></button></form>
+ </div>
+</header>
+<main class="page-content">
+
+<section class="page-heading"><div><span class="section-label">GESTIÓN DEL SISTEMA</span>
+ <h2 th:text="${(esNuevo ? 'Registrar ' : 'Modificar ') + (tipo == 'telefono' ? 'teléfono' : tipo == 'correo' ? 'correo' : 'dirección')}">Nuevo dato</h2>
+ <p th:text="${'Usuario: ' + nombreUsuario}">Usuario</p></div>
+ <a class="btn-secondary-custom" th:href="@{/datos-contacto(usuario=${datoForm.idUsuario})}"><i class="bi bi-arrow-left"></i> Volver al listado</a>
+</section>
+<div th:if="${mensajeError}" class="alert alert-danger" th:text="${mensajeError}"></div>
+<section class="content-card">
+ <div class="content-card-header"><div><span class="section-label">REGISTRO</span><h3>Información de contacto</h3></div></div>
+ <form th:action="@{/datos-contacto/{tipo}/guardar(tipo=${tipo})}" th:object="${datoForm}" method="post">
+  <input type="hidden" th:field="*{idUsuario}">
+  <input type="hidden" name="editar" th:value="${!esNuevo}">
+  <input type="hidden" th:field="*{valorAnterior}">
+  <div class="form-grid" style="padding:24px 25px 0;">
+   <div th:if="${tipo == 'telefono'}" class="form-group-custom">
+    <label for="valorTelefono">Número de teléfono</label>
+    <input id="valorTelefono" th:field="*{valor}" type="tel" maxlength="20" required placeholder="Ej. 8888-8888">
+   </div>
+   <div th:if="${tipo == 'correo'}" class="form-group-custom">
+    <label for="valorCorreo">Correo electrónico</label>
+    <input id="valorCorreo" th:field="*{valor}" type="email" maxlength="150" required placeholder="correo@ejemplo.com">
+   </div>
+   <th:block th:if="${tipo == 'direccion'}">
+    <th:block th:if="${esNuevo}">
+     <div class="form-group-custom"><label for="provincia">Provincia</label>
+      <select id="provincia" th:field="*{idProvincia}" required><option value="">Seleccione provincia</option>
+       <option th:each="p : ${provincias}" th:value="${p.id}" th:text="${p.nombre}">Provincia</option></select>
+     </div>
+     <div class="form-group-custom"><label for="canton">Cantón</label>
+      <select id="canton" th:field="*{idCanton}" required><option value="">Seleccione cantón</option>
+       <option th:each="c : ${cantones}" th:value="${c.id}" th:text="${c.nombre}" th:attr="data-padre=${c.idPadre}">Cantón</option></select>
+     </div>
+     <div class="form-group-custom"><label for="distrito">Distrito</label>
+      <select id="distrito" th:field="*{idDistrito}" required><option value="">Seleccione distrito</option>
+       <option th:each="d : ${distritos}" th:value="${d.id}" th:text="${d.nombre}" th:attr="data-padre=${d.idPadre}">Distrito</option></select>
+     </div>
+    </th:block>
+    <th:block th:unless="${esNuevo}">
+     <input type="hidden" th:field="*{idProvincia}">
+     <input type="hidden" th:field="*{idCanton}">
+     <input type="hidden" th:field="*{idDistrito}">
+     <p class="text-muted" style="padding:10px 0;">La provincia, cantón y distrito forman parte de la clave de la dirección. Para cambiar la ubicación debe crearse otra dirección.</p>
+    </th:block>
+    <div class="form-group-custom" style="grid-column:1/-1"><label for="otrasSenas">Otras señas</label>
+     <input id="otrasSenas" th:field="*{otrasSenas}" maxlength="200" placeholder="Casa, edificio, número, referencias...">
+    </div>
+   </th:block>
+  </div>
+  <div class="modal-actions" style="padding:12px 25px 24px;">
+   <a class="btn-secondary-custom" th:href="@{/datos-contacto(usuario=${datoForm.idUsuario})}">Cancelar</a>
+   <button type="submit" class="btn-primary-custom"><i class="bi bi-check-lg"></i> Guardar</button>
+  </div>
+ </form>
+</section>
+
+</main></div></div>
+<script src="/js/datos-contacto.js"></script>
+</body></html>

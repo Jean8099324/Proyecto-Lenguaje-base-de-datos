@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="es" xmlns:th="http://www.thymeleaf.org">
 
@@ -90,24 +91,55 @@
 
                     <span class="nav-title">GESTIÓN</span>
 
-                    <!-- Acceso visual a clientes conservado, sin funcionalidad. -->
-                    <a href="#" aria-disabled="true" onclick="return false;" class="nav-link under-construction" title="En construcción">
+                    <!-- CLIENTES -->
+                    <a th:if="${esAdministrador}" href="/clientes" class="nav-link">
                         <i class="bi bi-people"></i>
                         <span>Clientes</span>
                     </a>
-                    <a th:if="${esAdministrador}" href="/usuarios/listado" class="nav-link"><i class="bi bi-person-badge"></i><span>Usuarios</span></a>
-                    <a th:if="${esAdministrador}" href="/usuarios/roles" class="nav-link"><i class="bi bi-person-lock"></i><span>Roles de usuario</span></a>
 
-                    <a href="#" aria-disabled="true" onclick="return false;" class="nav-link under-construction" title="En construcción">
+                    <!-- USUARIOS -->
+                    <a th:if="${esAdministrador}" href="/usuarios/listado" class="nav-link">
+                        <i class="bi bi-person-badge"></i>
+                        <span>Usuarios</span>
+                    </a>
+
+                    <!-- ROLES DE USUARIO -->
+                    <a th:if="${esAdministrador}" href="/usuarios/roles" class="nav-link">
+                        <i class="bi bi-person-lock"></i>
+                        <span>Roles de usuario</span>
+                    </a>
+
+                    <!-- VEHÍCULOS -->
+                    <a th:if="${esAdministrador}" href="/vehiculos" class="nav-link">
                         <i class="bi bi-car-front"></i>
                         <span>Vehículos</span>
                     </a>
 
-                    <a href="#" aria-disabled="true" onclick="return false;" class="nav-link under-construction" title="En construcción">
+                    <!-- PERSONAL -->
+                    <a th:if="${esAdministrador}" href="/personal" class="nav-link">
                         <i class="bi bi-person-badge"></i>
                         <span>Personal</span>
                     </a>
 
+                    <!-- CONTACTOS -->
+                    <a th:if="${esAdministrador}" href="/contactos" class="nav-link">
+                        <i class="bi bi-person-lines-fill"></i>
+                        <span>Contactos</span>
+                    </a>
+
+                    <!-- DATOS DE CONTACTO -->
+                    <a th:if="${esAdministrador}" href="/datos-contacto" class="nav-link">
+                        <i class="bi bi-envelope-at"></i>
+                        <span>Datos de contacto</span>
+                    </a>
+
+                    <!-- UBICACIONES Y CONFIGURACIÓN -->
+                    <a th:if="${esAdministrador}" href="/configuracion" class="nav-link">
+                        <i class="bi bi-geo-alt"></i>
+                        <span>Ubicaciones y configuración</span>
+                    </a>
+
+                    <!-- TALLERES -->
                     <a href="#" aria-disabled="true" onclick="return false;" class="nav-link under-construction" title="En construcción">
                         <i class="bi bi-tools"></i>
                         <span>Talleres</span>
@@ -228,7 +260,7 @@
                             <span th:text="${session.usernameUsuario != null ? session.usernameUsuario : #authentication.name}">usuario</span>
                         </div>
 
-                            <i class="bi bi-cone-striped construction-profile-marker" title="Menú de usuario en construcción"></i>
+                        <i class="bi bi-cone-striped construction-profile-marker" title="Menú de usuario en construcción"></i>
 
                     </div>
 
@@ -647,7 +679,7 @@
                     <div class="quick-grid">
 
                         <!-- CLIENTES -->
-                        <a href="#" aria-disabled="true" onclick="return false;" class="quick-card under-construction" title="En construcción">
+                        <a th:if="${esAdministrador}" href="/clientes" class="quick-card">
 
                             <i class="bi bi-people"></i>
 
@@ -663,18 +695,32 @@
 
                             </div>
 
-                            <i class="bi bi-cone-striped"></i>
+                            <i class="bi bi-chevron-right"></i>
 
                         </a>
+
+                        <!-- USUARIOS -->
                         <a th:if="${esAdministrador}" href="/usuarios/listado" class="quick-card">
-                            <i class="bi bi-person-badge"></i><div><strong>Usuarios</strong><span>Administrar usuarios</span></div><i class="bi bi-chevron-right"></i>
+                            <i class="bi bi-person-badge"></i>
+                            <div>
+                                <strong>Usuarios</strong>
+                                <span>Administrar usuarios</span>
+                            </div>
+                            <i class="bi bi-chevron-right"></i>
                         </a>
+
+                        <!-- ROLES DE USUARIO -->
                         <a th:if="${esAdministrador}" href="/usuarios/roles" class="quick-card">
-                            <i class="bi bi-person-lock"></i><div><strong>Roles de usuario</strong><span>Administrar permisos</span></div><i class="bi bi-chevron-right"></i>
+                            <i class="bi bi-person-lock"></i>
+                            <div>
+                                <strong>Roles de usuario</strong>
+                                <span>Administrar permisos</span>
+                            </div>
+                            <i class="bi bi-chevron-right"></i>
                         </a>
 
                         <!-- VEHÍCULOS -->
-                        <a href="#" aria-disabled="true" onclick="return false;" class="quick-card under-construction" title="En construcción">
+                        <a th:if="${esAdministrador}" href="/vehiculos" class="quick-card">
 
                             <i class="bi bi-car-front"></i>
 
@@ -690,12 +736,12 @@
 
                             </div>
 
-                            <i class="bi bi-cone-striped"></i>
+                            <i class="bi bi-chevron-right"></i>
 
                         </a>
 
                         <!-- PERSONAL -->
-                        <a href="#" aria-disabled="true" onclick="return false;" class="quick-card under-construction" title="En construcción">
+                        <a th:if="${esAdministrador}" href="/personal" class="quick-card">
 
                             <i class="bi bi-person-badge"></i>
 
@@ -711,7 +757,7 @@
 
                             </div>
 
-                            <i class="bi bi-cone-striped"></i>
+                            <i class="bi bi-chevron-right"></i>
 
                         </a>
 

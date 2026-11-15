@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Rescate Vial CR | Ubicaciones y configuración</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/usuarios.css">
+</head>
+<body>
+<div class="app-layout">
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <div class="brand-icon"><i class="bi bi-truck"></i></div>
+            <div class="brand-text"><h1>Rescate Vial CR</h1><span>Gestión de Asistencia Vial</span></div>
+            <button type="button" class="close-sidebar" id="closeSidebar"><i class="bi bi-x-lg"></i></button>
+        </div>
+        <nav class="sidebar-nav">
+            <div class="nav-section"><span class="nav-title">PRINCIPAL</span>
+                <a class="nav-link" href="/dashboard"><i class="bi bi-grid-1x2-fill"></i><span>Dashboard</span></a>
+            </div>
+            <div class="nav-section"><span class="nav-title">GESTIÓN</span>
+                <a class="nav-link" href="/usuarios/listado"><i class="bi bi-person-badge"></i><span>Usuarios</span></a>
+                <a class="nav-link" href="/usuarios/roles"><i class="bi bi-person-lock"></i><span>Roles de usuario</span></a>
+                <a class="nav-link" href="/clientes"><i class="bi bi-people"></i><span>Clientes</span></a>
+                <a class="nav-link" href="/vehiculos"><i class="bi bi-car-front"></i><span>Vehículos</span></a>
+                <a class="nav-link" href="/personal"><i class="bi bi-person-workspace"></i><span>Personal</span></a>
+                <a class="nav-link" href="/contactos"><i class="bi bi-person-lines-fill"></i><span>Contactos</span></a>
+                <a class="nav-link" href="/datos-contacto"><i class="bi bi-envelope-at"></i><span>Datos de contacto</span></a>
+                <a class="nav-link active" href="/configuracion"><i class="bi bi-geo-alt"></i><span>Ubicaciones y configuración</span></a>
+            </div>
+        </nav>
+        <div class="sidebar-footer"><div class="system-status"><span class="status-dot"></span>
+            <div><strong>Sistema operativo</strong><span>Catálogos y ubicaciones</span></div>
+        </div></div>
+    </aside>
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+    <div class="main-content">
+        <header class="topbar">
+            <div class="topbar-left"><button type="button" class="menu-button" id="menuButton"><i class="bi bi-list"></i></button>
+                <div><h2>Ubicaciones y configuración</h2><span>Administración de catálogos</span></div>
+            </div>
+            <div class="topbar-right"><div class="user-divider"></div><div class="user-profile">
+                <div class="user-avatar" th:text="${session.inicialesUsuario != null ? session.inicialesUsuario : 'U'}">U</div>
+                <div class="user-info"><strong th:text="${session.nombreUsuario != null ? session.nombreUsuario : #authentication.name}">Usuario</strong>
+                    <span th:text="${session.usernameUsuario != null ? session.usernameUsuario : #authentication.name}">usuario</span></div>
+                </div>
+                <form th:action="@{/logout}" method="post"><button type="submit" class="topbar-action" title="Cerrar sesión"><i class="bi bi-box-arrow-right"></i></button></form>
+            </div>
+        </header>
+        <main class="page-content">
+            <section class="page-heading"><div><span class="section-label">GESTIÓN DEL SISTEMA</span>
+                <h2>Ubicaciones y configuración</h2><p>Administre provincias, cantones, distritos, tipos de usuarios y estados.</p></div>
+                <a class="btn-primary-custom" th:href="@{/configuracion/{t}/nuevo(t=${tipo.clave})}"><i class="bi bi-plus-circle"></i> Nuevo registro</a>
+            </section>
+            <div th:if="${mensajeExito}" class="alert alert-success" th:text="${mensajeExito}"></div>
+            <div th:if="${mensajeError}" class="alert alert-danger" th:text="${mensajeError}"></div>
+            <section class="content-card mb-4">
+                <div class="content-card-header"><div><span class="section-label">CATÁLOGOS</span><h3>Seleccionar catálogo</h3></div></div>
+                <div class="d-flex flex-wrap gap-2 p-3">
+                    <a th:each="c : ${catalogos}" th:href="@{/configuracion/{t}(t=${c.clave})}"
+                       th:classappend="${c.clave == tipo.clave} ? 'btn btn-danger' : 'btn btn-outline-secondary'"
+                       th:text="${c.plural}">Provincias</a>
+                </div>
+            </section>
+            <section class="content-card">
+                <div class="content-card-header"><div><span class="section-label">REGISTROS</span>
+                    <h3 th:text="${tipo.plural}">Registros</h3></div>
+                    <div class="table-tools"><div class="search-box"><i class="bi bi-search"></i>
+                        <input type="search" id="buscarConfiguracion" placeholder="Buscar por nombre o ID..." aria-label="Buscar registro">
+                    </div></div>
+                </div>
+                <div class="table-responsive">
+                    <table class="clients-table">
+                        <thead><tr>
+                            <th>ID</th><th>NOMBRE</th>
+                            <th th:if="${tipo.tienePadre}" th:text="${tipo.padre == 'provincias' ? 'PROVINCIA' : 'CANTÓN'}">SUPERIOR</th>
+                            <th th:unless="${tipo.estadoSistema}">ESTADO</th>
+                            <th>ACCIONES</th>
+                        </tr></thead>
+                        <tbody id="tablaConfiguracion">
+                            <tr th:each="r : ${registros}" data-registro="true">
+                                <td th:text="${r.id}">1</td>
+                                <td th:text="${r.nombre}">Nombre</td>
+                                <td th:if="${tipo.tienePadre}" th:text="${r.nombrePadre}">Padre</td>
+                                <td th:unless="${tipo.estadoSistema}" th:text="${r.activo ? 'ACTIVO' : 'INACTIVO'}">ACTIVO</td>
+                                <td><div class="d-flex align-items-center gap-2">
+                                    <a class="action-btn edit" th:href="@{/configuracion/{t}/editar/{id}(t=${tipo.clave},id=${r.id})}" title="Editar registro"><i class="bi bi-pencil-square"></i></a>
+                                    <form th:if="${!tipo.estadoSistema && r.activo}" th:action="@{/configuracion/{t}/{id}/estado(t=${tipo.clave},id=${r.id})}" method="post"
+                                          onsubmit="return confirm('¿Desactivar este registro? Podría estar relacionado con otros datos.');">
+                                        <input type="hidden" name="reactivar" value="false">
+                                        <button type="submit" class="btn btn-sm btn-outline-danger">Desactivar</button>
+                                    </form>
+                                    <form th:if="${!tipo.estadoSistema && !r.activo}" th:action="@{/configuracion/{t}/{id}/estado(t=${tipo.clave},id=${r.id})}" method="post"
+                                          onsubmit="return confirm('¿Reactivar este registro?');">
+                                        <input type="hidden" name="reactivar" value="true">
+                                        <button type="submit" class="btn btn-sm btn-outline-success">Reactivar</button>
+                                    </form>
+                                </div></td>
+                            </tr>
+                            <tr th:if="${#lists.isEmpty(registros)}"><td colspan="5" class="text-center">No hay registros en este catálogo.</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="table-footer"><span>Mostrando <strong id="cantidadVisible" th:text="${total}">0</strong> registros</span></div>
+            </section>
+            <p class="text-muted small mt-3" th:if="${tipo.estadoSistema}">Los estados ACTIVO e INACTIVO son valores esenciales del sistema. No se permite desactivarlos ni renombrarlos.</p>
+        </main>
+    </div>
+</div>
+<script src="/js/configuracion.js"></script>
+</body>
+</html>
