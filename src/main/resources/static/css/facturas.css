@@ -1,0 +1,163 @@
+/*
+ * PANTALLA 24: FACTURACION
+ * ESTILOS DEL MODULO
+ * RESCATE VIAL CR
+ */
+
+.btn-factura-nueva {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 18px;
+    border-radius: 9px;
+    background: var(--accent, #e63946);
+    color: white;
+    font-size: 12px;
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.btn-factura-nueva:hover {
+    background: #cb303c;
+    color: white;
+}
+
+.buscador-facturas {
+    max-width: 240px;
+    font-size: 12px;
+    border-radius: 9px;
+}
+
+.tabla-facturas {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.tabla-facturas th {
+    padding: 15px;
+    background: #fafbfc;
+    color: #8b959f;
+    font-size: 9px;
+    letter-spacing: 0.6px;
+    white-space: nowrap;
+    border-bottom: 1px solid #e3e8ed;
+}
+
+.tabla-facturas td {
+    padding: 16px 15px;
+    color: #56616c;
+    font-size: 11px;
+    border-bottom: 1px solid #edf0f2;
+    white-space: nowrap;
+}
+
+.tabla-facturas tbody tr:hover {
+    background: #fafcfd;
+}
+
+.estado-factura {
+    display: inline-block;
+    padding: 5px 10px;
+    border-radius: 20px;
+    background: #eaf7ef;
+    color: #198754;
+    font-size: 10px;
+    font-weight: 700;
+}
+
+.acciones-factura {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.btn-accion {
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    width: 30px;
+    height: 30px;
+    border: 1px solid #e3e8ed;
+    border-radius: 7px;
+    background: white;
+    cursor: pointer;
+    text-decoration: none;
+}
+
+.btn-accion.editar {
+    color: #1769aa;
+}
+
+.btn-accion.eliminar {
+    color: #e63946;
+}
+
+.btn-accion:hover {
+    background: #f4f7fa;
+}
+
+/*
+ * BOTON DESCARGAR PDF
+ *
+ * DESCRIPCION:
+ * PERMITE IDENTIFICAR LA ACCION
+ * DE DESCARGAR UNA FACTURA EN PDF.
+ */
+
+.btn-accion.pdf {
+    color: #e63946;
+    background: #ffffff;
+    border: 1px solid #e3e8ed;
+}
+
+.btn-accion.pdf:hover {
+    color: #ffffff;
+    background: #e63946;
+    border-color: #e63946;
+}
+
+.btn-accion.pdf i {
+    font-size: 15px;
+}
+
+/*
+ * ESTILOS CUANDO NO EXISTEN FACTURAS
+ */
+
+.sin-facturas {
+    padding: 45px !important;
+    text-align: center;
+    color: #8b959f;
+}
+
+.sin-facturas i {
+    display: block;
+    font-size: 30px;
+    margin-bottom: 10px;
+}
+
+.sin-facturas p {
+    margin-bottom: 4px;
+    font-weight: 600;
+    color: #17202a;
+}
+
+.sin-facturas span {
+    font-size: 11px;
+}
+
+/*
+ * DISEÑO RESPONSIVO
+ */
+
+@media (max-width: 768px) {
+
+    .card-header-custom {
+        gap: 12px;
+        flex-wrap: wrap;
+    }
+
+    .buscador-facturas {
+        max-width: 100%;
+    }
+}

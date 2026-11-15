@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Facturación | Rescate Vial CR</title>
+
+    <!-- ESTILOS DEL DASHBOARD -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css">
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
+
+    <link rel="stylesheet" th:href="@{/css/dashboard.css}">
+    <link rel="stylesheet" th:href="@{/css/facturas.css}">
+</head>
+
+<body>
+
+    <div class="app-layout">
+
+        <!-- MENU LATERAL -->
+        <aside class="sidebar" id="sidebar">
+
+            <div class="sidebar-header">
+
+                <div class="brand-icon">
+                    <i class="bi bi-truck"></i>
+                </div>
+
+                <div class="brand-text">
+                    <h1>Rescate Vial CR</h1>
+                    <span>Gestión de Asistencia Vial</span>
+                </div>
+
+                <button class="close-sidebar" id="closeSidebar" type="button">
+                    <i class="bi bi-x-lg"></i>
+                </button>
+
+            </div>
+
+            <nav class="sidebar-nav">
+
+                <div class="nav-section">
+
+                    <span class="nav-title">PRINCIPAL</span>
+
+                    <a th:href="@{/dashboard}" class="nav-link">
+                        <i class="bi bi-grid-1x2-fill"></i>
+                        <span>Dashboard</span>
+                    </a>
+
+                </div>
+
+                <div class="nav-section">
+
+                    <span class="nav-title">SERVICIOS</span>
+
+                    <a th:href="@{/reparaciones/listado}" class="nav-link">
+                        <i class="bi bi-wrench-adjustable"></i>
+                        <span>Reparaciones</span>
+                    </a>
+
+                    <a th:href="@{/detalle-reparaciones/listado}" class="nav-link">
+                        <i class="bi bi-list-check"></i>
+                        <span>Detalle de reparaciones</span>
+                    </a>
+
+                    <a th:href="@{/repuestos/listado}" class="nav-link">
+                        <i class="bi bi-box-seam"></i>
+                        <span>Repuestos</span>
+                    </a>
+
+                </div>
+
+                <div class="nav-section">
+
+                    <span class="nav-title">FINANZAS</span>
+
+                    <a th:href="@{/facturas/listado}" class="nav-link active">
+                        <i class="bi bi-receipt"></i>
+                        <span>Facturación</span>
+                    </a>
+
+                    <a href="#" class="nav-link under-construction" onclick="return false;">
+                        <i class="bi bi-credit-card"></i>
+                        <span>Pagos</span>
+                    </a>
+
+                </div>
+
+            </nav>
+
+            <div class="sidebar-footer">
+
+                <div class="system-status">
+                    <span class="status-dot"></span>
+
+                    <div>
+                        <strong>Sistema operativo</strong>
+                        <span>Todos los servicios activos</span>
+                    </div>
+                </div>
+
+            </div>
+
+        </aside>
+
+        <!-- FONDO MOVIL -->
+        <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+        <!-- CONTENIDO PRINCIPAL -->
+        <div class="main-content">
+
+            <!-- ENCABEZADO SUPERIOR -->
+            <header class="topbar">
+
+                <div class="topbar-left">
+
+                    <button class="menu-button" id="menuButton" type="button">
+                        <i class="bi bi-list"></i>
+                    </button>
+
+                    <div>
+                        <h2>Facturación</h2>
+                        <span>Gestión de facturas y operaciones financieras</span>
+                    </div>
+
+                </div>
+
+                <div class="topbar-right">
+
+                    <div class="user-profile">
+
+                        <div class="user-avatar"
+                            th:text="${session.inicialesUsuario != null ? session.inicialesUsuario : 'U'}">
+                            U
+                        </div>
+
+                        <div class="user-info">
+
+                            <strong
+                                th:text="${session.nombreUsuario != null ? session.nombreUsuario : #authentication.name}">
+                                Usuario
+                            </strong>
+
+                            <span
+                                th:text="${session.usernameUsuario != null ? session.usernameUsuario : #authentication.name}">
+                                usuario
+                            </span>
+
+                        </div>
+
+                    </div>
+
+                    <!-- CERRAR SESION -->
+                    <form th:action="@{/logout}" method="post">
+
+                        <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}"
+                            th:value="${_csrf.token}">
+
+                        <button type="submit" class="topbar-action" title="Cerrar sesión">
+
+                            <i class="bi bi-box-arrow-right"></i>
+
+                        </button>
+
+                    </form>
+
+                </div>
+
+            </header>
+
+            <!-- CONTENIDO DE FACTURACION -->
+            <main class="dashboard-content">
+
+                <!-- TITULO -->
+                <section class="welcome-section">
+
+                    <div>
+
+                        <span class="section-label">
+                            FINANZAS / FACTURACIÓN
+                        </span>
+
+                        <h2>Gestión de facturas</h2>
+
+                        <p>
+                            Consulta, registra y administra las facturas
+                            de Rescate Vial CR.
+                        </p>
+
+                    </div>
+
+                    <a th:href="@{/facturas/nuevo}" class="btn-factura-nueva">
+
+                        <i class="bi bi-plus-lg"></i>
+                        Nueva factura
+
+                    </a>
+
+                </section>
+
+                <!-- MENSAJE DE EXITO -->
+                <div th:if="${mensaje}" class="alert alert-success alert-dismissible fade show">
+
+                    <span th:text="${mensaje}"></span>
+
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
+
+                </div>
+
+                <!-- MENSAJE DE ERROR -->
+                <div th:if="${error}" class="alert alert-danger alert-dismissible fade show">
+
+                    <span th:text="${error}"></span>
+
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
+
+                </div>
+
+                <!-- TARJETA DE FACTURAS -->
+                <article class="dashboard-card">
+
+                    <div class="card-header-custom">
+
+                        <div>
+
+                            <span class="section-label">
+                                FACTURACIÓN
+                            </span>
+
+                            <h3>Listado de facturas</h3>
+
+                        </div>
+
+                        <input type="search" id="buscarFactura" class="form-control buscador-facturas"
+                            placeholder="Buscar factura...">
+
+                    </div>
+
+                    <div class="table-responsive">
+
+                        <table class="tabla-facturas" id="tablaFacturas">
+
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>FECHA</th>
+                                    <th>HORA</th>
+                                    <th>VENTA</th>
+                                    <th>SUBTOTAL</th>
+                                    <th>DEDUCCIONES</th>
+                                    <th>IMPUESTOS</th>
+                                    <th>TOTAL</th>
+                                    <th>ESTADO</th>
+                                    <th>ACCIONES</th>
+                                </tr>
+                            </thead>
+
+                            <tbody>
+
+                                <tr th:each="factura : ${facturas}">
+
+                                    <td th:text="${factura.idFactura}"></td>
+
+                                    <td th:text="${factura.fechaFactura}"></td>
+
+                                    <td th:text="${factura.horaFactura}"></td>
+
+                                    <td th:text="${factura.idVenta}"></td>
+
+                                    <td
+                                        th:text="${factura.subtotal != null ? '₡ ' + #numbers.formatDecimal(factura.subtotal, 1, 'COMMA', 2, 'POINT') : '—'}">
+                                    </td>
+
+                                    <td
+                                        th:text="${factura.totalDeducciones != null ? '₡ ' + #numbers.formatDecimal(factura.totalDeducciones, 1, 'COMMA', 2, 'POINT') : '—'}">
+                                    </td>
+
+                                    <td
+                                        th:text="${factura.totalImpuestos != null ? '₡ ' + #numbers.formatDecimal(factura.totalImpuestos, 1, 'COMMA', 2, 'POINT') : '—'}">
+                                    </td>
+
+                                    <td class="fw-bold"
+                                        th:text="${factura.totalFactura != null ? '₡ ' + #numbers.formatDecimal(factura.totalFactura, 1, 'COMMA', 2, 'POINT') : '—'}">
+                                    </td>
+
+                                    <td>
+                                        <span class="estado-factura" th:text="${factura.idEstado}">
+                                        </span>
+                                    </td>
+
+                                    <td>
+
+                                        <div class="acciones-factura">
+
+                                            <!-- EDITAR -->
+                                            <a th:href="@{/facturas/modificar(idFactura=${factura.idFactura})}"
+                                                class="btn-accion editar" title="Modificar factura">
+
+                                                <i class="bi bi-pencil-square"></i>
+
+                                            </a>
+
+                                            <!-- DESCARGAR PDF -->
+                                            <a th:href="@{/facturas/pdf(idFactura=${factura.idFactura})}"
+                                                class="btn-accion pdf" title="Descargar factura PDF"
+                                                aria-label="Descargar factura PDF">
+
+                                                <i class="bi bi-file-earmark-pdf"></i>
+
+                                            </a>
+
+                                            <!-- ELIMINAR -->
+                                            <form th:action="@{/facturas/eliminar}" method="post"
+                                                class="form-eliminar-factura">
+
+                                                <input type="hidden" name="idFactura" th:value="${factura.idFactura}">
+
+                                                <input type="hidden" th:if="${_csrf != null}"
+                                                    th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+
+                                                <button type="submit" class="btn-accion eliminar"
+                                                    title="Eliminar factura">
+
+                                                    <i class="bi bi-trash"></i>
+
+                                                </button>
+
+                                            </form>
+
+                                        </div>
+
+                                    </td>
+
+                                </tr>
+
+                                <!-- SIN FACTURAS -->
+                                <tr th:if="${facturas == null or #lists.isEmpty(facturas)}">
+
+                                    <td colspan="10" class="sin-facturas">
+
+                                        <i class="bi bi-receipt"></i>
+
+                                        <p>No hay facturas registradas.</p>
+
+                                        <span>
+                                            Las facturas aparecerán aquí
+                                            cuando se registren en Oracle.
+                                        </span>
+
+                                    </td>
+
+                                </tr>
+
+                            </tbody>
+
+                        </table>
+
+                    </div>
+
+                </article>
+
+            </main>
+
+        </div>
+
+    </div>
+
+    <!-- JAVASCRIPT -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script th:src="@{/js/dashboard.js}"></script>
+    <script th:src="@{/js/facturas.js}"></script>
+
+</body>
+
+</html>

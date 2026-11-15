@@ -171,8 +171,7 @@
                         <span>Detalle de reparaciones</span>
                     </a>
 
-                    <a href="#" aria-disabled="true" onclick="return false;" class="nav-link under-construction"
-                        title="En construcción">
+                    <a th:href="@{/repuestos/listado}" class="nav-link">
                         <i class="bi bi-box-seam"></i>
                         <span>Repuestos</span>
                     </a>
@@ -184,11 +183,13 @@
 
                     <span class="nav-title">FINANZAS</span>
 
-                    <a href="#" aria-disabled="true" onclick="return false;" class="nav-link under-construction"
-                        title="En construcción">
+
+                    <!-- PANTALLA 24: FACTURACION -->
+                    <a th:href="@{/facturas/listado}" class="nav-link">
                         <i class="bi bi-receipt"></i>
                         <span>Facturación</span>
                     </a>
+
 
                     <a href="#" aria-disabled="true" onclick="return false;" class="nav-link under-construction"
                         title="En construcción">

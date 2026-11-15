@@ -1,73 +1,102 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+
     <modelVersion>4.0.0</modelVersion>
+
+    <!-- CONFIGURACION DE SPRING BOOT -->
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
         <version>4.1.2</version>
-        <relativePath/> <!-- lookup parent from repository -->
+        <relativePath />
     </parent>
+
+    <!-- INFORMACION DEL PROYECTO -->
     <groupId>com.rescatevial</groupId>
     <artifactId>rescatevial</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name/>
-    <description/>
-    <url/>
+
+    <name />
+    <description />
+    <url />
+
     <licenses>
-        <license/>
+        <license />
     </licenses>
+
     <developers>
-        <developer/>
+        <developer />
     </developers>
+
     <scm>
-        <connection/>
-        <developerConnection/>
-        <tag/>
-        <url/>
+        <connection />
+        <developerConnection />
+        <tag />
+        <url />
     </scm>
+
+    <!-- VERSION DE JAVA -->
     <properties>
         <java.version>21</java.version>
     </properties>
+
+    <!-- DEPENDENCIAS DEL PROYECTO -->
     <dependencies>
 
+        <!-- SPRING BOOT ACTUATOR -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-actuator</artifactId>
         </dependency>
 
+        <!-- CONEXION JDBC CON ORACLE -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-jdbc</artifactId>
         </dependency>
+
+        <!-- THYMELEAF -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-thymeleaf</artifactId>
         </dependency>
+
+        <!-- VALIDACIONES -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-validation</artifactId>
         </dependency>
+
+        <!-- SEGURIDAD CRIPTOGRAFICA -->
         <dependency>
             <groupId>org.springframework.security</groupId>
             <artifactId>spring-security-crypto</artifactId>
         </dependency>
+
+        <!-- SPRING WEB MVC -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-webmvc</artifactId>
         </dependency>
 
+        <!-- HERRAMIENTAS DE DESARROLLO -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-devtools</artifactId>
             <scope>runtime</scope>
             <optional>true</optional>
         </dependency>
+
+        <!-- LOMBOK -->
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
             <optional>true</optional>
         </dependency>
+
+        <!-- ORACLE DATABASE -->
         <dependency>
             <groupId>com.oracle.database.jdbc</groupId>
             <artifactId>ojdbc17-production</artifactId>
@@ -75,33 +104,53 @@
             <type>pom</type>
             <scope>runtime</scope>
         </dependency>
+
+        <!-- PANTALLA 24: FACTURACION -->
+        <!-- GENERACION DE FACTURAS EN PDF -->
+        <dependency>
+            <groupId>org.apache.pdfbox</groupId>
+            <artifactId>pdfbox</artifactId>
+            <version>3.0.6</version>
+        </dependency>
+
+        <!-- PRUEBAS DE THYMELEAF -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-thymeleaf-test</artifactId>
             <scope>test</scope>
         </dependency>
+
+        <!-- PRUEBAS DE VALIDACIONES -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-validation-test</artifactId>
             <scope>test</scope>
         </dependency>
-        <!-- Seguridad y autenticación de usuarios -->
+
+        <!-- SEGURIDAD Y AUTENTICACION -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-security</artifactId>
         </dependency>
+
+        <!-- PRUEBAS DE SPRING WEB MVC -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-webmvc-test</artifactId>
             <scope>test</scope>
         </dependency>
+
     </dependencies>
 
+    <!-- CONFIGURACION DE COMPILACION -->
     <build>
         <plugins>
+
+            <!-- COMPILADOR DE JAVA -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
+
                 <configuration>
                     <annotationProcessorPaths>
                         <path>
@@ -111,9 +160,12 @@
                     </annotationProcessorPaths>
                 </configuration>
             </plugin>
+
+            <!-- SPRING BOOT MAVEN PLUGIN -->
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
+
                 <configuration>
                     <excludes>
                         <exclude>
@@ -123,6 +175,7 @@
                     </excludes>
                 </configuration>
             </plugin>
+
         </plugins>
     </build>
 

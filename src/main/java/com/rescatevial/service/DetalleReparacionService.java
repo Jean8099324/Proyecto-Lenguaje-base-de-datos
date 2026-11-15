@@ -20,85 +20,85 @@ import com.rescatevial.repository.DetalleReparacionRepository;
 @Service
 public class DetalleReparacionService {
 
-    private final DetalleReparacionRepository detalleRepository;
+        private final DetalleReparacionRepository detalleRepository;
 
-    // INYECCION DE DEPENDENCIAS
-    public DetalleReparacionService(
-            DetalleReparacionRepository detalleRepository) {
+        // INYECCION DE DEPENDENCIAS
+        public DetalleReparacionService(
+                        DetalleReparacionRepository detalleRepository) {
 
-        this.detalleRepository = detalleRepository;
-    }
-
-    // CONSULTAR TODOS LOS DETALLES
-    @Transactional(readOnly = true)
-    public List<DetalleReparacion> getDetalles() {
-
-        return detalleRepository.findAll();
-    }
-
-    // CONSULTAR DETALLE POR REPARACION Y REPUESTO
-    @Transactional(readOnly = true)
-    public Optional<DetalleReparacion> getDetallePorId(
-            Long idReparacion,
-            Long idRepuesto) {
-
-        return detalleRepository.findById(
-                idReparacion,
-                idRepuesto);
-    }
-
-    // INSERTAR UN NUEVO DETALLE
-    @Transactional
-    public void insertar(DetalleReparacion detalle) {
-
-        // EVITAR REGISTRAR EL MISMO REPUESTO
-        // DOS VECES EN UNA REPARACION
-        if (detalleRepository.findById(
-                detalle.getIdReparacion(),
-                detalle.getIdRepuesto()).isPresent()) {
-
-            throw new IllegalArgumentException(
-                    "El repuesto ya está registrado "
-                            + "en esta reparación.");
+                this.detalleRepository = detalleRepository;
         }
 
-        // INSERTAR MEDIANTE PROCEDIMIENTO ORACLE
-        detalleRepository.insertUsingProcedure(detalle);
-    }
+        // CONSULTAR TODOS LOS DETALLES
+        @Transactional(readOnly = true)
+        public List<DetalleReparacion> getDetalles() {
 
-    // MODIFICAR UN DETALLE EXISTENTE
-    @Transactional
-    public void modificar(DetalleReparacion detalle) {
+                return detalleRepository.findAll();
+        }
 
-        // VERIFICAR QUE EL DETALLE EXISTA
-        detalleRepository.findById(
-                detalle.getIdReparacion(),
-                detalle.getIdRepuesto())
-                .orElseThrow(() -> new IllegalArgumentException(
-                        "No se encontró el detalle "
-                                + "de reparación indicado."));
+        // CONSULTAR DETALLE POR REPARACION Y REPUESTO
+        @Transactional(readOnly = true)
+        public Optional<DetalleReparacion> getDetallePorId(
+                        Long idReparacion,
+                        Long idRepuesto) {
 
-        // MODIFICAR MEDIANTE PROCEDIMIENTO ORACLE
-        detalleRepository.updateUsingProcedure(detalle);
-    }
+                return detalleRepository.findById(
+                                idReparacion,
+                                idRepuesto);
+        }
 
-    // ELIMINAR UN DETALLE
-    @Transactional
-    public void eliminar(
-            Long idReparacion,
-            Long idRepuesto) {
+        // INSERTAR UN NUEVO DETALLE
+        @Transactional
+        public void insertar(DetalleReparacion detalle) {
 
-        // VERIFICAR QUE EL DETALLE EXISTA
-        detalleRepository.findById(
-                idReparacion,
-                idRepuesto)
-                .orElseThrow(() -> new IllegalArgumentException(
-                        "No existe el detalle "
-                                + "de reparación indicado."));
+                // EVITAR REGISTRAR EL MISMO REPUESTO
+                // DOS VECES EN UNA REPARACION
+                if (detalleRepository.findById(
+                                detalle.getIdReparacion(),
+                                detalle.getIdRepuesto()).isPresent()) {
 
-        // ELIMINAR MEDIANTE PROCEDIMIENTO ORACLE
-        detalleRepository.deleteById(
-                idReparacion,
-                idRepuesto);
-    }
+                        throw new IllegalArgumentException(
+                                        "El repuesto ya está registrado "
+                                                        + "en esta reparación.");
+                }
+
+                // INSERTAR MEDIANTE PROCEDIMIENTO ORACLE
+                detalleRepository.insertUsingProcedure(detalle);
+        }
+
+        // MODIFICAR UN DETALLE EXISTENTE
+        @Transactional
+        public void modificar(DetalleReparacion detalle) {
+
+                // VERIFICAR QUE EL DETALLE EXISTA
+                detalleRepository.findById(
+                                detalle.getIdReparacion(),
+                                detalle.getIdRepuesto())
+                                .orElseThrow(() -> new IllegalArgumentException(
+                                                "No se encontró el detalle "
+                                                                + "de reparación indicado."));
+
+                // MODIFICAR MEDIANTE PROCEDIMIENTO ORACLE
+                detalleRepository.updateUsingProcedure(detalle);
+        }
+
+        // ELIMINAR UN DETALLE
+        @Transactional
+        public void eliminar(
+                        Long idReparacion,
+                        Long idRepuesto) {
+
+                // VERIFICAR QUE EL DETALLE EXISTA
+                detalleRepository.findById(
+                                idReparacion,
+                                idRepuesto)
+                                .orElseThrow(() -> new IllegalArgumentException(
+                                                "No existe el detalle "
+                                                                + "de reparación indicado."));
+
+                // ELIMINAR MEDIANTE PROCEDIMIENTO ORACLE
+                detalleRepository.deleteById(
+                                idReparacion,
+                                idRepuesto);
+        }
 }

@@ -1,0 +1,222 @@
+/* Repuestos: estilos propios. Reutiliza dashboard.css sin modificarlo. */
+.repuestos-page {
+    max-width: 1600px;
+}
+
+.repuestos-heading {
+    align-items: center;
+}
+
+.repuestos-card {
+    box-shadow: 0 4px 14px rgba(11, 31, 51, .025);
+}
+
+.repuestos-card-header {
+    gap: 18px;
+    flex-wrap: wrap;
+}
+
+.btn-repuestos-primary,
+.btn-repuestos-secondary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 9px;
+    min-height: 43px;
+    padding: 0 18px;
+    border-radius: 9px;
+    font-size: 12px;
+    font-weight: 700;
+    text-decoration: none;
+    transition: .2s ease;
+}
+
+.btn-repuestos-primary {
+    border: 1px solid #e63946;
+    background: #e63946;
+    color: white;
+}
+
+.btn-repuestos-primary:hover {
+    background: #cb303c;
+    color: white;
+}
+
+.btn-repuestos-secondary {
+    border: 1px solid #e3e8ed;
+    background: white;
+    color: #0b1f33;
+}
+
+.btn-repuestos-secondary:hover {
+    background: #f4f7fa;
+    color: #0b1f33;
+}
+
+.repuestos-search {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    min-width: 240px;
+    padding: 9px 13px;
+    border: 1px solid #e3e8ed;
+    border-radius: 9px;
+    color: #8995a1;
+    background: white;
+}
+
+.repuestos-search input {
+    width: 100%;
+    border: 0;
+    outline: 0;
+    color: #17202a;
+    font-size: 12px;
+}
+
+.repuestos-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.repuestos-table th {
+    padding: 14px 20px;
+    background: #fafbfc;
+    border-bottom: 1px solid #e3e8ed;
+    color: #8b959f;
+    font-size: 10px;
+    letter-spacing: .6px;
+    white-space: nowrap;
+}
+
+.repuestos-table td {
+    padding: 16px 20px;
+    border-bottom: 1px solid #edf0f2;
+    color: #56616c;
+    font-size: 12px;
+}
+
+.repuestos-table td strong {
+    color: #0b1f33;
+}
+
+.repuestos-table tbody tr:hover {
+    background: #fafcfd;
+}
+
+.repuestos-table tbody tr:last-child td {
+    border-bottom: 0;
+}
+
+.repuestos-status {
+    display: inline-flex;
+    padding: 6px 10px;
+    border-radius: 20px;
+    font-size: 10px;
+    font-weight: 700;
+    background: #f2f4f7;
+    color: #667085;
+}
+
+.repuestos-status.is-active {
+    color: #198754;
+    background: #eaf7ef;
+}
+
+.repuestos-status.is-inactive {
+    color: #c43b46;
+    background: #ffedef;
+}
+
+.repuestos-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.repuestos-actions form {
+    margin: 0;
+}
+
+.repuestos-icon-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 33px;
+    height: 33px;
+    border: 1px solid #e3e8ed;
+    border-radius: 8px;
+    background: white;
+    font-size: 14px;
+    cursor: pointer;
+}
+
+.repuestos-icon-button.edit {
+    color: #153a5b;
+}
+
+.repuestos-icon-button.delete {
+    color: #e63946;
+}
+
+.repuestos-icon-button:hover {
+    background: #f4f7fa;
+}
+
+.repuestos-empty {
+    text-align: center;
+    padding: 32px !important;
+    color: #8995a1 !important;
+}
+
+.repuestos-empty i {
+    margin-right: 8px;
+}
+
+.repuestos-form {
+    padding: 26px;
+}
+
+.repuestos-form .form-label {
+    color: #0b1f33;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.repuestos-form .form-control,
+.repuestos-form .form-select {
+    min-height: 42px;
+    border-color: #e3e8ed;
+    font-size: 13px;
+}
+
+.repuestos-form textarea.form-control {
+    min-height: 110px;
+}
+
+.repuestos-form .form-control:focus,
+.repuestos-form .form-select:focus {
+    border-color: #153a5b;
+    box-shadow: 0 0 0 .2rem rgba(21, 58, 91, .12);
+}
+
+.repuestos-form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    margin-top: 28px;
+    flex-wrap: wrap;
+}
+
+@media(max-width:650px) {
+    .repuestos-search {
+        width: 100%;
+    }
+
+    .repuestos-heading {
+        align-items: flex-start;
+    }
+
+    .repuestos-table {
+        min-width: 760px;
+    }
+}

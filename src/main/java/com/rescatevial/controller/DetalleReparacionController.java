@@ -29,145 +29,145 @@ import jakarta.validation.Valid;
 @RequestMapping("/detalle-reparaciones")
 public class DetalleReparacionController {
 
-    private final DetalleReparacionService detalleService;
-    private final ReparacionService reparacionService;
-    private final EstadoService estadoService;
+        private final DetalleReparacionService detalleService;
+        private final ReparacionService reparacionService;
+        private final EstadoService estadoService;
 
-    // INYECCION DE DEPENDENCIAS
-    public DetalleReparacionController(
-            DetalleReparacionService detalleService,
-            ReparacionService reparacionService,
-            EstadoService estadoService) {
+        // INYECCION DE DEPENDENCIAS
+        public DetalleReparacionController(
+                        DetalleReparacionService detalleService,
+                        ReparacionService reparacionService,
+                        EstadoService estadoService) {
 
-        this.detalleService = detalleService;
-        this.reparacionService = reparacionService;
-        this.estadoService = estadoService;
-    }
-
-    // MOSTRAR LISTADO DE DETALLES
-    @GetMapping("/listado")
-    public String listado(Model model) {
-
-        model.addAttribute(
-                "detalles",
-                detalleService.getDetalles());
-
-        model.addAttribute(
-                "reparaciones",
-                reparacionService.getReparaciones());
-
-        model.addAttribute(
-                "estados",
-                estadoService.listar());
-
-        model.addAttribute(
-                "detalle",
-                new DetalleReparacion());
-
-        return "detalle-reparaciones/listado";
-    }
-
-    // MOSTRAR FORMULARIO PARA MODIFICAR
-    @GetMapping("/modificar/{idReparacion}/{idRepuesto}")
-    public String modificar(
-            @PathVariable Long idReparacion,
-            @PathVariable Long idRepuesto,
-            Model model,
-            RedirectAttributes redirect) {
-
-        var detalle = detalleService.getDetallePorId(
-                idReparacion, idRepuesto);
-
-        if (detalle.isEmpty()) {
-
-            redirect.addFlashAttribute(
-                    "error",
-                    "No se encontró el detalle solicitado.");
-
-            return "redirect:/detalle-reparaciones/listado";
+                this.detalleService = detalleService;
+                this.reparacionService = reparacionService;
+                this.estadoService = estadoService;
         }
 
-        model.addAttribute("detalle", detalle.get());
+        // MOSTRAR LISTADO DE DETALLES
+        @GetMapping("/listado")
+        public String listado(Model model) {
 
-        model.addAttribute(
-                "estados",
-                estadoService.listar());
+                model.addAttribute(
+                                "detalles",
+                                detalleService.getDetalles());
 
-        return "detalle-reparaciones/modifica";
-    }
+                model.addAttribute(
+                                "reparaciones",
+                                reparacionService.getReparaciones());
 
-    // GUARDAR DETALLE NUEVO O MODIFICADO
-    @PostMapping("/guardar")
-    public String guardar(
-            @Valid @ModelAttribute("detalle") DetalleReparacion detalle,
-            BindingResult resultado,
-            @RequestParam(name = "edicion", defaultValue = "false") boolean edicion,
-            RedirectAttributes redirect) {
+                model.addAttribute(
+                                "estados",
+                                estadoService.listar());
 
-        if (resultado.hasErrors()) {
+                model.addAttribute(
+                                "detalle",
+                                new DetalleReparacion());
 
-            redirect.addFlashAttribute(
-                    "error",
-                    "Verifica los datos ingresados.");
-
-            return "redirect:/detalle-reparaciones/listado";
+                return "detalle-reparaciones/listado";
         }
 
-        try {
+        // MOSTRAR FORMULARIO PARA MODIFICAR
+        @GetMapping("/modificar/{idReparacion}/{idRepuesto}")
+        public String modificar(
+                        @PathVariable Long idReparacion,
+                        @PathVariable Long idRepuesto,
+                        Model model,
+                        RedirectAttributes redirect) {
 
-            if (edicion) {
+                var detalle = detalleService.getDetallePorId(
+                                idReparacion, idRepuesto);
 
-                detalleService.modificar(detalle);
+                if (detalle.isEmpty()) {
 
-                redirect.addFlashAttribute(
-                        "exito",
-                        "Detalle actualizado correctamente.");
+                        redirect.addFlashAttribute(
+                                        "error",
+                                        "No se encontró el detalle solicitado.");
 
-            } else {
+                        return "redirect:/detalle-reparaciones/listado";
+                }
 
-                detalleService.insertar(detalle);
+                model.addAttribute("detalle", detalle.get());
 
-                redirect.addFlashAttribute(
-                        "exito",
-                        "Detalle registrado correctamente.");
-            }
+                model.addAttribute(
+                                "estados",
+                                estadoService.listar());
 
-        } catch (Exception e) {
-
-            redirect.addFlashAttribute(
-                    "error",
-                    "No fue posible guardar el detalle: "
-                            + e.getMessage());
+                return "detalle-reparaciones/modifica";
         }
 
-        return "redirect:/detalle-reparaciones/listado";
-    }
+        // GUARDAR DETALLE NUEVO O MODIFICADO
+        @PostMapping("/guardar")
+        public String guardar(
+                        @Valid @ModelAttribute("detalle") DetalleReparacion detalle,
+                        BindingResult resultado,
+                        @RequestParam(name = "edicion", defaultValue = "false") boolean edicion,
+                        RedirectAttributes redirect) {
 
-    // ELIMINAR DETALLE
-    @PostMapping("/eliminar/{idReparacion}/{idRepuesto}")
-    public String eliminar(
-            @PathVariable Long idReparacion,
-            @PathVariable Long idRepuesto,
-            RedirectAttributes redirect) {
+                if (resultado.hasErrors()) {
 
-        try {
+                        redirect.addFlashAttribute(
+                                        "error",
+                                        "Verifica los datos ingresados.");
 
-            detalleService.eliminar(
-                    idReparacion,
-                    idRepuesto);
+                        return "redirect:/detalle-reparaciones/listado";
+                }
 
-            redirect.addFlashAttribute(
-                    "exito",
-                    "Detalle eliminado correctamente.");
+                try {
 
-        } catch (Exception e) {
+                        if (edicion) {
 
-            redirect.addFlashAttribute(
-                    "error",
-                    "No fue posible eliminar el detalle: "
-                            + e.getMessage());
+                                detalleService.modificar(detalle);
+
+                                redirect.addFlashAttribute(
+                                                "exito",
+                                                "Detalle actualizado correctamente.");
+
+                        } else {
+
+                                detalleService.insertar(detalle);
+
+                                redirect.addFlashAttribute(
+                                                "exito",
+                                                "Detalle registrado correctamente.");
+                        }
+
+                } catch (Exception e) {
+
+                        redirect.addFlashAttribute(
+                                        "error",
+                                        "No fue posible guardar el detalle: "
+                                                        + e.getMessage());
+                }
+
+                return "redirect:/detalle-reparaciones/listado";
         }
 
-        return "redirect:/detalle-reparaciones/listado";
-    }
+        // ELIMINAR DETALLE
+        @PostMapping("/eliminar/{idReparacion}/{idRepuesto}")
+        public String eliminar(
+                        @PathVariable Long idReparacion,
+                        @PathVariable Long idRepuesto,
+                        RedirectAttributes redirect) {
+
+                try {
+
+                        detalleService.eliminar(
+                                        idReparacion,
+                                        idRepuesto);
+
+                        redirect.addFlashAttribute(
+                                        "exito",
+                                        "Detalle eliminado correctamente.");
+
+                } catch (Exception e) {
+
+                        redirect.addFlashAttribute(
+                                        "error",
+                                        "No fue posible eliminar el detalle: "
+                                                        + e.getMessage());
+                }
+
+                return "redirect:/detalle-reparaciones/listado";
+        }
 }
