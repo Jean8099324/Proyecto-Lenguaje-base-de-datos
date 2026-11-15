@@ -23,7 +23,10 @@ public class Incidente implements Serializable {
     @Size(max = 100) private String nombreReportante;
     @Size(max = 100) private String primerApellidoReportante;
     @Size(max = 100) private String segundoApellidoReportante;
-    @Size(max = 20) private String telefonoReportante;
+    @jakarta.validation.constraints.Pattern(
+            regexp = "^$|\\d{8}",
+            message = "El teléfono debe contener exactamente 8 dígitos numéricos.")
+    private String telefonoReportante;
     @Size(max = 150) private String correoReportante;
     @NotNull private Long idTipoIncidente;
     @NotNull private Long idPrioridad;

@@ -126,8 +126,10 @@ public class DatoContactoService {
         usuario(dato.getIdUsuario());
         if ("telefono".equals(tipo) || "correo".equals(tipo)) {
             String valor = requerido(dato.getValor(), "El dato");
-            int maximo = "telefono".equals(tipo) ? 20 : 150;
+            int maximo = "telefono".equals(tipo) ? 8 : 150;
             if (valor.length() > maximo) throw new IllegalArgumentException("El valor supera la longitud permitida.");
+            if ("telefono".equals(tipo) && !valor.matches("\\d{8}"))
+                throw new IllegalArgumentException("El teléfono debe contener exactamente 8 dígitos numéricos.");
             if ("correo".equals(tipo) && !valor.matches("^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$"))
                 throw new IllegalArgumentException("Indica un correo válido.");
             if (editar) {

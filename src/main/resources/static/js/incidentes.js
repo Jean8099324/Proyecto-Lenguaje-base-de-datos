@@ -1,5 +1,17 @@
 document.addEventListener("DOMContentLoaded", () => {
     const modal = document.getElementById("modalIncidente");
+    document.querySelectorAll("#tablaIncidentes .status-pill").forEach((pill) => {
+        const estado = pill.textContent.trim().toUpperCase();
+        const clases = {
+            "REPORTADO": "status-reported",
+            "ASIGNADO": "status-assigned",
+            "UNIDAD EN CAMINO": "status-dispatched",
+            "EN ATENCION": "status-attending",
+            "TRASLADO": "status-transfer",
+            "FINALIZADO": "status-completed"
+        };
+        pill.classList.add(clases[estado] || "status-default");
+    });
     const provincia = document.getElementById("incidenteProvincia");
     const canton = document.getElementById("incidenteCanton");
     const distrito = document.getElementById("incidenteDistrito");

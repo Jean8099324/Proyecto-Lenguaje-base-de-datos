@@ -13,7 +13,7 @@
         <div class="sidebar-header"><div class="brand-icon"><i class="bi bi-truck"></i></div><div class="brand-text"><h1>Rescate Vial CR</h1><span>Gestión de Asistencia Vial</span></div><button class="close-sidebar" id="closeSidebar"><i class="bi bi-x-lg"></i></button></div>
         <nav class="sidebar-nav">
             <div class="nav-section"><span class="nav-title">PRINCIPAL</span><a href="/dashboard" class="nav-link"><i class="bi bi-grid-1x2-fill"></i><span>Dashboard</span></a></div>
-            <div class="nav-section"><span class="nav-title">OPERACIONES</span><a href="/incidentes/listado" class="nav-link active"><i class="bi bi-exclamation-triangle"></i><span>Incidentes</span></a><a href="/despacho" class="nav-link"><i class="bi bi-send"></i><span>Despacho</span></a><a href="#" class="nav-link under-construction" aria-disabled="true" onclick="return false"><i class="bi bi-truck-front"></i><span>Unidades</span></a></div>
+            <div class="nav-section"><span class="nav-title">OPERACIONES</span><a href="/incidentes/listado" class="nav-link active"><i class="bi bi-exclamation-triangle"></i><span>Incidentes</span></a><a href="/despacho" class="nav-link"><i class="bi bi-send"></i><span>Despacho</span></a><a href="/unidades" class="nav-link"><i class="bi bi-truck-front"></i><span>Unidades</span></a></div>
             <div class="nav-section"><span class="nav-title">GESTIÓN</span><a href="/usuarios/listado" class="nav-link" th:if="${esAdministrador}"><i class="bi bi-person-badge"></i><span>Usuarios</span></a><a href="/usuarios/roles" class="nav-link" th:if="${esAdministrador}"><i class="bi bi-person-lock"></i><span>Roles de usuario</span></a></div>
         </nav>
         <div class="sidebar-footer"><div class="system-status"><span class="status-dot"></span><div><strong>Sistema operativo</strong><span>Gestión de incidentes</span></div></div></div>
@@ -22,7 +22,7 @@
     <div class="main-content">
         <header class="topbar"><div class="topbar-left"><button class="menu-button" id="menuButton"><i class="bi bi-list"></i></button><div><h2>Incidentes</h2><span>Registro y seguimiento</span></div></div><div class="topbar-right"><div class="user-divider"></div><div class="user-profile"><div class="user-avatar" th:text="${session.inicialesUsuario != null ? session.inicialesUsuario : 'U'}">U</div><div class="user-info"><strong th:text="${session.nombreUsuario != null ? session.nombreUsuario : #authentication.name}">Usuario</strong><span th:text="${session.usernameUsuario != null ? session.usernameUsuario : #authentication.name}">usuario</span></div></div><form th:action="@{/logout}" method="post" class="logout-form"><input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"><button type="submit" class="topbar-action" title="Cerrar sesión"><i class="bi bi-box-arrow-right"></i></button></form></div></header>
         <main class="page-content">
-            <section class="page-heading"><div><span class="section-label">OPERACIONES</span><h2>Incidentes</h2><p>Registre los reportes y consulte el avance de cada caso.</p></div><button class="btn-primary-custom" id="btnNuevoIncidente"><i class="bi bi-plus-lg"></i> Nuevo incidente</button></section>
+            <section class="page-heading"><div><span class="section-label">OPERACIONES</span><h2>Incidentes</h2><p>Registre los reportes y consulte el avance de cada caso.</p></div><button type="button" class="btn-primary-custom" id="btnNuevoIncidente"><i class="bi bi-plus-lg"></i> Nuevo incidente</button></section>
             <div th:if="${mensajeExito}" class="alert alert-success" th:text="${mensajeExito}"></div><div th:if="${mensajeError}" class="alert alert-danger" th:text="${mensajeError}"></div>
             <section class="content-card">
                 <div class="incident-filters">
@@ -60,7 +60,7 @@
             <div class="form-group-custom"><label class="required-label">Nombre</label><input type="text" maxlength="100" th:field="*{nombreReportante}" required></div>
             <div class="form-group-custom"><label>Primer apellido</label><input type="text" maxlength="100" th:field="*{primerApellidoReportante}"></div>
             <div class="form-group-custom"><label>Segundo apellido</label><input type="text" maxlength="100" th:field="*{segundoApellidoReportante}"></div>
-            <div class="form-group-custom"><label>Teléfono</label><input type="tel" maxlength="20" th:field="*{telefonoReportante}" placeholder="Ej. 8888-8888"></div>
+            <div class="form-group-custom"><label for="telefonoReportante">Teléfono</label><input id="telefonoReportante" type="tel" inputmode="numeric" maxlength="8" pattern="[0-9]{8}" th:field="*{telefonoReportante}" placeholder="Ej. 88888888" title="Ingrese exactamente 8 dígitos numéricos"></div>
             <div class="form-group-custom"><label>Correo electrónico</label><input type="email" maxlength="150" th:field="*{correoReportante}" placeholder="nombre@correo.com"></div>
         </div></fieldset>
         <input type="hidden" th:field="*{idEstado}" value="3">
@@ -79,5 +79,5 @@
         <div class="form-group-custom"><label for="idEstadoVehiculo">Estado del vehículo</label><select id="idEstadoVehiculo" name="idEstado" required><option value="">Seleccione estado</option><option th:each="o : ${estadosVehiculo}" th:value="${o.id}" th:text="${o.nombreEstado}"></option></select></div>
     </div><div class="vehicle-form-error" id="vehiculoError" role="alert" hidden></div><div class="modal-actions"><button type="button" class="btn-secondary-custom" id="cancelarVehiculo">Cancelar</button><button type="submit" class="btn-primary-custom" id="guardarVehiculo"><i class="bi bi-check-lg"></i> Guardar y seleccionar</button></div></form>
 </div></div>
-<script src="/js/dashboard.js"></script><script src="/js/incidentes.js"></script>
+<script src="/js/dashboard.js"></script><script src="/js/incidentes.js?v=2"></script>
 </body></html>
