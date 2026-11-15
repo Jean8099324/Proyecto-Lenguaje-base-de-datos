@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Rescate Vial CR | Contactos</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/usuarios.css">
+</head>
+<body>
+<div class="app-layout">
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <div class="brand-icon"><i class="bi bi-truck"></i></div>
+            <div class="brand-text"><h1>Rescate Vial CR</h1><span>Gestión de Asistencia Vial</span></div>
+            <button type="button" class="close-sidebar" id="closeSidebar"><i class="bi bi-x-lg"></i></button>
+        </div>
+        <nav class="sidebar-nav">
+            <div class="nav-section"><span class="nav-title">PRINCIPAL</span>
+                <a class="nav-link" href="/dashboard"><i class="bi bi-grid-1x2-fill"></i><span>Dashboard</span></a>
+            </div>
+            <div class="nav-section"><span class="nav-title">GESTIÓN</span>
+                <a class="nav-link" href="/usuarios/listado"><i class="bi bi-person-badge"></i><span>Usuarios</span></a>
+                <a class="nav-link" href="/usuarios/roles"><i class="bi bi-person-lock"></i><span>Roles de usuario</span></a>
+                <a class="nav-link" href="/clientes"><i class="bi bi-people"></i><span>Clientes</span></a>
+                <a class="nav-link" href="/vehiculos"><i class="bi bi-car-front"></i><span>Vehículos</span></a>
+                <a class="nav-link" href="/personal"><i class="bi bi-person-workspace"></i><span>Personal</span></a>
+                <a class="nav-link active" href="/contactos"><i class="bi bi-person-lines-fill"></i><span>Contactos</span></a>
+            </div>
+        </nav>
+        <div class="sidebar-footer"><div class="system-status"><span class="status-dot"></span>
+            <div><strong>Sistema operativo</strong><span>Gestión de contactos</span></div>
+        </div></div>
+    </aside>
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+    <div class="main-content">
+        <header class="topbar">
+            <div class="topbar-left"><button type="button" class="menu-button" id="menuButton"><i class="bi bi-list"></i></button>
+                <div><h2>Contactos</h2><span>Administración de contactos</span></div>
+            </div>
+            <div class="topbar-right"><div class="user-divider"></div>
+                <div class="user-profile">
+                    <div class="user-avatar" th:text="${session.inicialesUsuario != null ? session.inicialesUsuario : 'U'}">U</div>
+                    <div class="user-info"><strong th:text="${session.nombreUsuario != null ? session.nombreUsuario : #authentication.name}">Usuario</strong>
+                        <span th:text="${session.usernameUsuario != null ? session.usernameUsuario : #authentication.name}">usuario</span>
+                    </div>
+                </div>
+                <form th:action="@{/logout}" method="post"><button type="submit" class="topbar-action" title="Cerrar sesión"><i class="bi bi-box-arrow-right"></i></button></form>
+            </div>
+        </header>
+        <main class="page-content">
+            <section class="page-heading">
+                <div><span class="section-label">GESTIÓN DEL SISTEMA</span>
+                    <h2>Incidentes asociados</h2>
+                    <p>Asocie o retire incidentes del contacto <strong th:text="${contacto.nombreContacto + ' ' + contacto.primerApellido}">Contacto</strong>.</p>
+                </div>
+                <a href="/contactos" class="btn-secondary-custom"><i class="bi bi-arrow-left"></i> Volver a contactos</a>
+            </section>
+            <div th:if="${mensajeExito}" class="alert alert-success" th:text="${mensajeExito}"></div>
+            <div th:if="${mensajeError}" class="alert alert-danger" th:text="${mensajeError}"></div>
+            <section class="content-card">
+                <div class="content-card-header"><div><span class="section-label">ASOCIACIÓN</span><h3>Vincular un incidente</h3></div></div>
+                <form th:action="@{/contactos/{id}/incidentes/asociar(id=${contacto.id})}" method="post">
+                    <div class="form-grid" style="padding:24px 25px 0;">
+                        <div class="form-group-custom"><label for="idIncidente">Incidente</label>
+                            <select id="idIncidente" name="idIncidente" required>
+                                <option value="">Seleccione un incidente</option>
+                                <option th:each="incidente : ${incidentes}" th:value="${incidente.id}"
+                                        th:text="${'#' + incidente.id + ' — ' + incidente.detalle}">Incidente</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="modal-actions" style="padding:0 25px 22px;">
+                        <button type="submit" class="btn-primary-custom"><i class="bi bi-link-45deg"></i> Asociar incidente</button>
+                    </div>
+                </form>
+            </section>
+            <section class="content-card mt-4">
+                <div class="content-card-header"><div><span class="section-label">RELACIONES</span><h3>Incidentes vinculados al contacto</h3></div></div>
+                <div class="table-responsive">
+                    <table class="clients-table">
+                        <thead><tr><th>ID INCIDENTE</th><th>DESCRIPCIÓN</th><th>ESTADO</th><th>ACCIONES</th></tr></thead>
+                        <tbody>
+                        <tr th:each="relacion : ${relaciones}">
+                            <td th:text="${relacion.idIncidente}">1</td>
+                            <td th:text="${nombresIncidentes[relacion.idIncidente] != null ? nombresIncidentes[relacion.idIncidente] : 'Sin información'}">Descripción</td>
+                            <td th:text="${relacion.nombreEstado}">ACTIVO</td>
+                            <td>
+                                <form th:if="${relacion.nombreEstado == 'ACTIVO'}"
+                                      th:action="@{/contactos/{id}/incidentes/{incidente}/quitar(id=${contacto.id},incidente=${relacion.idIncidente})}"
+                                      method="post" onsubmit="return confirm('¿Retirar este contacto del incidente?');">
+                                    <button type="submit" class="btn btn-sm btn-outline-danger">Retirar</button>
+                                </form>
+                                <span th:unless="${relacion.nombreEstado == 'ACTIVO'}" class="text-muted">Relación inactiva</span>
+                            </td>
+                        </tr>
+                        <tr th:if="${#lists.isEmpty(relaciones)}"><td colspan="4" class="text-center">No hay incidentes asociados.</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+        </main>
+    </div>
+</div>
+<script src="/js/contactos.js"></script>
+</body>
+</html>

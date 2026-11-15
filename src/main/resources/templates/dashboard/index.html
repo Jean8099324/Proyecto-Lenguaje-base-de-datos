@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="es" xmlns:th="http://www.thymeleaf.org">
 
@@ -65,6 +66,7 @@
                     <a href="/incidentes/listado" class="nav-link">
                         <i class="bi bi-exclamation-triangle"></i>
                         <span>Incidentes</span>
+                        <span class="nav-badge" th:text="${incidentesRegistrados}">0</span>
                     </a>
 
                     <a href="#" aria-disabled="true" onclick="return false;" class="nav-link under-construction" title="En construcción">
@@ -89,24 +91,55 @@
 
                     <span class="nav-title">GESTIÓN</span>
 
-                    <!-- Acceso visual a clientes conservado, sin funcionalidad. -->
-                    <a href="#" aria-disabled="true" onclick="return false;" class="nav-link under-construction" title="En construcción">
+                    <!-- CLIENTES -->
+                    <a th:if="${esAdministrador}" href="/clientes" class="nav-link">
                         <i class="bi bi-people"></i>
                         <span>Clientes</span>
                     </a>
-                    <a th:if="${esAdministrador}" href="/usuarios/listado" class="nav-link"><i class="bi bi-person-badge"></i><span>Usuarios</span></a>
-                    <a th:if="${esAdministrador}" href="/usuarios/roles" class="nav-link"><i class="bi bi-person-lock"></i><span>Roles de usuario</span></a>
 
-                    <a href="#" aria-disabled="true" onclick="return false;" class="nav-link under-construction" title="En construcción">
+                    <!-- USUARIOS -->
+                    <a th:if="${esAdministrador}" href="/usuarios/listado" class="nav-link">
+                        <i class="bi bi-person-badge"></i>
+                        <span>Usuarios</span>
+                    </a>
+
+                    <!-- ROLES DE USUARIO -->
+                    <a th:if="${esAdministrador}" href="/usuarios/roles" class="nav-link">
+                        <i class="bi bi-person-lock"></i>
+                        <span>Roles de usuario</span>
+                    </a>
+
+                    <!-- VEHÍCULOS -->
+                    <a th:if="${esAdministrador}" href="/vehiculos" class="nav-link">
                         <i class="bi bi-car-front"></i>
                         <span>Vehículos</span>
                     </a>
 
-                    <a href="#" aria-disabled="true" onclick="return false;" class="nav-link under-construction" title="En construcción">
+                    <!-- PERSONAL -->
+                    <a th:if="${esAdministrador}" href="/personal" class="nav-link">
                         <i class="bi bi-person-badge"></i>
                         <span>Personal</span>
                     </a>
 
+                    <!-- CONTACTOS -->
+                    <a th:if="${esAdministrador}" href="/contactos" class="nav-link">
+                        <i class="bi bi-person-lines-fill"></i>
+                        <span>Contactos</span>
+                    </a>
+
+                    <!-- DATOS DE CONTACTO -->
+                    <a th:if="${esAdministrador}" href="/datos-contacto" class="nav-link">
+                        <i class="bi bi-envelope-at"></i>
+                        <span>Datos de contacto</span>
+                    </a>
+
+                    <!-- UBICACIONES Y CONFIGURACIÓN -->
+                    <a th:if="${esAdministrador}" href="/configuracion" class="nav-link">
+                        <i class="bi bi-geo-alt"></i>
+                        <span>Ubicaciones y configuración</span>
+                    </a>
+
+                    <!-- TALLERES -->
                     <a href="#" aria-disabled="true" onclick="return false;" class="nav-link under-construction" title="En construcción">
                         <i class="bi bi-tools"></i>
                         <span>Talleres</span>
@@ -227,7 +260,7 @@
                             <span th:text="${session.usernameUsuario != null ? session.usernameUsuario : #authentication.name}">usuario</span>
                         </div>
 
-                            <i class="bi bi-cone-striped construction-profile-marker" title="Menú de usuario en construcción"></i>
+                        <i class="bi bi-cone-striped construction-profile-marker" title="Menú de usuario en construcción"></i>
 
                     </div>
 
@@ -288,13 +321,12 @@
 
                         <div class="stat-content">
 
-                            <span>Incidentes activos <i class="bi bi-cone-striped construction-inline" title="Dato en construcción"></i></span>
+                            <span>Incidentes registrados</span>
 
-                            <strong>4</strong>
+                            <strong th:text="${incidentesRegistrados}">0</strong>
 
-                            <small>
-                                <i class="bi bi-arrow-up"></i>
-                                2 nuevos hoy
+                            <small class="neutral">
+                                Total registrado en Oracle
                             </small>
 
                         </div>
@@ -310,12 +342,12 @@
 
                         <div class="stat-content">
 
-                            <span>Unidades disponibles <i class="bi bi-cone-striped construction-inline" title="Dato en construcción"></i></span>
+                            <span>Unidades registradas</span>
 
-                            <strong>8</strong>
+                            <strong th:text="${unidadesRegistradas}">0</strong>
 
                             <small class="neutral">
-                                de 12 unidades
+                                Total registrado en Oracle
                             </small>
 
                         </div>
@@ -331,12 +363,12 @@
 
                         <div class="stat-content">
 
-                            <span>En atención <i class="bi bi-cone-striped construction-inline" title="Dato en construcción"></i></span>
+                            <span>En atención</span>
 
-                            <strong>3</strong>
+                            <strong th:text="${incidentesEnAtencion}">0</strong>
 
                             <small class="neutral">
-                                servicios en curso
+                                Incidentes en atención
                             </small>
 
                         </div>
@@ -352,13 +384,12 @@
 
                         <div class="stat-content">
 
-                            <span>Clientes registrados <i class="bi bi-cone-striped construction-inline" title="Dato en construcción"></i></span>
+                            <span>Clientes registrados</span>
 
-                            <strong>248</strong>
+                            <strong th:text="${clientesRegistrados}">0</strong>
 
-                            <small>
-                                <i class="bi bi-arrow-up"></i>
-                                6 este mes
+                            <small class="neutral">
+                                Registrados en Oracle
                             </small>
 
                         </div>
@@ -380,7 +411,7 @@
                             <div>
 
                                 <span class="section-label">
-                                    OPERACIONES <i class="bi bi-cone-striped construction-inline" title="Datos en construcción"></i>
+                                    OPERACIONES
                                 </span>
 
                                 <h3>Incidentes recientes</h3>
@@ -412,124 +443,24 @@
 
                                 <tbody>
 
-                                    <!-- INCIDENTE 1 -->
-                                    <tr>
-
+                                    <!-- Registros reales consultados desde Oracle -->
+                                    <tr th:each="incidente : ${incidentesRecientes}">
                                         <td>
-                                            <strong>#RV-1024</strong>
+                                            <strong th:text="${'#RV-' + incidente.id}">#RV-1</strong>
                                         </td>
-
                                         <td>
                                             <i class="bi bi-geo-alt"></i>
-                                            San José
+                                            <span th:text="${incidente.ubicacion}">San José</span>
                                         </td>
-
+                                        <td th:text="${incidente.tipo}">Accidente de tránsito</td>
                                         <td>
-                                            Colisión
+                                            <span class="status-badge" th:classappend="${incidente.claseEstado}"
+                                                  th:text="${incidente.estado}">Reportado</span>
                                         </td>
-
-                                        <td>
-
-                                            <span class="status-badge attending">
-                                                En atención
-                                            </span>
-
-                                        </td>
-
-                                        <td>
-                                            10:42 AM
-                                        </td>
-
+                                        <td th:text="${incidente.hora}">21:04</td>
                                     </tr>
-
-                                    <!-- INCIDENTE 2 -->
-                                    <tr>
-
-                                        <td>
-                                            <strong>#RV-1023</strong>
-                                        </td>
-
-                                        <td>
-                                            <i class="bi bi-geo-alt"></i>
-                                            Heredia
-                                        </td>
-
-                                        <td>
-                                            Avería
-                                        </td>
-
-                                        <td>
-
-                                            <span class="status-badge dispatched">
-                                                Despachado
-                                            </span>
-
-                                        </td>
-
-                                        <td>
-                                            09:55 AM
-                                        </td>
-
-                                    </tr>
-
-                                    <!-- INCIDENTE 3 -->
-                                    <tr>
-
-                                        <td>
-                                            <strong>#RV-1022</strong>
-                                        </td>
-
-                                        <td>
-                                            <i class="bi bi-geo-alt"></i>
-                                            Alajuela
-                                        </td>
-
-                                        <td>
-                                            Neumático
-                                        </td>
-
-                                        <td>
-
-                                            <span class="status-badge pending">
-                                                Pendiente
-                                            </span>
-
-                                        </td>
-
-                                        <td>
-                                            09:21 AM
-                                        </td>
-
-                                    </tr>
-
-                                    <!-- INCIDENTE 4 -->
-                                    <tr>
-
-                                        <td>
-                                            <strong>#RV-1021</strong>
-                                        </td>
-
-                                        <td>
-                                            <i class="bi bi-geo-alt"></i>
-                                            Cartago
-                                        </td>
-
-                                        <td>
-                                            Grúa
-                                        </td>
-
-                                        <td>
-
-                                            <span class="status-badge completed">
-                                                Finalizado
-                                            </span>
-
-                                        </td>
-
-                                        <td>
-                                            08:47 AM
-                                        </td>
-
+                                    <tr th:if="${#lists.isEmpty(incidentesRecientes)}">
+                                        <td colspan="5">No hay incidentes registrados.</td>
                                     </tr>
 
                                 </tbody>
@@ -550,7 +481,7 @@
                             <div>
 
                                 <span class="section-label">
-                                    FLOTA <i class="bi bi-cone-striped construction-inline" title="Datos en construcción"></i>
+                                    FLOTA
                                 </span>
 
                                 <h3>Estado de unidades</h3>
@@ -565,10 +496,10 @@
 
                         <div class="unit-summary">
 
-                            <div class="unit-chart">
+                            <div class="unit-chart" th:style="${estiloGraficoUnidades}">
 
                                 <div>
-                                    <strong>12</strong>
+                                    <strong th:text="${unidadesRegistradas}">0</strong>
                                     <span>Total</span>
                                 </div>
 
@@ -584,9 +515,7 @@
                                         Disponibles
                                     </span>
 
-                                    <strong>
-                                        8
-                                    </strong>
+                                    <strong th:text="${unidadesDisponibles}">0</strong>
 
                                 </div>
 
@@ -595,12 +524,10 @@
                                     <span class="legend-color busy"></span>
 
                                     <span>
-                                        En servicio
+                                        Asignadas / en servicio
                                     </span>
 
-                                    <strong>
-                                        3
-                                    </strong>
+                                    <strong th:text="${unidadesEnServicio}">0</strong>
 
                                 </div>
 
@@ -609,12 +536,10 @@
                                     <span class="legend-color maintenance"></span>
 
                                     <span>
-                                        Mantenimiento
+                                        Fuera de operación
                                     </span>
 
-                                    <strong>
-                                        1
-                                    </strong>
+                                    <strong th:text="${unidadesFueraOperacion}">0</strong>
 
                                 </div>
 
@@ -646,7 +571,7 @@
                     <div class="quick-grid">
 
                         <!-- CLIENTES -->
-                        <a href="#" aria-disabled="true" onclick="return false;" class="quick-card under-construction" title="En construcción">
+                        <a th:if="${esAdministrador}" href="/clientes" class="quick-card">
 
                             <i class="bi bi-people"></i>
 
@@ -662,18 +587,32 @@
 
                             </div>
 
-                            <i class="bi bi-cone-striped"></i>
+                            <i class="bi bi-chevron-right"></i>
 
                         </a>
+
+                        <!-- USUARIOS -->
                         <a th:if="${esAdministrador}" href="/usuarios/listado" class="quick-card">
-                            <i class="bi bi-person-badge"></i><div><strong>Usuarios</strong><span>Administrar usuarios</span></div><i class="bi bi-chevron-right"></i>
+                            <i class="bi bi-person-badge"></i>
+                            <div>
+                                <strong>Usuarios</strong>
+                                <span>Administrar usuarios</span>
+                            </div>
+                            <i class="bi bi-chevron-right"></i>
                         </a>
+
+                        <!-- ROLES DE USUARIO -->
                         <a th:if="${esAdministrador}" href="/usuarios/roles" class="quick-card">
-                            <i class="bi bi-person-lock"></i><div><strong>Roles de usuario</strong><span>Administrar permisos</span></div><i class="bi bi-chevron-right"></i>
+                            <i class="bi bi-person-lock"></i>
+                            <div>
+                                <strong>Roles de usuario</strong>
+                                <span>Administrar permisos</span>
+                            </div>
+                            <i class="bi bi-chevron-right"></i>
                         </a>
 
                         <!-- VEHÍCULOS -->
-                        <a href="#" aria-disabled="true" onclick="return false;" class="quick-card under-construction" title="En construcción">
+                        <a th:if="${esAdministrador}" href="/vehiculos" class="quick-card">
 
                             <i class="bi bi-car-front"></i>
 
@@ -689,12 +628,12 @@
 
                             </div>
 
-                            <i class="bi bi-cone-striped"></i>
+                            <i class="bi bi-chevron-right"></i>
 
                         </a>
 
                         <!-- PERSONAL -->
-                        <a href="#" aria-disabled="true" onclick="return false;" class="quick-card under-construction" title="En construcción">
+                        <a th:if="${esAdministrador}" href="/personal" class="quick-card">
 
                             <i class="bi bi-person-badge"></i>
 
@@ -710,7 +649,7 @@
 
                             </div>
 
-                            <i class="bi bi-cone-striped"></i>
+                            <i class="bi bi-chevron-right"></i>
 
                         </a>
 

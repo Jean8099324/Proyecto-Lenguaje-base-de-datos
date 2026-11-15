@@ -10,6 +10,10 @@ public class ContactoIncidente {
     private String segundoApellido;
     private String telefono;
     private String correo;
+    private Long idIncidente;
+private Long idContacto;
+private Long idEstado;
+private String nombreEstado;
 
     public String getNombreCompleto() {
         return java.util.stream.Stream.of(nombre, primerApellido, segundoApellido)

@@ -25,6 +25,12 @@ public class SecurityConfig {
                         "/webjars/**", "/favicon.ico")
                 .permitAll()
                 .requestMatchers("/usuarios/**").hasRole("ADMIN")
+                .requestMatchers("/clientes/**").hasRole("ADMIN")
+                .requestMatchers("/vehiculos/**").hasRole("ADMIN")
+                .requestMatchers("/personal/**").hasRole("ADMIN")
+                .requestMatchers("/contactos/**").hasRole("ADMIN")
+                .requestMatchers("/datos-contacto/**").hasRole("ADMIN")
+                .requestMatchers("/configuracion/**").hasRole("ADMIN")
                 .requestMatchers("/dashboard").authenticated()
                 .anyRequest().authenticated())
                 .formLogin(form -> form
