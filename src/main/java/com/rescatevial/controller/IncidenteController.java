@@ -39,7 +39,13 @@ public class IncidenteController {
         model.addAttribute("incidentes", incidentes);
         model.addAttribute("totalIncidentes", incidentes.size());
         catalogos(model);
-        if (!model.containsAttribute("incidenteForm")) model.addAttribute("incidenteForm", new Incidente());
+        if (!model.containsAttribute("incidenteForm")) {
+            var ahora = java.time.ZonedDateTime.now(java.time.ZoneId.of("America/Costa_Rica"));
+            var formulario = new Incidente();
+            formulario.setFechaReporte(ahora.toLocalDate());
+            formulario.setHoraReporte(ahora.format(java.time.format.DateTimeFormatter.ofPattern("HH:mm")));
+            model.addAttribute("incidenteForm", formulario);
+        }
         return "incidentes/listado";
     }
 
@@ -104,7 +110,9 @@ public class IncidenteController {
         model.addAttribute("vehiculos", incidenteService.vehiculos());
         model.addAttribute("tiposIncidente", incidenteService.tipos());
         model.addAttribute("prioridades", incidenteService.prioridades());
-        model.addAttribute("ubicaciones", incidenteService.ubicaciones());
+        model.addAttribute("provincias", incidenteService.provincias());
+        model.addAttribute("cantones", incidenteService.cantones());
+        model.addAttribute("distritos", incidenteService.distritos());
         model.addAttribute("marcasVehiculo", incidenteService.marcasVehiculo());
         model.addAttribute("modelosVehiculo", incidenteService.modelosVehiculo());
         model.addAttribute("aniosVehiculo", incidenteService.aniosVehiculo());
@@ -115,6 +123,10 @@ public class IncidenteController {
                         || Long.valueOf(2).equals(estado.getId()))
                 .toList());
         model.addAttribute("estados", estados);
+        model.addAttribute("estadosIncidente", estados.stream()
+                .filter(estado -> estado.getId() != null
+                        && estado.getId() >= 3 && estado.getId() <= 8)
+                .toList());
         model.addAttribute("estadosFiltro", estados);
     }
 }

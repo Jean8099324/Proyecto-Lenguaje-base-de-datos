@@ -25,14 +25,15 @@ public class IncidenteService {
     public List<Incidente> listar() {
         List<Incidente> incidentes = repository.findAll();
         Map<Long, String> vehiculos = labels(repository.findVehicles());
-        Map<Long, String> ubicaciones = labels(repository.findLocations());
         Map<Long, String> tipos = labels(repository.findIncidentTypes());
         Map<Long, String> prioridades = labels(repository.findPriorities());
         Map<Long, String> estados = estadoService.listar().stream().collect(Collectors.toMap(
                 estado -> estado.getId(), estado -> estado.getNombreEstado(), (first, ignored) -> first));
         incidentes.forEach(i -> {
             i.setVehiculoEtiqueta(vehiculos.getOrDefault(i.getIdVehiculo(), "Vehículo " + i.getIdVehiculo()));
-            i.setUbicacionEtiqueta(ubicaciones.getOrDefault(i.getIdUbicacion(), "Ubicación " + i.getIdUbicacion()));
+            i.setUbicacionEtiqueta(i.getOtrasSenas() == null || i.getOtrasSenas().isBlank()
+                    ? "Provincia " + i.getIdProvincia() + ", cantón " + i.getIdCanton() + ", distrito " + i.getIdDistrito()
+                    : i.getOtrasSenas());
             i.setTipoEtiqueta(tipos.getOrDefault(i.getIdTipoIncidente(), "Tipo " + i.getIdTipoIncidente()));
             i.setPrioridadEtiqueta(prioridades.getOrDefault(i.getIdPrioridad(), "Prioridad " + i.getIdPrioridad()));
             i.setEstadoEtiqueta(estados.getOrDefault(i.getIdEstado(), "Estado " + i.getIdEstado()));
@@ -47,7 +48,9 @@ public class IncidenteService {
     @Transactional(readOnly = true) public List<OpcionIncidente> vehiculos() { return repository.findVehicles(); }
     @Transactional(readOnly = true) public List<OpcionIncidente> tipos() { return repository.findIncidentTypes(); }
     @Transactional(readOnly = true) public List<OpcionIncidente> prioridades() { return repository.findPriorities(); }
-    @Transactional(readOnly = true) public List<OpcionIncidente> ubicaciones() { return repository.findLocations(); }
+    @Transactional(readOnly = true) public List<OpcionIncidente> provincias() { return repository.findProvinces(); }
+    @Transactional(readOnly = true) public List<OpcionIncidente> cantones() { return repository.findCantons(); }
+    @Transactional(readOnly = true) public List<OpcionIncidente> distritos() { return repository.findDistricts(); }
     @Transactional(readOnly = true) public List<OpcionIncidente> marcasVehiculo() { return repository.findBrands(); }
     @Transactional(readOnly = true) public List<OpcionIncidente> modelosVehiculo() { return repository.findModels(); }
     @Transactional(readOnly = true) public List<OpcionIncidente> aniosVehiculo() { return repository.findYears(); }

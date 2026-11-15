@@ -45,7 +45,9 @@ public class IncidenteRepository {
         var call = new SimpleJdbcCall(jdbc).withCatalogName("FIDE_PROYECTO_FINAL_RESCATE_VIAL_CR_PCK")
                 .withProcedureName("FIDE_INSERTAR_INCIDENTES_SP").withoutProcedureColumnMetaDataAccess()
                 .declareParameters(incidentParameters(false));
-        call.execute(parameters(incidente, false));
+        Map<String, Object> result = call.execute(parameters(incidente, false));
+        incidente.setId(((Number) result.get("P_ID_INCIDENTE")).longValue());
+        insertLocation(incidente);
     }
 
     public void update(Incidente incidente) {
@@ -53,6 +55,7 @@ public class IncidenteRepository {
                 .withProcedureName("FIDE_MODIFICAR_INCIDENTES_SP").withoutProcedureColumnMetaDataAccess()
                 .declareParameters(incidentParameters(true));
         call.execute(parameters(incidente, true));
+        updateLocation(incidente);
     }
 
     public void deactivate(Long id) {
@@ -136,8 +139,45 @@ public class IncidenteRepository {
         return options("FIDE_OBTENER_PRIORIDADES_SP", "ID_PRIORIDAD", "NOMBRE_PRIORIDAD");
     }
 
-    public List<OpcionIncidente> findLocations() {
-        return options("FIDE_OBTENER_UBICACION_INCIDENTES_SP", "ID_UBICACION_INCIDENTE", "OTRAS_SENAS");
+    public List<OpcionIncidente> findProvinces() {
+        return options("FIDE_OBTENER_PROVINCIAS_SP", "ID_PROVINCIA", "NOMBRE_PROVINCIA", null, "ID_ESTADO");
+    }
+
+    public List<OpcionIncidente> findCantons() {
+        return options("FIDE_OBTENER_CANTONES_SP", "ID_CANTON", "NOMBRE_CANTON", "ID_PROVINCIA", "ID_ESTADO");
+    }
+
+    public List<OpcionIncidente> findDistricts() {
+        return options("FIDE_OBTENER_DISTRITOS_SP", "ID_DISTRITO", "NOMBRE_DISTRITO", "ID_CANTON", "ID_ESTADO");
+    }
+
+    private void insertLocation(Incidente incidente) {
+        locationCall("FIDE_INSERTAR_UBICACION_INCIDENTES_SP").execute(locationParameters(incidente));
+    }
+
+    private void updateLocation(Incidente incidente) {
+        locationCall("FIDE_MODIFICAR_UBICACION_INCIDENTES_SP").execute(locationParameters(incidente));
+    }
+
+    private SimpleJdbcCall locationCall(String procedure) {
+        return new SimpleJdbcCall(jdbc).withCatalogName("FIDE_PROYECTO_FINAL_RESCATE_VIAL_CR_PCK")
+                .withProcedureName(procedure).withoutProcedureColumnMetaDataAccess()
+                .declareParameters(new SqlParameter("P_ID_INCIDENTE", Types.NUMERIC),
+                        new SqlParameter("P_ID_PROVINCIA", Types.NUMERIC),
+                        new SqlParameter("P_ID_CANTON", Types.NUMERIC),
+                        new SqlParameter("P_ID_DISTRITO", Types.NUMERIC),
+                        new SqlParameter("P_OTRAS_SENAS", Types.VARCHAR),
+                        new SqlParameter("P_ID_ESTADO", Types.NUMERIC));
+    }
+
+    private static MapSqlParameterSource locationParameters(Incidente incidente) {
+        return new MapSqlParameterSource()
+                .addValue("P_ID_INCIDENTE", incidente.getId(), Types.NUMERIC)
+                .addValue("P_ID_PROVINCIA", incidente.getIdProvincia(), Types.NUMERIC)
+                .addValue("P_ID_CANTON", incidente.getIdCanton(), Types.NUMERIC)
+                .addValue("P_ID_DISTRITO", incidente.getIdDistrito(), Types.NUMERIC)
+                .addValue("P_OTRAS_SENAS", emptyToNull(incidente.getOtrasSenas()), Types.VARCHAR)
+                .addValue("P_ID_ESTADO", 1L, Types.NUMERIC);
     }
 
     private static String emptyToNull(String value) {
@@ -173,7 +213,6 @@ public class IncidenteRepository {
                 new SqlParameter("P_FECHA_REPORTE", Types.DATE),
                 new SqlParameter("P_HORA_REPORTE", Types.VARCHAR),
                 new SqlParameter("P_DETALLES_INCIDENTE", Types.VARCHAR),
-                new SqlParameter("P_ID_UBICACION_INCIDENTE", Types.NUMERIC),
                 new SqlParameter("P_ID_TIPO_INCIDENTE", Types.NUMERIC),
                 new SqlParameter("P_ID_PRIORIDAD", Types.NUMERIC),
                 new SqlParameter("P_ID_ESTADO", Types.NUMERIC),
@@ -186,13 +225,13 @@ public class IncidenteRepository {
                 new SqlParameter("P_FECHA_REPORTE", Types.DATE),
                 new SqlParameter("P_HORA_REPORTE", Types.VARCHAR),
                 new SqlParameter("P_DETALLES_INCIDENTE", Types.VARCHAR),
-                new SqlParameter("P_ID_UBICACION_INCIDENTE", Types.NUMERIC),
                 new SqlParameter("P_ID_TIPO_INCIDENTE", Types.NUMERIC),
                 new SqlParameter("P_ID_PRIORIDAD", Types.NUMERIC),
                 new SqlParameter("P_ID_ESTADO", Types.NUMERIC),
                 new SqlParameter("P_ID_USUARIO", Types.NUMERIC),
                 new SqlParameter("P_FECHA_CIERRE", Types.DATE),
-                new SqlParameter("P_HORA_CIERRE", Types.VARCHAR)
+                new SqlParameter("P_HORA_CIERRE", Types.VARCHAR),
+                new SqlOutParameter("P_ID_INCIDENTE", Types.NUMERIC)
         };
     }
 
@@ -203,7 +242,6 @@ public class IncidenteRepository {
                 .addValue("P_FECHA_REPORTE", sqlDate(i.getFechaReporte()), Types.DATE)
                 .addValue("P_HORA_REPORTE", i.getHoraReporte(), Types.VARCHAR)
                 .addValue("P_DETALLES_INCIDENTE", i.getDetalles(), Types.VARCHAR)
-                .addValue("P_ID_UBICACION_INCIDENTE", i.getIdUbicacion(), Types.NUMERIC)
                 .addValue("P_ID_TIPO_INCIDENTE", i.getIdTipoIncidente(), Types.NUMERIC)
                 .addValue("P_ID_PRIORIDAD", i.getIdPrioridad(), Types.NUMERIC)
                 .addValue("P_ID_ESTADO", i.getIdEstado(), Types.NUMERIC)
@@ -223,7 +261,10 @@ public class IncidenteRepository {
         i.setFechaReporte(rs.getDate("FECHA_REPORTE") == null ? null : rs.getDate("FECHA_REPORTE").toLocalDate());
         i.setHoraReporte(rs.getString("HORA_REPORTE"));
         i.setDetalles(rs.getString("DETALLES_INCIDENTE"));
-        i.setIdUbicacion(rs.getLong("ID_UBICACION_INCIDENTE"));
+        i.setIdProvincia(rs.getLong("ID_PROVINCIA"));
+        i.setIdCanton(rs.getLong("ID_CANTON"));
+        i.setIdDistrito(rs.getLong("ID_DISTRITO"));
+        i.setOtrasSenas(rs.getString("OTRAS_SENAS"));
         i.setIdTipoIncidente(rs.getLong("ID_TIPO_INCIDENTE"));
         i.setIdPrioridad(rs.getLong("ID_PRIORIDAD"));
         i.setIdEstado(rs.getLong("ID_ESTADO"));

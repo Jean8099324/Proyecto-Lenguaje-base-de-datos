@@ -1,8 +1,43 @@
 document.addEventListener("DOMContentLoaded", () => {
     const modal = document.getElementById("modalIncidente");
-    const open = () => { modal?.classList.add("show"); document.body.style.overflow = "hidden"; };
+    const provincia = document.getElementById("incidenteProvincia");
+    const canton = document.getElementById("incidenteCanton");
+    const distrito = document.getElementById("incidenteDistrito");
+    const filtrarOpciones = (select, atributo, valor) => {
+        [...(select?.options || [])].forEach((option, index) => {
+            if (index === 0) return;
+            option.hidden = Boolean(valor) && option.dataset[atributo] !== valor;
+        });
+    };
+    provincia?.addEventListener("change", () => {
+        canton.value = "";
+        distrito.value = "";
+        filtrarOpciones(canton, "provincia", provincia.value);
+        filtrarOpciones(distrito, "canton", "");
+    });
+    canton?.addEventListener("change", () => {
+        distrito.value = "";
+        filtrarOpciones(distrito, "canton", canton.value);
+    });
+    filtrarOpciones(canton, "provincia", provincia?.value || "");
+    filtrarOpciones(distrito, "canton", canton?.value || "");
+    const fillReportDateTime = () => {
+        const parts = Object.fromEntries(new Intl.DateTimeFormat("en-GB", {
+            timeZone: "America/Costa_Rica", year: "numeric", month: "2-digit",
+            day: "2-digit", hour: "2-digit", minute: "2-digit", hourCycle: "h23"
+        }).formatToParts(new Date()).map(part => [part.type, part.value]));
+        const date = modal?.querySelector('[name="fechaReporte"]');
+        const time = modal?.querySelector('[name="horaReporte"]');
+        if (date && !date.value) date.value = `${parts.year}-${parts.month}-${parts.day}`;
+        if (time && !time.value) time.value = `${parts.hour}:${parts.minute}`;
+    };
+    const open = () => {
+        fillReportDateTime();
+        modal?.classList.add("show");
+        document.body.style.overflow = "hidden";
+    };
     const close = () => { modal?.classList.remove("show"); document.body.style.overflow = ""; };
-    if (modal?.classList.contains("show")) document.body.style.overflow = "hidden";
+    if (modal?.classList.contains("show")) open();
     document.getElementById("btnNuevoIncidente")?.addEventListener("click", open);
     document.getElementById("cerrarModal")?.addEventListener("click", close);
     document.getElementById("cancelarIncidente")?.addEventListener("click", close);

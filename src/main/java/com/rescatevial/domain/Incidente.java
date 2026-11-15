@@ -12,10 +12,14 @@ public class Incidente implements Serializable {
 
     private Long id;
     @NotNull private Long idVehiculo;
+    @org.springframework.format.annotation.DateTimeFormat(iso = org.springframework.format.annotation.DateTimeFormat.ISO.DATE)
     private LocalDate fechaReporte;
     private String horaReporte;
     @Size(max = 500) private String detalles;
-    @NotNull private Long idUbicacion;
+    @NotNull private Long idProvincia;
+    @NotNull private Long idCanton;
+    @NotNull private Long idDistrito;
+    @Size(max = 200) private String otrasSenas;
     @NotNull private Long idTipoIncidente;
     @NotNull private Long idPrioridad;
     @NotNull private Long idEstado;

@@ -33,9 +33,15 @@
 .full-width { grid-column: 1 / -1; }
 .form-group-custom textarea { width: 100%; resize: vertical; border: 1px solid var(--border); border-radius: 8px; padding: 11px 13px; color: var(--text); background: #fff; }
 .form-group-custom textarea:focus { outline: 0; border-color: var(--primary-light); box-shadow: 0 0 0 3px rgba(21,58,91,.1); }
+.location-section { min-width: 0; margin: 2px 0; padding: 18px; border: 1px solid var(--border); border-radius: 10px; background: #f8fafc; }
+.location-section legend { float: none; width: auto; margin: 0 0 14px; padding: 0 6px; color: var(--primary); font-size: 12px; font-weight: 700; }
+.location-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+.location-notes { grid-column: 1 / -1; }
 @media (max-width: 980px) { .incident-filters { grid-template-columns: 1fr 1fr; } }
 @media (max-width: 700px) { .edit-incident-card { padding: 18px; } .incident-modal-panel { width: calc(100% - 24px); } .incident-filters { grid-template-columns: 1fr; padding-inline: 14px; } }
 @media (max-width: 700px) {
     .incident-modal-panel > .modal-header-custom { padding: 20px 18px; }
     .incident-modal-panel > form { padding: 20px 18px; }
+    .location-grid { grid-template-columns: 1fr; }
+    .location-notes { grid-column: auto; }
 }
