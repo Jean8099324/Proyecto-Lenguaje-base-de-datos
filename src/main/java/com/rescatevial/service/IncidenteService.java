@@ -1,6 +1,10 @@
 package com.rescatevial.service;
 
 import com.rescatevial.domain.Incidente;
+import com.rescatevial.domain.ContactoIncidente;
+import com.rescatevial.domain.FacturacionIncidente;
+import com.rescatevial.domain.HistorialServicioIncidente;
+import com.rescatevial.domain.VehiculoDetalleIncidente;
 import com.rescatevial.domain.OpcionIncidente;
 import com.rescatevial.domain.VehiculoIncidenteForm;
 import com.rescatevial.repository.IncidenteRepository;
@@ -25,15 +29,22 @@ public class IncidenteService {
     public List<Incidente> listar() {
         List<Incidente> incidentes = repository.findAll();
         Map<Long, String> vehiculos = labels(repository.findVehicles());
+        Map<Long, String> provincias = labels(repository.findProvinces());
+        Map<Long, String> cantones = labels(repository.findCantons());
+        Map<Long, String> distritos = labels(repository.findDistricts());
         Map<Long, String> tipos = labels(repository.findIncidentTypes());
         Map<Long, String> prioridades = labels(repository.findPriorities());
         Map<Long, String> estados = estadoService.listar().stream().collect(Collectors.toMap(
                 estado -> estado.getId(), estado -> estado.getNombreEstado(), (first, ignored) -> first));
         incidentes.forEach(i -> {
             i.setVehiculoEtiqueta(vehiculos.getOrDefault(i.getIdVehiculo(), "Vehículo " + i.getIdVehiculo()));
-            i.setUbicacionEtiqueta(i.getOtrasSenas() == null || i.getOtrasSenas().isBlank()
-                    ? "Provincia " + i.getIdProvincia() + ", cantón " + i.getIdCanton() + ", distrito " + i.getIdDistrito()
-                    : i.getOtrasSenas());
+            String ubicacion = provincias.getOrDefault(i.getIdProvincia(), "Provincia " + i.getIdProvincia())
+                    + ", " + cantones.getOrDefault(i.getIdCanton(), "Cantón " + i.getIdCanton())
+                    + ", " + distritos.getOrDefault(i.getIdDistrito(), "Distrito " + i.getIdDistrito());
+            if (i.getOtrasSenas() != null && !i.getOtrasSenas().isBlank()) {
+                ubicacion += " — " + i.getOtrasSenas();
+            }
+            i.setUbicacionEtiqueta(ubicacion);
             i.setTipoEtiqueta(tipos.getOrDefault(i.getIdTipoIncidente(), "Tipo " + i.getIdTipoIncidente()));
             i.setPrioridadEtiqueta(prioridades.getOrDefault(i.getIdPrioridad(), "Prioridad " + i.getIdPrioridad()));
             i.setEstadoEtiqueta(estados.getOrDefault(i.getIdEstado(), "Estado " + i.getIdEstado()));
@@ -41,10 +52,37 @@ public class IncidenteService {
         return incidentes;
     }
     @Transactional(readOnly = true) public Optional<Incidente> buscar(Long id) { return repository.findById(id); }
+    @Transactional(readOnly = true)
+    public Optional<Incidente> buscarDetalle(Long id) {
+        return repository.findById(id).map(i -> {
+            Map<Long, String> vehiculos = labels(repository.findVehicles());
+            Map<Long, String> provincias = labels(repository.findProvinces());
+            Map<Long, String> cantones = labels(repository.findCantons());
+            Map<Long, String> distritos = labels(repository.findDistricts());
+            Map<Long, String> tipos = labels(repository.findIncidentTypes());
+            Map<Long, String> prioridades = labels(repository.findPriorities());
+            Map<Long, String> estados = estadoService.listar().stream().collect(Collectors.toMap(
+                    estado -> estado.getId(), estado -> estado.getNombreEstado(), (first, ignored) -> first));
+            i.setVehiculoEtiqueta(vehiculos.getOrDefault(i.getIdVehiculo(), "Vehículo " + i.getIdVehiculo()));
+            String ubicacion = provincias.getOrDefault(i.getIdProvincia(), "Provincia " + i.getIdProvincia())
+                    + ", " + cantones.getOrDefault(i.getIdCanton(), "Cantón " + i.getIdCanton())
+                    + ", " + distritos.getOrDefault(i.getIdDistrito(), "Distrito " + i.getIdDistrito());
+            if (i.getOtrasSenas() != null && !i.getOtrasSenas().isBlank()) ubicacion += " — " + i.getOtrasSenas();
+            i.setUbicacionEtiqueta(ubicacion);
+            i.setTipoEtiqueta(tipos.getOrDefault(i.getIdTipoIncidente(), "Tipo " + i.getIdTipoIncidente()));
+            i.setPrioridadEtiqueta(prioridades.getOrDefault(i.getIdPrioridad(), "Prioridad " + i.getIdPrioridad()));
+            i.setEstadoEtiqueta(estados.getOrDefault(i.getIdEstado(), "Estado " + i.getIdEstado()));
+            return i;
+        });
+    }
     @Transactional public void guardar(Incidente incidente) {
         if (incidente.getId() == null) repository.insert(incidente); else repository.update(incidente);
     }
     @Transactional public void desactivar(Long id) { repository.deactivate(id); }
+    @Transactional(readOnly = true) public List<ContactoIncidente> contactos(Long id) { return repository.findContactsByIncident(id); }
+    @Transactional(readOnly = true) public Optional<VehiculoDetalleIncidente> vehiculoDetalle(Long id) { return repository.findVehicleDetail(id); }
+    @Transactional(readOnly = true) public List<HistorialServicioIncidente> historialServicios(Long id) { return repository.findServiceHistory(id); }
+    @Transactional(readOnly = true) public List<FacturacionIncidente> facturacion(Long id) { return repository.findBilling(id); }
     @Transactional(readOnly = true) public List<OpcionIncidente> vehiculos() { return repository.findVehicles(); }
     @Transactional(readOnly = true) public List<OpcionIncidente> tipos() { return repository.findIncidentTypes(); }
     @Transactional(readOnly = true) public List<OpcionIncidente> prioridades() { return repository.findPriorities(); }

@@ -48,15 +48,22 @@ document.addEventListener("DOMContentLoaded", () => {
         .map(id => document.getElementById(id)).filter(Boolean);
     const rows = [...document.querySelectorAll("#tablaIncidentes tr[data-tipo]")];
     const noResults = document.getElementById("sinResultados");
+    const dateFrom = document.getElementById("filtroFechaDesde");
+    const dateTo = document.getElementById("filtroFechaHasta");
     const applyFilters = () => {
         const query = search?.value.trim().toLocaleLowerCase("es") ?? "";
         const [type, priority, status] = filters.map(filter => filter.value);
+        const from = dateFrom?.value ?? "";
+        const to = dateTo?.value ?? "";
         let visible = 0;
         rows.forEach(row => {
+            const reportDate = row.dataset.fecha || "";
             const matches = row.textContent.toLocaleLowerCase("es").includes(query)
                 && (!type || row.dataset.tipo === type)
                 && (!priority || row.dataset.prioridad === priority)
-                && (!status || row.dataset.estado === status);
+                && (!status || row.dataset.estado === status)
+                && (!from || (reportDate && reportDate >= from))
+                && (!to || (reportDate && reportDate <= to));
             row.hidden = !matches;
             if (matches) visible++;
         });
@@ -64,6 +71,39 @@ document.addEventListener("DOMContentLoaded", () => {
     };
     search?.addEventListener("input", applyFilters);
     filters.forEach(filter => filter.addEventListener("change", applyFilters));
+    [dateFrom, dateTo].forEach(filter => filter?.addEventListener("change", applyFilters));
+    document.getElementById("limpiarFechas")?.addEventListener("click", () => {
+        dateFrom.value = "";
+        dateTo.value = "";
+        applyFilters();
+    });
+
+    const tableBody = document.getElementById("tablaIncidentes");
+    const sortButtons = [...document.querySelectorAll(".sort-button")];
+    const sortState = { key: "", direction: "asc" };
+    const sortValue = (row, key) => key === "fecha"
+        ? `${row.dataset.fecha || ""}T${row.dataset.hora || ""}`
+        : row.dataset[`${key}Etiqueta`]?.toLocaleLowerCase("es") || "";
+    sortButtons.forEach(button => button.addEventListener("click", () => {
+        const key = button.dataset.sort;
+        sortState.direction = sortState.key === key && sortState.direction === "asc" ? "desc" : "asc";
+        sortState.key = key;
+        rows.sort((first, second) => sortValue(first, key).localeCompare(sortValue(second, key), "es", { numeric: true })
+            * (sortState.direction === "asc" ? 1 : -1));
+        rows.forEach(row => tableBody.insertBefore(row, noResults));
+        sortButtons.forEach(item => {
+            const icon = item.querySelector("i");
+            item.classList.toggle("active", item === button);
+            item.setAttribute("aria-sort", item === button ? (sortState.direction === "asc" ? "ascending" : "descending") : "none");
+            icon.className = item === button
+                ? `bi ${sortState.direction === "asc" ? "bi-arrow-up" : "bi-arrow-down"}`
+                : "bi bi-arrow-down-up";
+        });
+    }));
+    rows.forEach(row => row.addEventListener("dblclick", event => {
+        if (event.target.closest(".incident-actions")) return;
+        if (row.dataset.detalleUrl) window.location.href = row.dataset.detalleUrl;
+    }));
 
     const plateInput = document.getElementById("placaVehiculo");
     const plateConfirmed = document.getElementById("placaConfirmada");

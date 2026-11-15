@@ -22,6 +22,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 @Controller
 @RequestMapping("/incidentes")
 public class IncidenteController {
+    private static final long ESTADO_REPORTADO_ID = 3L;
     private final IncidenteService incidenteService;
     private final EstadoService estadoService;
     private final UsuarioService usuarioService;
@@ -44,6 +45,7 @@ public class IncidenteController {
             var formulario = new Incidente();
             formulario.setFechaReporte(ahora.toLocalDate());
             formulario.setHoraReporte(ahora.format(java.time.format.DateTimeFormatter.ofPattern("HH:mm")));
+            formulario.setIdEstado(ESTADO_REPORTADO_ID);
             model.addAttribute("incidenteForm", formulario);
         }
         return "incidentes/listado";
@@ -61,9 +63,33 @@ public class IncidenteController {
         return "incidentes/modifica";
     }
 
+    @GetMapping("/detalle/{id}")
+    public String detalle(@PathVariable Long id, Model model, RedirectAttributes redirect) {
+        Incidente incidente = incidenteService.buscarDetalle(id).orElse(null);
+        if (incidente == null) {
+            redirect.addFlashAttribute("mensajeError", "No se encontró el incidente indicado.");
+            return "redirect:/incidentes/listado";
+        }
+        model.addAttribute("incidente", incidente);
+        model.addAttribute("contactos", incidenteService.contactos(id));
+        model.addAttribute("vehiculo", incidenteService.vehiculoDetalle(incidente.getIdVehiculo()).orElse(null));
+        model.addAttribute("historialServicios", incidenteService.historialServicios(id));
+        model.addAttribute("facturacion", incidenteService.facturacion(id));
+        return "incidentes/detalle";
+    }
+
     @PostMapping("/guardar")
     public String guardar(@Valid @ModelAttribute("incidenteForm") Incidente incidente,
                           BindingResult result, RedirectAttributes redirect) {
+        boolean nuevo = incidente.getId() == null;
+        if (nuevo) incidente.setIdEstado(ESTADO_REPORTADO_ID);
+        if (nuevo && (incidente.getNombreReportante() == null || incidente.getNombreReportante().isBlank())) {
+            result.rejectValue("nombreReportante", "required", "Indique quién reporta el incidente.");
+        }
+        if (nuevo && (incidente.getTelefonoReportante() == null || incidente.getTelefonoReportante().isBlank())
+                && (incidente.getCorreoReportante() == null || incidente.getCorreoReportante().isBlank())) {
+            result.rejectValue("telefonoReportante", "required", "Indique al menos un teléfono o correo de contacto.");
+        }
         if (result.hasErrors()) {
             redirect.addFlashAttribute("mensajeError", "Complete los campos requeridos del incidente.");
             redirect.addFlashAttribute("incidenteForm", incidente);
@@ -72,7 +98,7 @@ public class IncidenteController {
         }
         try {
             incidenteService.guardar(incidente);
-            redirect.addFlashAttribute("mensajeExito", incidente.getId() == null
+            redirect.addFlashAttribute("mensajeExito", nuevo
                     ? "Incidente registrado correctamente." : "Incidente actualizado correctamente.");
         } catch (Exception ex) {
             redirect.addFlashAttribute("mensajeError", "No se pudo guardar el incidente: " + ex.getMessage());

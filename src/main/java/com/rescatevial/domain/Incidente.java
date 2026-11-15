@@ -20,10 +20,14 @@ public class Incidente implements Serializable {
     @NotNull private Long idCanton;
     @NotNull private Long idDistrito;
     @Size(max = 200) private String otrasSenas;
+    @Size(max = 100) private String nombreReportante;
+    @Size(max = 100) private String primerApellidoReportante;
+    @Size(max = 100) private String segundoApellidoReportante;
+    @Size(max = 20) private String telefonoReportante;
+    @Size(max = 150) private String correoReportante;
     @NotNull private Long idTipoIncidente;
     @NotNull private Long idPrioridad;
     @NotNull private Long idEstado;
-    private Long idUsuario;
     private LocalDate fechaCierre;
     private String horaCierre;
     private String vehiculoEtiqueta;
