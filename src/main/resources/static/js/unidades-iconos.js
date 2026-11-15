@@ -1,0 +1,1 @@
+document.addEventListener('DOMContentLoaded',()=>document.querySelectorAll('.units-table .btn-outline-danger').forEach(b=>{b.innerHTML='<i class="bi bi-archive"></i>';b.classList.remove('btn','btn-sm');b.classList.add('action-btn','delete');}));
