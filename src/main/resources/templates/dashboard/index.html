@@ -62,23 +62,27 @@
 
                     <span class="nav-title">OPERACIONES</span>
 
-                    <a href="#" aria-disabled="true" onclick="return false;" class="nav-link under-construction" title="En construcción">
+                    <a href="#" aria-disabled="true" onclick="return false;" class="nav-link under-construction"
+                        title="En construcción">
                         <i class="bi bi-exclamation-triangle"></i>
                         <span>Incidentes</span>
                         <span class="nav-badge">4</span>
                     </a>
 
-                    <a href="#" aria-disabled="true" onclick="return false;" class="nav-link under-construction" title="En construcción">
+                    <a href="#" aria-disabled="true" onclick="return false;" class="nav-link under-construction"
+                        title="En construcción">
                         <i class="bi bi-send"></i>
                         <span>Despacho</span>
                     </a>
 
-                    <a href="#" aria-disabled="true" onclick="return false;" class="nav-link under-construction" title="En construcción">
+                    <a href="#" aria-disabled="true" onclick="return false;" class="nav-link under-construction"
+                        title="En construcción">
                         <i class="bi bi-truck-front"></i>
                         <span>Unidades</span>
                     </a>
 
-                    <a href="#" aria-disabled="true" onclick="return false;" class="nav-link under-construction" title="En construcción">
+                    <a href="#" aria-disabled="true" onclick="return false;" class="nav-link under-construction"
+                        title="En construcción">
                         <i class="bi bi-camera"></i>
                         <span>Evidencias</span>
                     </a>
@@ -91,24 +95,30 @@
                     <span class="nav-title">GESTIÓN</span>
 
                     <!-- Acceso visual a clientes conservado, sin funcionalidad. -->
-                    <a href="#" aria-disabled="true" onclick="return false;" class="nav-link under-construction" title="En construcción">
+                    <a href="#" aria-disabled="true" onclick="return false;" class="nav-link under-construction"
+                        title="En construcción">
                         <i class="bi bi-people"></i>
                         <span>Clientes</span>
                     </a>
-                    <a th:if="${esAdministrador}" href="/usuarios/listado" class="nav-link"><i class="bi bi-person-badge"></i><span>Usuarios</span></a>
-                    <a th:if="${esAdministrador}" href="/usuarios/roles" class="nav-link"><i class="bi bi-person-lock"></i><span>Roles de usuario</span></a>
+                    <a th:if="${esAdministrador}" href="/usuarios/listado" class="nav-link"><i
+                            class="bi bi-person-badge"></i><span>Usuarios</span></a>
+                    <a th:if="${esAdministrador}" href="/usuarios/roles" class="nav-link"><i
+                            class="bi bi-person-lock"></i><span>Roles de usuario</span></a>
 
-                    <a href="#" aria-disabled="true" onclick="return false;" class="nav-link under-construction" title="En construcción">
+                    <a href="#" aria-disabled="true" onclick="return false;" class="nav-link under-construction"
+                        title="En construcción">
                         <i class="bi bi-car-front"></i>
                         <span>Vehículos</span>
                     </a>
 
-                    <a href="#" aria-disabled="true" onclick="return false;" class="nav-link under-construction" title="En construcción">
+                    <a href="#" aria-disabled="true" onclick="return false;" class="nav-link under-construction"
+                        title="En construcción">
                         <i class="bi bi-person-badge"></i>
                         <span>Personal</span>
                     </a>
 
-                    <a href="#" aria-disabled="true" onclick="return false;" class="nav-link under-construction" title="En construcción">
+                    <a href="#" aria-disabled="true" onclick="return false;" class="nav-link under-construction"
+                        title="En construcción">
                         <i class="bi bi-tools"></i>
                         <span>Talleres</span>
                     </a>
@@ -120,17 +130,19 @@
 
                     <span class="nav-title">SERVICIOS</span>
 
-                    <a href="#" aria-disabled="true" onclick="return false;" class="nav-link under-construction" title="En construcción">
+                    <a href="#" aria-disabled="true" onclick="return false;" class="nav-link under-construction"
+                        title="En construcción">
                         <i class="bi bi-clipboard-check"></i>
                         <span>Inspecciones</span>
                     </a>
 
-                    <a href="#" aria-disabled="true" onclick="return false;" class="nav-link under-construction" title="En construcción">
+                    <a th:href="@{/reparaciones/listado}" class="nav-link">
                         <i class="bi bi-wrench-adjustable"></i>
                         <span>Reparaciones</span>
                     </a>
 
-                    <a href="#" aria-disabled="true" onclick="return false;" class="nav-link under-construction" title="En construcción">
+                    <a href="#" aria-disabled="true" onclick="return false;" class="nav-link under-construction"
+                        title="En construcción">
                         <i class="bi bi-box-seam"></i>
                         <span>Repuestos</span>
                     </a>
@@ -142,12 +154,14 @@
 
                     <span class="nav-title">FINANZAS</span>
 
-                    <a href="#" aria-disabled="true" onclick="return false;" class="nav-link under-construction" title="En construcción">
+                    <a href="#" aria-disabled="true" onclick="return false;" class="nav-link under-construction"
+                        title="En construcción">
                         <i class="bi bi-receipt"></i>
                         <span>Facturación</span>
                     </a>
 
-                    <a href="#" aria-disabled="true" onclick="return false;" class="nav-link under-construction" title="En construcción">
+                    <a href="#" aria-disabled="true" onclick="return false;" class="nav-link under-construction"
+                        title="En construcción">
                         <i class="bi bi-credit-card"></i>
                         <span>Pagos</span>
                     </a>
@@ -159,7 +173,8 @@
 
                     <span class="nav-title">CONTROL</span>
 
-                    <a href="#" aria-disabled="true" onclick="return false;" class="nav-link under-construction" title="En construcción">
+                    <a href="#" aria-disabled="true" onclick="return false;" class="nav-link under-construction"
+                        title="En construcción">
                         <i class="bi bi-clock-history"></i>
                         <span>Historial</span>
                     </a>
@@ -221,14 +236,18 @@
                     <div class="user-profile">
 
                         <!-- Datos de sesión preparados por UsuarioDetailsService, siguiendo el patrón de proyecto_final_tienda. -->
-                        <div class="user-avatar" th:text="${session.inicialesUsuario != null ? session.inicialesUsuario : 'U'}">U</div>
+                        <div class="user-avatar"
+                            th:text="${session.inicialesUsuario != null ? session.inicialesUsuario : 'U'}">U</div>
 
                         <div class="user-info">
-                            <strong th:text="${session.nombreUsuario != null ? session.nombreUsuario : #authentication.name}">Usuario</strong>
-                            <span th:text="${session.usernameUsuario != null ? session.usernameUsuario : #authentication.name}">usuario</span>
+                            <strong
+                                th:text="${session.nombreUsuario != null ? session.nombreUsuario : #authentication.name}">Usuario</strong>
+                            <span
+                                th:text="${session.usernameUsuario != null ? session.usernameUsuario : #authentication.name}">usuario</span>
                         </div>
 
-                            <i class="bi bi-cone-striped construction-profile-marker" title="Menú de usuario en construcción"></i>
+                        <i class="bi bi-cone-striped construction-profile-marker"
+                            title="Menú de usuario en construcción"></i>
 
                     </div>
 
@@ -254,11 +273,14 @@
                     <div>
 
                         <span class="section-label">
-                            RESUMEN OPERATIVO <i class="bi bi-cone-striped construction-inline" title="Datos en construcción"></i>
+                            RESUMEN OPERATIVO <i class="bi bi-cone-striped construction-inline"
+                                title="Datos en construcción"></i>
                         </span>
 
                         <!-- El saludo reutiliza el nombre completo guardado al autenticar al usuario. -->
-                        <h2>Buenos días, <span th:text="${session.nombreUsuario != null ? session.nombreUsuario : #authentication.name}">Usuario</span></h2>
+                        <h2>Buenos días, <span
+                                th:text="${session.nombreUsuario != null ? session.nombreUsuario : #authentication.name}">Usuario</span>
+                        </h2>
 
                         <p>
                             Aquí tiene un resumen del estado actual
@@ -289,7 +311,8 @@
 
                         <div class="stat-content">
 
-                            <span>Incidentes activos <i class="bi bi-cone-striped construction-inline" title="Dato en construcción"></i></span>
+                            <span>Incidentes activos <i class="bi bi-cone-striped construction-inline"
+                                    title="Dato en construcción"></i></span>
 
                             <strong>4</strong>
 
@@ -311,7 +334,8 @@
 
                         <div class="stat-content">
 
-                            <span>Unidades disponibles <i class="bi bi-cone-striped construction-inline" title="Dato en construcción"></i></span>
+                            <span>Unidades disponibles <i class="bi bi-cone-striped construction-inline"
+                                    title="Dato en construcción"></i></span>
 
                             <strong>8</strong>
 
@@ -332,7 +356,8 @@
 
                         <div class="stat-content">
 
-                            <span>En atención <i class="bi bi-cone-striped construction-inline" title="Dato en construcción"></i></span>
+                            <span>En atención <i class="bi bi-cone-striped construction-inline"
+                                    title="Dato en construcción"></i></span>
 
                             <strong>3</strong>
 
@@ -353,7 +378,8 @@
 
                         <div class="stat-content">
 
-                            <span>Clientes registrados <i class="bi bi-cone-striped construction-inline" title="Dato en construcción"></i></span>
+                            <span>Clientes registrados <i class="bi bi-cone-striped construction-inline"
+                                    title="Dato en construcción"></i></span>
 
                             <strong>248</strong>
 
@@ -381,7 +407,8 @@
                             <div>
 
                                 <span class="section-label">
-                                    OPERACIONES <i class="bi bi-cone-striped construction-inline" title="Datos en construcción"></i>
+                                    OPERACIONES <i class="bi bi-cone-striped construction-inline"
+                                        title="Datos en construcción"></i>
                                 </span>
 
                                 <h3>Incidentes recientes</h3>
@@ -551,7 +578,8 @@
                             <div>
 
                                 <span class="section-label">
-                                    FLOTA <i class="bi bi-cone-striped construction-inline" title="Datos en construcción"></i>
+                                    FLOTA <i class="bi bi-cone-striped construction-inline"
+                                        title="Datos en construcción"></i>
                                 </span>
 
                                 <h3>Estado de unidades</h3>
@@ -647,7 +675,8 @@
                     <div class="quick-grid">
 
                         <!-- CLIENTES -->
-                        <a href="#" aria-disabled="true" onclick="return false;" class="quick-card under-construction" title="En construcción">
+                        <a href="#" aria-disabled="true" onclick="return false;" class="quick-card under-construction"
+                            title="En construcción">
 
                             <i class="bi bi-people"></i>
 
@@ -667,14 +696,19 @@
 
                         </a>
                         <a th:if="${esAdministrador}" href="/usuarios/listado" class="quick-card">
-                            <i class="bi bi-person-badge"></i><div><strong>Usuarios</strong><span>Administrar usuarios</span></div><i class="bi bi-chevron-right"></i>
+                            <i class="bi bi-person-badge"></i>
+                            <div><strong>Usuarios</strong><span>Administrar usuarios</span></div><i
+                                class="bi bi-chevron-right"></i>
                         </a>
                         <a th:if="${esAdministrador}" href="/usuarios/roles" class="quick-card">
-                            <i class="bi bi-person-lock"></i><div><strong>Roles de usuario</strong><span>Administrar permisos</span></div><i class="bi bi-chevron-right"></i>
+                            <i class="bi bi-person-lock"></i>
+                            <div><strong>Roles de usuario</strong><span>Administrar permisos</span></div><i
+                                class="bi bi-chevron-right"></i>
                         </a>
 
                         <!-- VEHÍCULOS -->
-                        <a href="#" aria-disabled="true" onclick="return false;" class="quick-card under-construction" title="En construcción">
+                        <a href="#" aria-disabled="true" onclick="return false;" class="quick-card under-construction"
+                            title="En construcción">
 
                             <i class="bi bi-car-front"></i>
 
@@ -695,7 +729,8 @@
                         </a>
 
                         <!-- PERSONAL -->
-                        <a href="#" aria-disabled="true" onclick="return false;" class="quick-card under-construction" title="En construcción">
+                        <a href="#" aria-disabled="true" onclick="return false;" class="quick-card under-construction"
+                            title="En construcción">
 
                             <i class="bi bi-person-badge"></i>
 
@@ -716,7 +751,8 @@
                         </a>
 
                         <!-- TALLERES -->
-                        <a href="#" aria-disabled="true" onclick="return false;" class="quick-card under-construction" title="En construcción">
+                        <a href="#" aria-disabled="true" onclick="return false;" class="quick-card under-construction"
+                            title="En construcción">
 
                             <i class="bi bi-tools"></i>
 
