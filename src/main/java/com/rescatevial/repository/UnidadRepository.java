@@ -26,5 +26,26 @@ public class UnidadRepository {
     public void insertar(Unidad u) { call("FIDE_INSERTAR_UNIDADES_SP",new SqlParameter("P_NOMBRE_UNIDAD",Types.VARCHAR),new SqlParameter("P_ID_TIPO_UNIDAD",Types.NUMERIC),new SqlParameter("P_ID_ESTADO",Types.NUMERIC),new SqlParameter("P_PLACA_UNIDAD",Types.VARCHAR)).execute(params(u)); }
     public void modificar(Unidad u) { call("FIDE_MODIFICAR_UNIDADES_SP",new SqlParameter("P_ID_UNIDAD",Types.NUMERIC),new SqlParameter("P_NOMBRE_UNIDAD",Types.VARCHAR),new SqlParameter("P_ID_TIPO_UNIDAD",Types.NUMERIC),new SqlParameter("P_ID_ESTADO",Types.NUMERIC),new SqlParameter("P_PLACA_UNIDAD",Types.VARCHAR)).execute(params(u).addValue("P_ID_UNIDAD",u.getId(),Types.NUMERIC)); }
     public void desactivar(Long id) { call("FIDE_ELIMINAR_UNIDADES_SP",new SqlParameter("P_ID_UNIDAD",Types.NUMERIC)).execute(new MapSqlParameterSource("P_ID_UNIDAD",id)); }
-    public List<Map<String,Object>> historial(Long id) { return jdbc.queryForList("SELECT h.ID_HISTORIAL, h.OBSERVACIONES, h.FECHA_SALIDA_UNIDAD, h.HORA_SALIDA_UNIDAD, h.FECHA_REGRESO_UNIDAD, h.HORA_REGRESO_UNIDAD, h.ID_INCIDENTE, e.NOMBRE_ESTADO FROM FIDE_HISTORIALES_UNIDADES_TB h LEFT JOIN FIDE_ESTADOS_TB e ON e.ID_ESTADO=h.ID_ESTADO WHERE h.ID_UNIDAD=? ORDER BY h.ID_HISTORIAL DESC", id); }
+    public List<Map<String,Object>> historial(Long id) {
+        Map<Long, String> estados = new java.util.HashMap<>();
+        OraclePackageSupport.rows(OraclePackageSupport.call(jdbc, "FIDE_OBTENER_ESTADOS_SP",
+                        OraclePackageSupport.cursor()).execute(new MapSqlParameterSource()))
+                .forEach(row -> estados.put(((Number) row.get("ID_ESTADO")).longValue(),
+                        String.valueOf(row.get("NOMBRE_ESTADO"))));
+
+        return OraclePackageSupport.rows(OraclePackageSupport.call(jdbc,
+                        "FIDE_OBTENER_HISTORIALES_UNIDADES_SP", OraclePackageSupport.cursor())
+                .execute(new MapSqlParameterSource())).stream()
+                .filter(row -> id.equals(((Number) row.get("ID_UNIDAD")).longValue()))
+                .sorted((left, right) -> Long.compare(
+                        ((Number) right.get("ID_HISTORIAL")).longValue(),
+                        ((Number) left.get("ID_HISTORIAL")).longValue()))
+                .map(row -> {
+                    Map<String, Object> historial = new java.util.LinkedHashMap<>(row);
+                    Number estadoId = (Number) row.get("ID_ESTADO");
+                    historial.put("NOMBRE_ESTADO", estadoId == null ? null : estados.get(estadoId.longValue()));
+                    return historial;
+                })
+                .toList();
+    }
 }

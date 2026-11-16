@@ -63,7 +63,7 @@ public class VehiculoController {
         }
         try {
             if (vehiculo.getIdUsuario() == null)
-                throw new IllegalArgumentException("Seleccione el cliente propietario del veh?culo.");
+                throw new IllegalArgumentException("Seleccione el cliente propietario del vehículo.");
             servicio.guardar(vehiculo);
             redirect.addFlashAttribute("mensajeExito", nuevo ?
                     "Vehículo registrado correctamente." : "Vehículo actualizado correctamente.");

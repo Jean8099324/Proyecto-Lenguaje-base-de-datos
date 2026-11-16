@@ -48,4 +48,18 @@ public class Usuario implements Serializable {
 
     private Set<Rol> roles = new HashSet<>();
 
+    /** Username visible; oculta el identificador técnico usado para clientes sin cuenta. */
+    public String usernameParaMostrar() {
+        if (username == null || username.isBlank()) return "No registrado";
+        if (username.startsWith("cliente-")) {
+            try {
+                java.util.UUID.fromString(username.substring("cliente-".length()));
+                return "No registrado";
+            } catch (IllegalArgumentException ignored) {
+                // Es un username de usuario normal que casualmente comparte el prefijo.
+            }
+        }
+        return username;
+    }
+
 }

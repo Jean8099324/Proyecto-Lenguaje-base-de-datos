@@ -44,6 +44,22 @@
 .add-vehicle-link[hidden] { display: none; }
 .picker-message { display: block; margin-top: 6px; color: var(--muted); font-size: 11px; }
 .picker-message.selected { color: var(--success); font-weight: 700; }
+.picker-message.occupied { display: flex; align-items: flex-start; gap: 6px; color: #a96b00; font-weight: 700; }
+.picker-message.occupied::before { content: "⚠"; flex: 0 0 auto; font-size: 14px; line-height: 1; }
+.cliente-resumen { margin-top: 10px; padding: 12px 14px; border: 1px solid #cfe0ed; border-radius: 9px; background: #f5f9fc; color: var(--text); }
+.cliente-resumen[hidden] { display: none; }
+.cliente-resumen > strong { display: block; margin-bottom: 8px; color: var(--primary); font-size: 12px; }
+.cliente-resumen dl { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); margin: 0; gap: 8px 14px; }
+.cliente-resumen dt { color: var(--muted); font-size: 10px; font-weight: 700; text-transform: uppercase; }
+.cliente-resumen dd { margin: 2px 0 0; font-size: 12px; overflow-wrap: anywhere; }
+.cliente-resumen dd[data-resumen="telefonos"], .cliente-resumen dd[data-resumen="correos"] { display: flex; flex-direction: column; gap: 3px; }
+.cliente-resumen dd[data-resumen="telefonos"] span, .cliente-resumen dd[data-resumen="correos"] span { display: block; }
+.cliente-resumen-wide { grid-column: 1 / -1; }
+/* El modal de alta conserva dos columnas para alinear nombre/usuario y teléfono/correo. */
+.vehicle-modal .cliente-resumen dl { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+@media (max-width: 520px) {
+    .vehicle-modal .cliente-resumen dl { grid-template-columns: minmax(0, 1fr); }
+}
 .vehicle-modal { z-index: 2010; }
 .vehicle-modal-panel { max-width: 760px; }
 .vehicle-form-grid { padding: 24px 30px 10px; }

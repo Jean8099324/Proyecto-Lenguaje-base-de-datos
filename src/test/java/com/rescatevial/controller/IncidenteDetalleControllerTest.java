@@ -2,6 +2,7 @@ package com.rescatevial.controller;
 
 import com.rescatevial.domain.DatoContacto;
 import com.rescatevial.domain.Incidente;
+import com.rescatevial.domain.Usuario;
 import com.rescatevial.domain.VehiculoDetalleIncidente;
 import com.rescatevial.service.ContactoService;
 import com.rescatevial.service.DatoContactoService;
@@ -17,6 +18,33 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 class IncidenteDetalleControllerTest {
+
+    @Test
+    void usaElPropietarioDelVehiculoCuandoElIncidenteNoTieneCliente() {
+        IncidenteService incidentes = mock(IncidenteService.class);
+        DatoContactoService datos = mock(DatoContactoService.class);
+        UsuarioService usuarios = mock(UsuarioService.class);
+        Incidente incidente = new Incidente();
+        incidente.setId(2L);
+        incidente.setIdVehiculo(8L);
+        VehiculoDetalleIncidente vehiculo = new VehiculoDetalleIncidente();
+        vehiculo.setIdCliente(20L);
+        when(incidentes.buscarDetalle(2L)).thenReturn(Optional.of(incidente));
+        when(incidentes.vehiculoDetalle(8L)).thenReturn(Optional.of(vehiculo));
+        when(usuarios.getUsuarioPorId(20L)).thenReturn(Optional.of(new Usuario()));
+        when(datos.correos(20L)).thenReturn(List.of(dato("cliente@ejemplo.com", "ACTIVO")));
+        when(datos.telefonos(20L)).thenReturn(List.of(dato("88888888", "ACTIVO")));
+        IncidenteController controller = new IncidenteController(incidentes, mock(EstadoService.class),
+                usuarios, mock(ContactoService.class), datos);
+        ExtendedModelMap modelo = new ExtendedModelMap();
+
+        assertEquals("incidentes/detalle", controller.detalle(2L, modelo, new RedirectAttributesModelMap()));
+        assertNotNull(modelo.get("clienteIncidente"));
+        assertEquals(List.of("cliente@ejemplo.com"), contactos(modelo, "correosCliente").stream()
+                .map(DatoContacto::getValor).toList());
+        assertEquals(List.of("88888888"), contactos(modelo, "telefonosCliente").stream()
+                .map(DatoContacto::getValor).toList());
+    }
 
     @Test
     void cargaSoloTelefonosYCorreosActivosDelCliente() {

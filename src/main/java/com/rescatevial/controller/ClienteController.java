@@ -5,6 +5,8 @@ import com.rescatevial.domain.DatoContacto;
 import com.rescatevial.service.ClienteService;
 import com.rescatevial.service.CorreoService;
 import com.rescatevial.service.DatoContactoService;
+import com.rescatevial.service.VehiculoService;
+import com.rescatevial.service.IncidenteService;
 import jakarta.validation.Valid;
 import java.util.List;
 import java.security.SecureRandom;
@@ -27,14 +29,19 @@ public class ClienteController {
     private final ClienteService clienteService;
     private final CorreoService correoService;
     private final DatoContactoService datoContactoService;
+    private final VehiculoService vehiculoService;
+    private final IncidenteService incidenteService;
     private static final SecureRandom RANDOM = new SecureRandom();
     private static final String CARACTERES_PASSWORD = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789";
 
     public ClienteController(ClienteService clienteService, CorreoService correoService,
-                             DatoContactoService datoContactoService) {
+                             DatoContactoService datoContactoService, VehiculoService vehiculoService,
+                             IncidenteService incidenteService) {
         this.clienteService = clienteService;
         this.correoService = correoService;
         this.datoContactoService = datoContactoService;
+        this.vehiculoService = vehiculoService;
+        this.incidenteService = incidenteService;
     }
 
     @GetMapping
@@ -70,6 +77,21 @@ public class ClienteController {
         model.addAttribute("esNuevo", false);
         prepararContactos(model, formulario);
         return "clientes/formulario";
+    }
+
+    @GetMapping("/detalle/{id}")
+    public String detalle(@PathVariable Long id, Model model, RedirectAttributes redireccion) {
+        var cliente = clienteService.buscar(id);
+        if (cliente.isEmpty()) {
+            redireccion.addFlashAttribute("mensajeError", "No se encontró el cliente.");
+            return "redirect:/clientes";
+        }
+        model.addAttribute("cliente", cliente.get());
+        model.addAttribute("direcciones", datoContactoService.direcciones(id));
+        model.addAttribute("telefonos", datoContactoService.telefonos(id));
+        model.addAttribute("correos", datoContactoService.correos(id));
+        cargarRelaciones(model, id);
+        return "clientes/detalle";
     }
 
     @GetMapping("/username-disponible")
@@ -150,6 +172,7 @@ public class ClienteController {
     }
 
     private void prepararContactos(Model model, Usuario cliente) {
+        cargarRelaciones(model, cliente.getId());
         if (cliente.getId() != null) {
             model.addAttribute("clientesDisponibles", clienteService.listar());
         }
@@ -165,6 +188,33 @@ public class ClienteController {
         model.addAttribute("direcciones", datoContactoService.direcciones(cliente.getId()));
         model.addAttribute("telefonos", datoContactoService.telefonos(cliente.getId()));
         model.addAttribute("correos", datoContactoService.correos(cliente.getId()));
+    }
+
+    private void cargarRelaciones(Model model, Long clienteId) {
+        if (clienteId == null) {
+            model.addAttribute("vehiculos", List.of());
+            model.addAttribute("incidentes", List.of());
+            model.addAttribute("incidentesActivos", List.of());
+            return;
+        }
+        model.addAttribute("vehiculos", vehiculoService.listarPorCliente(clienteId));
+        // Los incidentes guardan el cliente en ID_USUARIO; cuando esta relación
+        // falta, el propietario se obtiene del vehículo asociado.
+        var vehiculosCliente = vehiculoService.listarPorCliente(clienteId);
+        var idsVehiculosCliente = vehiculosCliente.stream()
+                .map(com.rescatevial.domain.Vehiculo::getId)
+                .collect(java.util.stream.Collectors.toSet());
+        var incidentes = incidenteService.listar().stream()
+                .filter(incidente -> clienteId.equals(incidente.getIdUsuario())
+                        || idsVehiculosCliente.contains(incidente.getIdVehiculo()))
+                .toList();
+        model.addAttribute("incidentes", incidentes);
+        model.addAttribute("incidentesActivos", incidentes.stream()
+                .filter(incidente -> java.util.Set.of("REPORTADO", "ASIGNADO", "UNIDAD EN CAMINO",
+                                "EN ATENCION", "TRASLADO")
+                        .contains(incidente.getEstadoEtiqueta() == null ? ""
+                                : incidente.getEstadoEtiqueta().trim().toUpperCase(java.util.Locale.ROOT)))
+                .toList());
     }
 
     private void guardarContactos(Long clienteId, String tipo, List<String> valores) {

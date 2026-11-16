@@ -34,7 +34,7 @@ public class ClienteIncidenteController {
    .filter(d -> "ACTIVO".equalsIgnoreCase(d.getNombreEstado())).findFirst().orElse(null);
   Map<String,Object> respuesta=new LinkedHashMap<>();
   respuesta.put("id",cliente.getId());
-  respuesta.put("username",cliente.getUsername());
+  respuesta.put("username",cliente.usernameParaMostrar());
   respuesta.put("nombre",cliente.getNombre());
   respuesta.put("primerApellido",cliente.getPrimerApellido());
   respuesta.put("segundoApellido",cliente.getSegundoApellido());
@@ -49,7 +49,7 @@ public class ClienteIncidenteController {
   return ResponseEntity.ok(respuesta);
  }
  @PostMapping public ResponseEntity<?> crear(@Valid @ModelAttribute ClienteIncidenteForm f,BindingResult errores) {
-  if(errores.hasErrors()) return ResponseEntity.badRequest().body(Map.of("error","Revise nombre, apellidos, direcci?n y formatos de tel?fono o correo."));
+  if(errores.hasErrors()) return ResponseEntity.badRequest().body(Map.of("error","Revise nombre, apellidos, dirección y formatos de teléfono o correo."));
   try { return ResponseEntity.ok(opcion(registro.crear(f))); }
   catch(Exception ex) { return ResponseEntity.badRequest().body(Map.of("error","No se pudo registrar el cliente: "+ex.getMessage())); }
  }

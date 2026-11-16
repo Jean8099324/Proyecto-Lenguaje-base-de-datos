@@ -98,25 +98,25 @@ public class IncidenteRepository {
         List<OpcionIncidente> vehicles = IncidenteRepository.<OpcionIncidente>cursor(
                 call.execute(new MapSqlParameterSource())).stream()
                 .filter(vehicle -> Long.valueOf(1).equals(vehicle.getEstadoId())).toList();
-        String sql = """
-                SELECT DISTINCT i.ID_VEHICULO
-                  FROM FIDE_INCIDENTES_TB i
-                  JOIN FIDE_ESTADOS_TB e ON e.ID_ESTADO = i.ID_ESTADO
-                 WHERE UPPER(TRIM(e.NOMBRE_ESTADO)) IN (
-                     'REPORTADO', 'ASIGNADO', 'UNIDAD EN CAMINO', 'EN ATENCION', 'TRASLADO'
-                 )
-                   AND (? IS NULL OR i.ID_INCIDENTE <> ?)
-                """;
-        java.util.Set<Long> busyVehicleIds = new java.util.HashSet<>(jdbc.query(
-                sql, (rs, row) -> rs.getLong("ID_VEHICULO"), incidentId, incidentId));
-        return vehicles.stream().filter(vehicle -> !busyVehicleIds.contains(vehicle.getId())
-                || (incidentId != null && existsVehicleForIncident(vehicle.getId(), incidentId))).toList();
+        java.util.Set<String> activos = java.util.Set.of("REPORTADO", "ASIGNADO",
+                "UNIDAD EN CAMINO", "EN ATENCION", "TRASLADO");
+        Map<Long, String> estados = packageRows("FIDE_OBTENER_ESTADOS_SP").stream()
+                .collect(java.util.stream.Collectors.toMap(
+                        row -> number(row.get("ID_ESTADO")),
+                        row -> text(row.get("NOMBRE_ESTADO")),
+                        (first, second) -> first));
+        java.util.Set<Long> busyVehicleIds = findAll().stream()
+                .filter(incident -> activos.contains(estados.get(incident.getIdEstado())))
+                .filter(incident -> !java.util.Objects.equals(incidentId, incident.getId()))
+                .map(Incidente::getIdVehiculo)
+                .collect(java.util.stream.Collectors.toSet());
+        vehicles.forEach(vehicle -> vehicle.setIncidenteEnProceso(busyVehicleIds.contains(vehicle.getId())));
+        return vehicles;
     }
 
     private boolean existsVehicleForIncident(Long vehicleId, Long incidentId) {
-        Integer count = jdbc.queryForObject("SELECT COUNT(*) FROM FIDE_INCIDENTES_TB WHERE ID_VEHICULO = ? AND ID_INCIDENTE = ?",
-                Integer.class, vehicleId, incidentId);
-        return count != null && count > 0;
+        return findAll().stream().anyMatch(incident -> vehicleId.equals(incident.getIdVehiculo())
+                && incidentId.equals(incident.getId()));
     }
 
     public List<OpcionIncidente> findBrands() {
@@ -193,16 +193,14 @@ public class IncidenteRepository {
 
     private void insertLocation(Incidente incidente) {
         locationCall("FIDE_INSERTAR_UBICACION_INCIDENTES_SP").execute(locationParameters(incidente));
-        Integer locations = jdbc.queryForObject("""
-                SELECT COUNT(*)
-                FROM FIDE_UBICACION_INCIDENTES_TB
-                WHERE ID_INCIDENTE = ?
-                  AND ID_PROVINCIA = ?
-                  AND ID_CANTON = ?
-                  AND ID_DISTRITO = ?
-                """, Integer.class, incidente.getId(), incidente.getIdProvincia(),
-                incidente.getIdCanton(), incidente.getIdDistrito());
-        if (locations == null || locations == 0) {
+        boolean stored = packageRows("FIDE_OBTENER_UBICACION_POR_ID_SP",
+                new SqlParameter("P_ID_INCIDENTE", Types.NUMERIC),
+                new MapSqlParameterSource("P_ID_INCIDENTE", incidente.getId()))
+                .stream()
+                .anyMatch(row -> java.util.Objects.equals(incidente.getIdProvincia(), number(row.get("ID_PROVINCIA")))
+                        && java.util.Objects.equals(incidente.getIdCanton(), number(row.get("ID_CANTON")))
+                        && java.util.Objects.equals(incidente.getIdDistrito(), number(row.get("ID_DISTRITO"))));
+        if (!stored) {
             throw new IllegalStateException("Oracle no registró la ubicación del incidente.");
         }
     }
@@ -283,147 +281,175 @@ public class IncidenteRepository {
     }
 
     public Optional<VehiculoDetalleIncidente> findVehicleDetail(Long vehicleId) {
-        String sql = """
-                SELECT v.ID_USUARIO AS ID_CLIENTE, v.PLACA, v.CODIGO_CHASIS, m.NOMBRE_MARCA, mo.NOMBRE_MODELO, a.ANIO,
-                       u.NOMBRE AS NOMBRE_CLIENTE, u.PRIMER_APELLIDO AS PRIMER_APELLIDO_CLIENTE,
-                       u.SEGUNDO_APELLIDO AS SEGUNDO_APELLIDO_CLIENTE,
-                       (SELECT LISTAGG(TRIM(
-                                   NVL(p.NOMBRE_PROVINCIA, '') ||
-                                   CASE WHEN p.NOMBRE_PROVINCIA IS NOT NULL THEN ', ' ELSE '' END ||
-                                   NVL(c.NOMBRE_CANTON, '') ||
-                                   CASE WHEN c.NOMBRE_CANTON IS NOT NULL THEN ', ' ELSE '' END ||
-                                   NVL(d.NOMBRE_DISTRITO, '') ||
-                                   CASE WHEN dir.OTRAS_SENAS IS NOT NULL THEN ' - ' || dir.OTRAS_SENAS ELSE '' END
-                               ), ' | ') WITHIN GROUP (
-                                   ORDER BY p.NOMBRE_PROVINCIA, c.NOMBRE_CANTON, d.NOMBRE_DISTRITO
-                               )
-                          FROM FIDE_DIRECCIONES_TB dir
-                          JOIN FIDE_ESTADOS_TB ed ON ed.ID_ESTADO = dir.ID_ESTADO
-                          LEFT JOIN FIDE_PROVINCIAS_TB p ON p.ID_PROVINCIA = dir.ID_PROVINCIA
-                          LEFT JOIN FIDE_CANTONES_TB c ON c.ID_CANTON = dir.ID_CANTON
-                          LEFT JOIN FIDE_DISTRITOS_TB d ON d.ID_DISTRITO = dir.ID_DISTRITO
-                         WHERE dir.ID_USUARIO = u.ID_USUARIO
-                           AND UPPER(TRIM(ed.NOMBRE_ESTADO)) = 'ACTIVO') AS DIRECCION_CLIENTE
-                  FROM FIDE_VEHICULOS_TB v
-                  JOIN FIDE_MARCAS_TB m ON m.ID_MARCA = v.ID_MARCA
-                  JOIN FIDE_MODELOS_TB mo ON mo.ID_MARCA = v.ID_MARCA AND mo.ID_MODELO = v.ID_MODELO
-                  JOIN FIDE_ANIOS_TB a ON a.ID_MODELO = v.ID_MODELO AND a.ID_ANIO = v.ID_ANIO
-                  JOIN FIDE_USUARIOS_TB u ON u.ID_USUARIO = v.ID_USUARIO
-                 WHERE v.ID_VEHICULO = ?
-                """;
-        return jdbc.query(sql, (rs, row) -> {
-            VehiculoDetalleIncidente vehicle = new VehiculoDetalleIncidente();
-            vehicle.setIdCliente(rs.getLong("ID_CLIENTE"));
-            vehicle.setNombreCliente(fullName(
-                    rs.getString("NOMBRE_CLIENTE"),
-                    rs.getString("PRIMER_APELLIDO_CLIENTE"),
-                    rs.getString("SEGUNDO_APELLIDO_CLIENTE")));
-            vehicle.setDireccionCliente(rs.getString("DIRECCION_CLIENTE"));
-            vehicle.setPlaca(rs.getString("PLACA"));
-            vehicle.setCodigoChasis(rs.getString("CODIGO_CHASIS"));
-            vehicle.setMarca(rs.getString("NOMBRE_MARCA"));
-            vehicle.setModelo(rs.getString("NOMBRE_MODELO"));
-            vehicle.setAnio(rs.getString("ANIO"));
-            return vehicle;
-        }, vehicleId).stream().findFirst();
+        Map<String, Object> vehicle = packageRows("FIDE_OBTENER_VEHICULO_POR_ID_SP",
+                new SqlParameter("P_ID_VEHICULO", Types.NUMERIC),
+                new MapSqlParameterSource("P_ID_VEHICULO", vehicleId)).stream().findFirst().orElse(null);
+        if (vehicle == null) {
+            return Optional.empty();
+        }
+        Long clientId = number(vehicle.get("ID_USUARIO"));
+        Map<String, Object> client = packageRows("FIDE_OBTENER_USUARIO_POR_ID_USUARIO_SP",
+                new SqlParameter("P_ID_USUARIO", Types.NUMERIC),
+                new MapSqlParameterSource("P_ID_USUARIO", clientId)).stream().findFirst().orElse(null);
+        Map<Long, String> brands = names("FIDE_OBTENER_MARCAS_SP", "ID_MARCA", "NOMBRE_MARCA");
+        Map<Long, String> models = names("FIDE_OBTENER_MODELOS_SP", "ID_MODELO", "NOMBRE_MODELO");
+        Map<Long, String> years = names("FIDE_OBTENER_ANIOS_SP", "ID_ANIO", "ANIO");
+        Map<Long, String> provinces = names("FIDE_OBTENER_PROVINCIAS_SP", "ID_PROVINCIA", "NOMBRE_PROVINCIA");
+        Map<Long, String> cantons = names("FIDE_OBTENER_CANTONES_SP", "ID_CANTON", "NOMBRE_CANTON");
+        Map<Long, String> districts = names("FIDE_OBTENER_DISTRITOS_SP", "ID_DISTRITO", "NOMBRE_DISTRITO");
+        List<String> addresses = packageRows("FIDE_OBTENER_DIRECCIONES_SP").stream()
+                .filter(row -> clientId.equals(number(row.get("ID_USUARIO"))))
+                .filter(row -> Long.valueOf(1).equals(number(row.get("ID_ESTADO"))))
+                .map(row -> fullAddress(row, provinces, cantons, districts))
+                .toList();
+
+        VehiculoDetalleIncidente result = new VehiculoDetalleIncidente();
+        result.setIdCliente(clientId);
+        result.setNombreCliente(client == null ? null : fullName(text(client.get("NOMBRE")),
+                text(client.get("PRIMER_APELLIDO")), text(client.get("SEGUNDO_APELLIDO"))));
+        result.setDireccionesCliente(addresses);
+        result.setDireccionCliente(String.join(" | ", addresses));
+        result.setPlaca(text(vehicle.get("PLACA")));
+        result.setCodigoChasis(text(vehicle.get("CODIGO_CHASIS")));
+        result.setMarca(brands.get(number(vehicle.get("ID_MARCA"))));
+        result.setModelo(models.get(number(vehicle.get("ID_MODELO"))));
+        result.setAnio(years.get(number(vehicle.get("ID_ANIO"))));
+        return Optional.of(result);
     }
 
     public List<HistorialServicioIncidente> findServiceHistory(Long incidentId) {
         List<HistorialServicioIncidente> history = new ArrayList<>();
-        String unitSql = """
-                SELECT h.OBSERVACIONES, h.FECHA_SALIDA_UNIDAD, h.HORA_SALIDA_UNIDAD,
-                       h.FECHA_REGRESO_UNIDAD, h.HORA_REGRESO_UNIDAD,
-                       u.NOMBRE_UNIDAD, u.PLACA_UNIDAD, tu.NOMBRE_TIPO_UNIDAD,
-                       us.NOMBRE, us.PRIMER_APELLIDO, us.SEGUNDO_APELLIDO, e.NOMBRE_ESTADO
-                  FROM FIDE_HISTORIALES_UNIDADES_TB h
-                  JOIN FIDE_UNIDADES_TB u ON u.ID_UNIDAD = h.ID_UNIDAD
-                  JOIN FIDE_TIPOS_UNIDADES_TB tu ON tu.ID_TIPO_UNIDAD = u.ID_TIPO_UNIDAD
-                  JOIN FIDE_USUARIOS_TB us ON us.ID_USUARIO = h.ID_RESPONSABLE
-                  JOIN FIDE_ESTADOS_TB e ON e.ID_ESTADO = h.ID_ESTADO
-                 WHERE h.ID_INCIDENTE = ?
-                """;
-        history.addAll(jdbc.query(unitSql, (rs, row) -> {
+        Map<Long, Map<String, Object>> units = byId("FIDE_OBTENER_UNIDADES_SP", "ID_UNIDAD");
+        Map<Long, String> unitTypes = names("FIDE_OBTENER_TIPOS_UNIDADES_SP",
+                "ID_TIPO_UNIDAD", "NOMBRE_TIPO_UNIDAD");
+        Map<Long, Map<String, Object>> users = byId("FIDE_OBTENER_USUARIOS_SP", "ID_USUARIO");
+        Map<Long, String> states = names("FIDE_OBTENER_ESTADOS_SP", "ID_ESTADO", "NOMBRE_ESTADO");
+        history.addAll(packageRows("FIDE_OBTENER_HISTORIALES_UNIDADES_SP").stream()
+                .filter(row -> incidentId.equals(number(row.get("ID_INCIDENTE"))))
+                .map(row -> {
             HistorialServicioIncidente item = new HistorialServicioIncidente();
             item.setEtapa("Asistencia vial");
-            item.setRecurso(rs.getString("NOMBRE_TIPO_UNIDAD") + " · " + rs.getString("NOMBRE_UNIDAD")
-                    + (rs.getString("PLACA_UNIDAD") == null ? "" : " · " + rs.getString("PLACA_UNIDAD")));
-            item.setResponsable(fullName(rs.getString("NOMBRE"), rs.getString("PRIMER_APELLIDO"), rs.getString("SEGUNDO_APELLIDO")));
-            item.setEstado(rs.getString("NOMBRE_ESTADO"));
-            item.setDetalle(rs.getString("OBSERVACIONES"));
-            item.setFechaInicio(toLocalDate(rs.getDate("FECHA_SALIDA_UNIDAD")));
-            item.setHoraInicio(rs.getString("HORA_SALIDA_UNIDAD"));
-            item.setFechaFin(toLocalDate(rs.getDate("FECHA_REGRESO_UNIDAD")));
-            item.setHoraFin(rs.getString("HORA_REGRESO_UNIDAD"));
+            Map<String, Object> unit = units.get(number(row.get("ID_UNIDAD")));
+            Map<String, Object> user = users.get(number(row.get("ID_RESPONSABLE")));
+            item.setRecurso(unitTypes.get(number(unit == null ? null : unit.get("ID_TIPO_UNIDAD")))
+                    + " · " + text(unit == null ? null : unit.get("NOMBRE_UNIDAD"))
+                    + (unit == null || unit.get("PLACA_UNIDAD") == null ? "" : " · " + unit.get("PLACA_UNIDAD")));
+            item.setResponsable(user == null ? null : fullName(text(user.get("NOMBRE")),
+                    text(user.get("PRIMER_APELLIDO")), text(user.get("SEGUNDO_APELLIDO"))));
+            item.setEstado(states.get(number(row.get("ID_ESTADO"))));
+            item.setDetalle(text(row.get("OBSERVACIONES")));
+            item.setFechaInicio(toLocalDate(row.get("FECHA_SALIDA_UNIDAD")));
+            item.setHoraInicio(text(row.get("HORA_SALIDA_UNIDAD")));
+            item.setFechaFin(toLocalDate(row.get("FECHA_REGRESO_UNIDAD")));
+            item.setHoraFin(text(row.get("HORA_REGRESO_UNIDAD")));
             return item;
-        }, incidentId));
-        String repairSql = """
-                SELECT r.ID_REPARACION, r.DESCRIPCION_REPARACION, r.FECHA_INGRESO_TALLER,
-                       r.FECHA_SALIDA_TALLER, us.NOMBRE, us.PRIMER_APELLIDO,
-                       us.SEGUNDO_APELLIDO, e.NOMBRE_ESTADO
-                  FROM FIDE_REPARACIONES_TB r
-                  JOIN FIDE_USUARIOS_TB us ON us.ID_USUARIO = r.ID_MECANICO
-                  JOIN FIDE_ESTADOS_TB e ON e.ID_ESTADO = r.ID_ESTADO
-                 WHERE r.ID_INCIDENTE = ?
-                """;
-        history.addAll(jdbc.query(repairSql, (rs, row) -> {
+        }).toList());
+        history.addAll(packageRows("FIDE_OBTENER_REPARACIONES_SP").stream()
+                .filter(row -> incidentId.equals(number(row.get("ID_INCIDENTE"))))
+                .map(row -> {
             HistorialServicioIncidente item = new HistorialServicioIncidente();
             item.setEtapa("Taller");
-            item.setRecurso("Reparación #" + rs.getLong("ID_REPARACION"));
-            item.setResponsable(fullName(rs.getString("NOMBRE"), rs.getString("PRIMER_APELLIDO"), rs.getString("SEGUNDO_APELLIDO")));
-            item.setEstado(rs.getString("NOMBRE_ESTADO"));
-            item.setDetalle(rs.getString("DESCRIPCION_REPARACION"));
-            item.setFechaInicio(toLocalDate(rs.getDate("FECHA_INGRESO_TALLER")));
-            item.setFechaFin(toLocalDate(rs.getDate("FECHA_SALIDA_TALLER")));
+            Map<String, Object> user = users.get(number(row.get("ID_MECANICO")));
+            item.setRecurso("Reparación #" + number(row.get("ID_REPARACION")));
+            item.setResponsable(user == null ? null : fullName(text(user.get("NOMBRE")),
+                    text(user.get("PRIMER_APELLIDO")), text(user.get("SEGUNDO_APELLIDO"))));
+            item.setEstado(states.get(number(row.get("ID_ESTADO"))));
+            item.setDetalle(text(row.get("DESCRIPCION_REPARACION")));
+            item.setFechaInicio(toLocalDate(row.get("FECHA_INGRESO_TALLER")));
+            item.setFechaFin(toLocalDate(row.get("FECHA_SALIDA_TALLER")));
             return item;
-        }, incidentId));
+        }).toList());
         history.sort(Comparator.comparing((HistorialServicioIncidente item) -> item.getFechaInicio(),
                 Comparator.nullsLast(Comparator.naturalOrder())));
         return history;
     }
 
     public List<FacturacionIncidente> findBilling(Long incidentId) {
-        String sql = """
-                SELECT v.ID_VENTA, v.FECHA_VENTA, v.TOTAL_VENTA,
-                       f.ID_FACTURA, f.FECHA_FACTURA, f.HORA_FACTURA, f.SUBTOTAL,
-                       f.TOTAL_DEDUCCIONES, f.TOTAL_IMPUESTOS, f.TOTAL_FACTURA,
-                       NVL(p.TOTAL_PAGADO, 0) AS TOTAL_PAGADO,
-                       COALESCE(ef.NOMBRE_ESTADO, ev.NOMBRE_ESTADO) AS NOMBRE_ESTADO
-                  FROM FIDE_VENTAS_TB v
-                  JOIN FIDE_ESTADOS_TB ev ON ev.ID_ESTADO = v.ID_ESTADO
-                  LEFT JOIN FIDE_FACTURAS_TB f ON f.ID_VENTA = v.ID_VENTA
-                  LEFT JOIN FIDE_ESTADOS_TB ef ON ef.ID_ESTADO = f.ID_ESTADO
-                  LEFT JOIN (SELECT ID_FACTURA, SUM(MONTO_APORTADO) TOTAL_PAGADO
-                               FROM FIDE_PAGOS_TB GROUP BY ID_FACTURA) p
-                    ON p.ID_FACTURA = f.ID_FACTURA
-                 WHERE v.ID_INCIDENTE = ?
-                 ORDER BY v.FECHA_VENTA, v.ID_VENTA
-                """;
-        return jdbc.query(sql, (rs, row) -> {
+        Map<Long, Map<String, Object>> invoices = byId("FIDE_OBTENER_FACTURAS_SP", "ID_FACTURA");
+        Map<Long, String> states = names("FIDE_OBTENER_ESTADOS_SP", "ID_ESTADO", "NOMBRE_ESTADO");
+        Map<Long, java.math.BigDecimal> payments = new java.util.HashMap<>();
+        packageRows("FIDE_OBTENER_PAGOS_SP").forEach(row -> payments.merge(number(row.get("ID_FACTURA")),
+                decimal(row.get("MONTO_APORTADO")), java.math.BigDecimal::add));
+        return packageRows("FIDE_OBTENER_VENTAS_SP").stream()
+                .filter(row -> incidentId.equals(number(row.get("ID_INCIDENTE"))))
+                .sorted(Comparator.comparing(row -> toLocalDate(row.get("FECHA_VENTA")),
+                        Comparator.nullsLast(Comparator.naturalOrder())))
+                .map(row -> {
             FacturacionIncidente billing = new FacturacionIncidente();
-            billing.setIdVenta(rs.getLong("ID_VENTA"));
-            billing.setFechaVenta(toLocalDate(rs.getDate("FECHA_VENTA")));
-            billing.setTotalVenta(rs.getBigDecimal("TOTAL_VENTA"));
-            long invoiceId = rs.getLong("ID_FACTURA");
-            billing.setIdFactura(rs.wasNull() ? null : invoiceId);
-            billing.setFechaFactura(toLocalDate(rs.getDate("FECHA_FACTURA")));
-            billing.setHoraFactura(rs.getString("HORA_FACTURA"));
-            billing.setSubtotal(rs.getBigDecimal("SUBTOTAL"));
-            billing.setDeducciones(rs.getBigDecimal("TOTAL_DEDUCCIONES"));
-            billing.setImpuestos(rs.getBigDecimal("TOTAL_IMPUESTOS"));
-            billing.setTotalFactura(rs.getBigDecimal("TOTAL_FACTURA"));
-            billing.setTotalPagado(rs.getBigDecimal("TOTAL_PAGADO"));
-            billing.setEstado(rs.getString("NOMBRE_ESTADO"));
+            billing.setIdVenta(number(row.get("ID_VENTA")));
+            billing.setFechaVenta(toLocalDate(row.get("FECHA_VENTA")));
+            billing.setTotalVenta(decimal(row.get("TOTAL_VENTA")));
+            Map<String, Object> invoice = invoices.values().stream()
+                    .filter(candidate -> number(row.get("ID_VENTA")).equals(number(candidate.get("ID_VENTA"))))
+                    .findFirst().orElse(null);
+            Long invoiceId = invoice == null ? null : number(invoice.get("ID_FACTURA"));
+            billing.setIdFactura(invoiceId);
+            billing.setFechaFactura(invoice == null ? null : toLocalDate(invoice.get("FECHA_FACTURA")));
+            billing.setHoraFactura(invoice == null ? null : text(invoice.get("HORA_FACTURA")));
+            billing.setSubtotal(invoice == null ? null : decimal(invoice.get("SUBTOTAL")));
+            billing.setDeducciones(invoice == null ? null : decimal(invoice.get("TOTAL_DEDUCCIONES")));
+            billing.setImpuestos(invoice == null ? null : decimal(invoice.get("TOTAL_IMPUESTOS")));
+            billing.setTotalFactura(invoice == null ? null : decimal(invoice.get("TOTAL_FACTURA")));
+            billing.setTotalPagado(invoiceId == null ? java.math.BigDecimal.ZERO : payments.getOrDefault(invoiceId,
+                    java.math.BigDecimal.ZERO));
+            billing.setEstado(states.get(invoice == null ? number(row.get("ID_ESTADO"))
+                    : number(invoice.get("ID_ESTADO"))));
             return billing;
-        }, incidentId);
+        }).toList();
     }
 
-    private static java.time.LocalDate toLocalDate(Date date) {
-        return date == null ? null : date.toLocalDate();
+    private static java.time.LocalDate toLocalDate(Object value) {
+        return value instanceof Date date ? date.toLocalDate()
+                : value instanceof java.time.LocalDate localDate ? localDate : null;
     }
 
     private static String fullName(String... values) {
         return java.util.Arrays.stream(values).filter(value -> value != null && !value.isBlank())
                 .collect(java.util.stream.Collectors.joining(" "));
+    }
+
+    private Map<Long, Map<String, Object>> byId(String procedure, String idColumn) {
+        return packageRows(procedure).stream().collect(java.util.stream.Collectors.toMap(
+                row -> number(row.get(idColumn)), row -> row, (first, second) -> first));
+    }
+
+    private Map<Long, String> names(String procedure, String idColumn, String nameColumn) {
+        return packageRows(procedure).stream().collect(java.util.stream.Collectors.toMap(
+                row -> number(row.get(idColumn)), row -> text(row.get(nameColumn)), (first, second) -> first));
+    }
+
+    private List<Map<String, Object>> packageRows(String procedure) {
+        return OraclePackageSupport.rows(OraclePackageSupport.call(jdbc, procedure,
+                OraclePackageSupport.cursor()).execute(new MapSqlParameterSource()));
+    }
+
+    private List<Map<String, Object>> packageRows(String procedure, SqlParameter parameter,
+                                                  MapSqlParameterSource values) {
+        return OraclePackageSupport.rows(OraclePackageSupport.call(jdbc, procedure,
+                parameter, OraclePackageSupport.cursor()).execute(values));
+    }
+
+    private String fullAddress(Map<String, Object> row, Map<Long, String> provinces,
+                               Map<Long, String> cantons, Map<Long, String> districts) {
+        String base = String.join(", ",
+                text(provinces.get(number(row.get("ID_PROVINCIA")))),
+                text(cantons.get(number(row.get("ID_CANTON")))),
+                text(districts.get(number(row.get("ID_DISTRITO")))));
+        String notes = text(row.get("OTRAS_SENAS"));
+        return notes == null || notes.isBlank() ? base : base + " - " + notes;
+    }
+
+    private static Long number(Object value) {
+        return value instanceof Number number ? number.longValue() : null;
+    }
+
+    private static String text(Object value) {
+        return value == null ? null : value.toString();
+    }
+
+    private static java.math.BigDecimal decimal(Object value) {
+        return value instanceof java.math.BigDecimal decimal ? decimal
+                : value instanceof Number number ? java.math.BigDecimal.valueOf(number.doubleValue()) : null;
     }
 
     private static String emptyToNull(String value) {

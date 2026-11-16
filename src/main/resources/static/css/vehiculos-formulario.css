@@ -1,0 +1,201 @@
+﻿/* Formulario de vehículo: jerarquía y espaciado propios, sin alterar otros formularios. */
+.vehicle-form-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 22px 24px; padding: 26px 28px 12px; }
+.vehicle-form-grid > *, .vehicle-form-grid .cliente-propietario { min-width: 0; }
+.vehicle-form-grid .full-width { grid-column: 1 / -1; }
+.vehicle-form-grid .form-group-custom { display: flex; flex-direction: column; gap: 8px; margin: 0; }
+.vehicle-form-grid .form-group-custom > label { margin: 0; color: var(--primary); font-size: 13px; font-weight: 600; }
+.vehicle-form-grid input, .vehicle-form-grid select { width: 100%; min-width: 0; height: 48px; padding: 0 14px; border: 1px solid var(--border); border-radius: 9px; background: #fbfcfd; color: var(--text); font-size: 14px; }
+.vehicle-form-grid input:focus, .vehicle-form-grid select:focus { border-color: var(--primary-light); background: #fff; box-shadow: 0 0 0 3px rgba(53,104,142,.12); outline: none; }
+.vehicle-form-grid .cliente-propietario { display: grid; grid-template-columns: minmax(0,1fr) minmax(220px,.85fr); gap: 10px 16px; align-items: end; margin: 0; padding: 18px; border: 1px solid var(--border); border-radius: 12px; background: #f8fafc; }
+.vehicle-form-grid .cliente-propietario > label, .vehicle-form-grid .cliente-resumen, .vehicle-form-grid .abrir-cliente, .vehicle-form-grid .nuevo-cliente, .vehicle-form-grid .error-cliente { grid-column: 1 / -1; }
+.vehicle-form-grid .cliente-propietario > label { margin: 0; color: var(--primary); font-size: 13px; font-weight: 600; }
+.vehicle-form-grid .cliente-propietario .buscar-cliente { grid-column: 1; }
+.vehicle-form-grid .cliente-propietario .seleccionar-cliente { grid-column: 2; }
+.vehicle-form-grid .cliente-resumen { margin: 2px 0 0; padding: 16px; border: 1px solid #dce5ed; border-radius: 10px; background: #fff; }
+.vehicle-form-grid .cliente-resumen > strong { display: block; margin-bottom: 14px; color: var(--primary); font-size: 14px; }
+.vehicle-form-grid .cliente-resumen dl { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 12px 18px; margin: 0; }
+.vehicle-form-grid .cliente-resumen dl > div { min-width: 0; padding: 10px 12px; border-radius: 8px; background: #f6f8fa; }
+.vehicle-form-grid .cliente-resumen dt { margin-bottom: 5px; color: var(--muted); font-size: 10px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; }
+.vehicle-form-grid .cliente-resumen dd { margin: 0; color: var(--text); font-size: 13px; line-height: 1.5; overflow-wrap: anywhere; }
+.vehicle-form-grid .cliente-resumen dd[data-resumen="telefonos"], .vehicle-form-grid .cliente-resumen dd[data-resumen="correos"] { display: flex; flex-direction: column; gap: 4px; }
+.vehicle-form-grid .cliente-resumen dd span { display: block; }
+.vehicle-form-grid .cliente-resumen .cliente-resumen-wide { grid-column: 1 / -1; }
+.vehicle-form-grid .abrir-cliente { justify-self: start; min-height: 40px; padding: 0 14px; font-size: 12px; }
+.vehicle-form-grid .nuevo-cliente { min-width: 0; margin: 4px 0 0; padding: 18px; border: 1px solid var(--border); border-radius: 10px; }
+.vehicle-form-grid .nuevo-cliente .form-grid { padding: 12px 0; }
+.vehicle-form-grid .nuevo-cliente [data-campo="otrasSenas"] { min-height: 84px; }
+.vehicle-form-grid > .text-muted { margin: 0; padding: 4px 0; }
+.vehicle-form-actions { padding: 18px 28px 26px; border-top: 1px solid var(--border); }
+@media (max-width:760px) {
+ .vehicle-form-grid { gap: 18px; padding: 20px 18px 10px; }
+ .vehicle-form-grid .cliente-propietario { grid-template-columns: minmax(0,1fr); }
+ .vehicle-form-grid .cliente-propietario .buscar-cliente, .vehicle-form-grid .cliente-propietario .seleccionar-cliente { grid-column: 1; }
+ .vehicle-form-grid .cliente-resumen dl { grid-template-columns: repeat(2,minmax(0,1fr)); }
+ .vehicle-form-actions { padding: 16px 18px 20px; }
+}
+@media (max-width:520px) {
+ .vehicle-form-grid { grid-template-columns: minmax(0,1fr); }
+ .vehicle-form-grid .form-group-custom, .vehicle-form-grid .full-width { grid-column: 1; }
+ .vehicle-form-grid .cliente-resumen dl { grid-template-columns: minmax(0,1fr); }
+ .vehicle-form-grid .cliente-resumen .cliente-resumen-wide { grid-column: 1; }
+ .vehicle-form-actions { align-items: stretch; flex-direction: column-reverse; }
+ .vehicle-form-actions > * { justify-content: center; width: 100%; }
+}
+.vehicle-editor-card { overflow: hidden; }
+.vehicle-editor-card > form { display: grid; gap: 22px; padding: 24px 26px 0; }
+.vehicle-owner-card, .vehicle-data-card {
+  min-width: 0; padding: 22px 24px; border: 1px solid var(--border);
+  border-radius: 12px; background: #f8fafc;
+}
+.vehicle-section-heading {
+  display:flex; align-items:center; justify-content:space-between; gap:14px;
+  margin:0 0 18px; padding:0 0 14px; border-bottom:1px solid var(--border);
+}
+.vehicle-section-heading .section-label { display:block; margin:0 0 5px; }
+.vehicle-section-heading h4 { margin:0; color:var(--primary); font-size:16px; font-weight:700; }
+.vehicle-section-heading > i { flex:0 0 auto; color:var(--primary-light); font-size:22px; }
+.vehicle-owner-card .cliente-propietario {
+  display:grid; grid-template-columns:minmax(0,1fr) minmax(220px,.85fr);
+  gap:12px 16px; min-width:0; margin:0; padding:0; border:0; border-radius:0; background:transparent;
+}
+.vehicle-owner-card .cliente-propietario > label,
+.vehicle-owner-card .cliente-resumen,
+.vehicle-owner-card .abrir-cliente,
+.vehicle-owner-card .nuevo-cliente,
+.vehicle-owner-card .error-cliente { grid-column:1 / -1; }
+.vehicle-owner-card .cliente-propietario > label { margin:0; color:var(--primary); font-size:13px; font-weight:600; }
+.vehicle-owner-card .cliente-propietario .buscar-cliente { grid-column:1; }
+.vehicle-owner-card .cliente-propietario .seleccionar-cliente { grid-column:2; }
+.vehicle-owner-card input, .vehicle-owner-card select,
+.vehicle-data-card input, .vehicle-data-card select {
+  width:100%; min-width:0; height:48px; padding:0 14px;
+  border:1px solid var(--border); border-radius:9px; background:#fff;
+  color:var(--text); font-size:14px;
+}
+.vehicle-owner-card input:focus, .vehicle-owner-card select:focus,
+.vehicle-data-card input:focus, .vehicle-data-card select:focus {
+  border-color:var(--primary-light); box-shadow:0 0 0 3px rgba(53,104,142,.12); outline:0;
+}
+.vehicle-owner-card .cliente-resumen {
+  margin:2px 0 0; padding:16px; border:1px solid var(--border);
+  border-radius:10px; background:#fff;
+}
+.vehicle-owner-card .cliente-resumen > strong { display:block; margin-bottom:12px; color:var(--primary); font-size:13px; }
+.vehicle-owner-card .cliente-resumen dl { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:10px 12px; margin:0; }
+.vehicle-owner-card .cliente-resumen dl > div { min-width:0; padding:10px 12px; border-radius:8px; background:#f6f8fa; }
+.vehicle-owner-card .cliente-resumen dt { margin-bottom:4px; color:var(--muted); font-size:10px; font-weight:700; text-transform:uppercase; }
+.vehicle-owner-card .cliente-resumen dd { margin:0; color:var(--text); font-size:13px; line-height:1.5; overflow-wrap:anywhere; }
+.vehicle-owner-card .cliente-resumen dd[data-resumen="telefonos"],
+.vehicle-owner-card .cliente-resumen dd[data-resumen="correos"] { display:flex; flex-direction:column; gap:4px; }
+.vehicle-owner-card .cliente-resumen dd span { display:block; }
+.vehicle-owner-card .cliente-resumen-wide { grid-column:1 / -1; }
+.vehicle-owner-card .abrir-cliente { justify-self:start; min-height:40px; }
+.vehicle-owner-card .nuevo-cliente { min-width:0; margin:4px 0 0; padding:18px; border:1px solid var(--border); border-radius:10px; background:#fff; }
+.vehicle-owner-card .nuevo-cliente .form-grid { padding:12px 0; }
+.vehicle-owner-note > p { margin:0; color:var(--muted); font-size:13px; }
+.vehicle-data-card { background:#fff; }
+.vehicle-form-grid { grid-template-columns:repeat(2,minmax(0,1fr)); gap:20px 24px; padding:0; }
+.vehicle-form-grid > * { min-width:0; }
+.vehicle-form-grid .form-group-custom { display:flex; flex-direction:column; gap:8px; min-width:0; margin:0; }
+.vehicle-form-grid .form-group-custom > label { margin:0; color:var(--primary); font-size:13px; font-weight:600; }
+.vehicle-form-note { grid-column:1 / -1; display:flex; align-items:center; gap:8px; margin:0; padding:12px 14px; border:1px solid var(--border); border-radius:8px; background:#f8fafc; color:var(--muted); font-size:12px; }
+.vehicle-form-note i { color:var(--primary-light); }
+.vehicle-form-actions { padding:18px 0 24px; border-top:1px solid var(--border); }
+@media(max-width:760px) {
+ .vehicle-editor-card > form { gap:16px; padding:18px 18px 0; }
+ .vehicle-owner-card, .vehicle-data-card { padding:18px; }
+ .vehicle-owner-card .cliente-propietario { grid-template-columns:minmax(0,1fr); }
+ .vehicle-owner-card .cliente-propietario .buscar-cliente,
+ .vehicle-owner-card .cliente-propietario .seleccionar-cliente { grid-column:1; }
+ .vehicle-owner-card .cliente-resumen dl { grid-template-columns:repeat(2,minmax(0,1fr)); }
+ .vehicle-form-grid { gap:17px; }
+ .vehicle-form-actions { padding:16px 0 20px; }
+}
+@media(max-width:520px) {
+ .vehicle-form-grid { grid-template-columns:minmax(0,1fr); }
+ .vehicle-form-note { grid-column:1; }
+ .vehicle-owner-card .cliente-resumen dl { grid-template-columns:minmax(0,1fr); }
+ .vehicle-owner-card .cliente-resumen-wide { grid-column:1; }
+ .vehicle-form-actions { align-items:stretch; flex-direction:column-reverse; }
+ .vehicle-form-actions > * { justify-content:center; width:100%; }
+}
+
+/* El resumen del propietario se presenta debajo de su selector, en una tarjeta propia. */
+.vehicle-owner-summary { margin: 20px 0 0; padding: 18px 0 0; border-top: 1px solid var(--border); }
+.vehicle-owner-summary[hidden] { display: none; }
+.vehicle-owner-summary .cliente-resumen {
+  display: block; margin: 0; padding: 0; border: 0;
+  border-radius: 0; background: transparent; color: var(--text);
+}
+.vehicle-owner-summary .cliente-resumen > strong {
+  display: block; margin: 0 0 16px; color: var(--primary); font-size: 16px;
+}
+.vehicle-owner-summary .cliente-resumen dl {
+  display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px;
+  margin: 0;
+}
+.vehicle-owner-summary .cliente-resumen dl > div {
+  min-width: 0; padding: 13px 15px; border-radius: 9px; background: #f5f7f9;
+}
+.vehicle-owner-summary .cliente-resumen dt {
+  margin: 0 0 6px; color: var(--muted); font-size: 11px; font-weight: 700;
+  letter-spacing: .04em; text-transform: uppercase;
+}
+.vehicle-owner-summary .cliente-resumen dd {
+  margin: 0; color: var(--text); font-size: 14px; line-height: 1.5; overflow-wrap: anywhere;
+}
+.vehicle-owner-summary .cliente-resumen dd[data-resumen="telefonos"],
+.vehicle-owner-summary .cliente-resumen dd[data-resumen="correos"] {
+  display: flex; flex-direction: column; gap: 5px;
+}
+.vehicle-owner-summary .cliente-resumen dd span { display: block; }
+.vehicle-owner-summary .cliente-resumen .cliente-resumen-wide { grid-column: 1 / -1; }
+@media (max-width: 760px) {
+  .vehicle-owner-summary .cliente-resumen dl { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 520px) {
+  .vehicle-owner-summary { margin-top: 16px; padding-top: 16px; }
+  .vehicle-owner-summary .cliente-resumen dl { grid-template-columns: minmax(0, 1fr); }
+  .vehicle-owner-summary .cliente-resumen .cliente-resumen-wide { grid-column: 1; }
+}
+/* Reduce el alto del panel del propietario sin comprimir la lectura. */
+.vehicle-owner-card { padding: 15px 18px; }
+.vehicle-owner-card .cliente-propietario { row-gap: 8px; }
+.vehicle-owner-card input, .vehicle-owner-card select { height: 42px; }
+.vehicle-owner-card .abrir-cliente { min-height: 34px; }
+.vehicle-owner-summary { margin-top: 12px; padding-top: 12px; }
+.vehicle-owner-summary .cliente-resumen > strong { margin-bottom: 9px; font-size: 14px; }
+.vehicle-owner-summary .cliente-resumen dl { gap: 8px; }
+.vehicle-owner-summary .cliente-resumen dl > div { padding: 8px 11px; }
+.vehicle-owner-summary .cliente-resumen dt { margin-bottom: 3px; font-size: 10px; }
+.vehicle-owner-summary .cliente-resumen dd { font-size: 13px; line-height: 1.35; }
+.vehicle-owner-summary .cliente-resumen dd[data-resumen="telefonos"],
+.vehicle-owner-summary .cliente-resumen dd[data-resumen="correos"] { gap: 3px; }
+@media (max-width: 760px) {
+  .vehicle-owner-card { padding: 14px; }
+  .vehicle-owner-summary { margin-top: 10px; padding-top: 10px; }
+}
+.vehicle-owner-summary .cliente-resumen > strong {
+  margin-bottom: 8px;
+  color: var(--primary);
+  font-size: 13px;
+  font-weight: 600;
+}
+/* Agrupa nombre y usuario, luego teléfono y correo; la dirección usa todo el ancho. */
+.vehicle-owner-summary .cliente-resumen dl {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-items: stretch;
+  gap: 10px;
+}
+.vehicle-owner-summary .cliente-resumen dl > div {
+  min-height: 68px;
+  padding: 9px 12px;
+}
+.vehicle-owner-summary .cliente-resumen .cliente-resumen-wide {
+  grid-column: 1 / -1;
+}
+@media (max-width: 520px) {
+  .vehicle-owner-summary .cliente-resumen dl {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

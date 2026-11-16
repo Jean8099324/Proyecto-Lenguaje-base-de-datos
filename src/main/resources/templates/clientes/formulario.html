@@ -36,11 +36,17 @@
                                 <select id="clienteVinculado" onchange="if (this.value) window.location.href='/clientes/editar/' + this.value">
                                     <option th:each="cliente : ${clientesDisponibles}" th:value="${cliente.id}"
                                             th:selected="${cliente.id == clienteForm.id}"
-                                            th:text="${cliente.nombre + ' ' + cliente.primerApellido + (cliente.segundoApellido != null ? ' ' + cliente.segundoApellido : '') + ' (' + cliente.username + ')'}">Cliente</option>
+                                            th:text="${cliente.nombre + ' ' + cliente.primerApellido + (cliente.segundoApellido != null ? ' ' + cliente.segundoApellido : '') + ' (' + cliente.usernameParaMostrar() + ')'}">Cliente</option>
                                 </select>
                             </div>
                         </div>
-                        <div class="form-group-custom" th:if="${!esNuevo}">
+                        <div class="form-group-custom" th:if="${!esNuevo and clienteForm.usernameParaMostrar() == 'No registrado'}">
+                            <label for="usernameNoRegistrado">Username</label>
+                            <input id="usernameNoRegistrado" value="No registrado" readonly>
+                            <input type="hidden" th:field="*{username}">
+                            <small class="text-muted">Este cliente no tiene una cuenta de acceso.</small>
+                        </div>
+                        <div class="form-group-custom" th:if="${!esNuevo and clienteForm.usernameParaMostrar() != 'No registrado'}">
                             <label for="username">Username <span class="required-mark">*</span></label>
                             <input id="username" th:field="*{username}" maxlength="100" required data-username-check>
                             <small id="usernameStatus" class="username-status" aria-live="polite"></small>
@@ -128,6 +134,14 @@
                             <div th:each="telefono : ${telefonos}" class="contact-value" th:text="${telefono.valor}">88888888</div>
                         </div>
                     </div>
+                </section>
+                <section th:if="${!esNuevo}" class="client-detail-section">
+                    <h3>Vehículos registrados</h3>
+                    <div class="table-responsive client-related-table"><table class="clients-table"><thead><tr><th>PLACA</th><th>MARCA</th><th>MODELO</th><th>AÑO</th><th>ESTADO</th></tr></thead><tbody><tr th:each="vehiculo : ${vehiculos}"><td th:text="${vehiculo.placa != null ? vehiculo.placa : 'Sin placa'}">Placa</td><td th:text="${vehiculo.nombreMarca}">Marca</td><td th:text="${vehiculo.nombreModelo}">Modelo</td><td th:text="${vehiculo.anioTexto}">Año</td><td th:text="${vehiculo.nombreEstado}">ACTIVO</td></tr><tr th:if="${#lists.isEmpty(vehiculos)}"><td colspan="5">No hay vehículos registrados.</td></tr></tbody></table></div>
+                </section>
+                <section th:if="${!esNuevo}" class="client-detail-section">
+                    <h3>Incidentes activos</h3>
+                    <div class="table-responsive client-related-table"><table class="clients-table"><thead><tr><th>#</th><th>FECHA</th><th>VEHÍCULO</th><th>TIPO</th><th>ESTADO</th></tr></thead><tbody><tr th:each="incidente : ${incidentesActivos}"><td th:text="${incidente.id}">1</td><td th:text="${incidente.fechaReporte}">Fecha</td><td th:text="${incidente.vehiculoEtiqueta}">Vehículo</td><td th:text="${incidente.tipoEtiqueta}">Tipo</td><td th:text="${incidente.estadoEtiqueta}">Estado</td></tr><tr th:if="${#lists.isEmpty(incidentesActivos)}"><td colspan="5">No hay incidentes activos.</td></tr></tbody></table></div>
                 </section>
                     <div class="modal-actions form-actions"><a th:href="${retorno != null ? retorno : '/clientes'}" class="btn-secondary-custom">Cancelar</a><button type="submit" class="btn-primary-custom"><i class="bi bi-check-lg"></i> Guardar cliente</button></div>
                 </form>

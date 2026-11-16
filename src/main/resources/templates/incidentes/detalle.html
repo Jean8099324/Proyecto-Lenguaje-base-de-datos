@@ -15,7 +15,7 @@
     <div class="sidebar-overlay" id="sidebarOverlay"></div>
     <div class="main-content">
         <header class="topbar">
-            <div class="topbar-left"><button type="button" class="menu-button" id="menuButton" aria-label="Abrir men?"><i class="bi bi-list"></i></button><div><h2>Detalle de incidente</h2><span>Información completa del reporte</span></div></div>
+            <div class="topbar-left"><button type="button" class="menu-button" id="menuButton" aria-label="Abrir menú"><i class="bi bi-list"></i></button><div><h2>Detalle de incidente</h2><span>Información completa del reporte</span></div></div>
             <div class="topbar-right"><div class="user-profile"><div class="user-avatar" th:text="${session.inicialesUsuario != null ? session.inicialesUsuario : 'U'}">U</div><div class="user-info"><strong th:text="${session.nombreUsuario != null ? session.nombreUsuario : #authentication.name}">Usuario</strong><span th:text="${session.usernameUsuario != null ? session.usernameUsuario : #authentication.name}">usuario</span></div></div><form th:action="@{/logout}" method="post"><input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"><button type="submit" class="topbar-action" title="Cerrar sesión"><i class="bi bi-box-arrow-right"></i></button></form></div>
         </header>
         <main class="page-content">
@@ -26,10 +26,10 @@
                 <div th:if="${mensajeExito}" class="alert alert-success" th:text="${mensajeExito}"></div>
                 <div th:if="${mensajeError}" class="alert alert-danger" th:text="${mensajeError}"></div>
                 <details class="content-card" th:if="${esAdministrador}"><summary>Seleccionar o crear cliente propietario</summary>
-                  <p>Al guardar, este cliente ser? el due?o del veh?culo en todos sus incidentes.</p>
+                  <p>Al guardar, este cliente será el dueño del vehículo en todos sus incidentes.</p>
                   <form th:action="@{/incidentes/clientes/asociar/{id}(id=${incidente.id})}" method="post">
                     <div th:replace="~{fragments/cliente-propietario :: selector(${vehiculo != null ? vehiculo.idCliente : null})}"></div>
-                    <button type="submit" class="btn-primary-custom">Asociar cliente al veh?culo</button>
+                    <button type="submit" class="btn-primary-custom">Asociar cliente al vehículo</button>
                   </form>
                 </details>
                 <section class="detail-section incident-contact-section">
@@ -41,11 +41,14 @@
                         </div>
                         <div class="incident-contact-row">
                             <span>Username</span>
-                            <strong th:text="${clienteIncidente != null ? clienteIncidente.username : '—'}">—</strong>
+                            <strong th:text="${clienteIncidente != null ? clienteIncidente.usernameParaMostrar() : '—'}">—</strong>
                         </div>
-                        <div class="incident-contact-row">
-                            <span>Dirección</span>
-                            <strong th:text="${vehiculo != null and !#strings.isEmpty(vehiculo.direccionCliente) ? vehiculo.direccionCliente : '—'}">—</strong>
+                        <div th:if="${#lists.isEmpty(direccionesCliente)}" class="incident-contact-row">
+                            <span>Direcci&oacute;n</span><strong>&mdash;</strong>
+                        </div>
+                        <div th:each="direccion, estado : ${direccionesCliente}" class="incident-contact-row">
+                            <span th:text="${#lists.size(direccionesCliente) == 1 ? 'Direcci&oacute;n' : 'Direcci&oacute;n' + (estado.index + 1)}">Direcci&oacute;n 1</span>
+                            <strong th:text="${direccion}">Direcci&oacute;n</strong>
                         </div>
                         <div th:if="${#lists.isEmpty(correosCliente)}" class="incident-contact-row">
                             <span>Correo</span><strong>—</strong>

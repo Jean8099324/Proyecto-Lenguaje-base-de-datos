@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Rescate Vial CR | Detalle del cliente</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/usuarios.css">
+</head>
+<body>
+<div class="app-layout">
+    <aside th:replace="~{fragments/sidebar :: sidebar}"></aside>
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+    <div class="main-content">
+        <header class="topbar"><div class="topbar-left"><button type="button" class="menu-button" id="menuButton"><i class="bi bi-list"></i></button><div><h2>Detalle del cliente</h2><span>Informaci&oacute;n y relaciones registradas</span></div></div></header>
+        <main class="page-content client-readonly">
+            <section class="page-heading">
+                <div><span class="section-label">GESTI&Oacute;N DEL SISTEMA</span><h2 th:text="${cliente.nombre + ' ' + cliente.primerApellido}">Cliente</h2><p>Consulte todos los datos registrados del cliente.</p></div>
+                <div class="detail-heading-actions"><a href="/clientes" class="btn-secondary-custom"><i class="bi bi-arrow-left"></i> Volver</a><a th:href="@{/clientes/editar/{id}(id=${cliente.id})}" class="btn-primary-custom"><i class="bi bi-pencil-square"></i> Editar</a></div>
+            </section>
+            <section class="content-card client-detail-card">
+                <div class="content-card-header"><div><span class="section-label">CLIENTE</span><h3>Datos personales</h3></div></div>
+                <dl class="client-summary-grid client-complete-summary">
+                    <div><dt>Nombre</dt><dd th:text="${cliente.nombre}">Nombre</dd></div>
+                    <div><dt>Primer apellido</dt><dd th:text="${cliente.primerApellido}">Apellido</dd></div>
+                    <div><dt>Segundo apellido</dt><dd th:text="${cliente.segundoApellido != null and !cliente.segundoApellido.isBlank() ? cliente.segundoApellido : 'Sin registrar'}">Apellido</dd></div>
+                    <div><dt>Fecha de nacimiento</dt><dd th:text="${cliente.fechaNacimiento != null ? cliente.fechaNacimiento : 'Sin registrar'}">Fecha</dd></div>
+                    <div><dt>Username</dt><dd th:text="${cliente.usernameParaMostrar()}">usuario</dd></div>
+                    <div><dt>Estado</dt><dd><span class="status-badge active-status" th:classappend="${cliente.estadoNombre != null and !cliente.estadoNombre.equalsIgnoreCase('ACTIVO')} ? ' inactive-status' : ''" th:text="${cliente.estadoNombre != null ? cliente.estadoNombre : 'Sin estado'}">ACTIVO</span></dd></div>
+                </dl>
+            </section>
+            <section class="content-card client-detail-card">
+                <div class="content-card-header"><div><span class="section-label">CONTACTO</span><h3>Direcciones registradas</h3></div></div>
+                <div class="client-view-list">
+                    <article th:each="direccion : ${direcciones}" class="client-view-item">
+                        <div class="client-view-item-main"><strong th:text="${direccion.nombreProvincia + ', ' + direccion.nombreCanton + ', ' + direccion.nombreDistrito}">Provincia, cant&oacute;n, distrito</strong><p th:text="${direccion.otrasSenas != null and !direccion.otrasSenas.isBlank() ? direccion.otrasSenas : 'Sin otras se&ntilde;as'}">Otras se&ntilde;as</p></div>
+                        <span class="status-badge" th:classappend="${direccion.nombreEstado != null and direccion.nombreEstado.equalsIgnoreCase('ACTIVO')} ? ' active-status' : ' inactive-status'" th:text="${direccion.nombreEstado}">ACTIVO</span>
+                    </article>
+                    <div th:if="${#lists.isEmpty(direcciones)}" class="contact-empty">Sin direcciones registradas.</div>
+                </div>
+            </section>
+            <section class="content-card client-detail-card">
+                <div class="content-card-header"><div><span class="section-label">COMUNICACI&Oacute;N</span><h3>Correos y tel&eacute;fonos</h3></div></div>
+                <div class="contact-columns client-view-contacts">
+                    <div class="contact-box"><div class="contact-box-header"><strong>CORREOS</strong></div>
+                        <div th:each="correo : ${correos}" class="client-view-contact"><span th:text="${correo.valor}">correo@ejemplo.com</span><span class="status-badge" th:classappend="${correo.nombreEstado != null and correo.nombreEstado.equalsIgnoreCase('ACTIVO')} ? ' active-status' : ' inactive-status'" th:text="${correo.nombreEstado}">ACTIVO</span></div>
+                        <div th:if="${#lists.isEmpty(correos)}" class="contact-empty">Sin correos registrados.</div>
+                    </div>
+                    <div class="contact-box"><div class="contact-box-header"><strong>TEL&Eacute;FONOS</strong></div>
+                        <div th:each="telefono : ${telefonos}" class="client-view-contact"><span th:text="${telefono.valor}">88888888</span><span class="status-badge" th:classappend="${telefono.nombreEstado != null and telefono.nombreEstado.equalsIgnoreCase('ACTIVO')} ? ' active-status' : ' inactive-status'" th:text="${telefono.nombreEstado}">ACTIVO</span></div>
+                        <div th:if="${#lists.isEmpty(telefonos)}" class="contact-empty">Sin tel&eacute;fonos registrados.</div>
+                    </div>
+                </div>
+            </section>
+            <section class="content-card client-detail-card">
+                <div class="content-card-header"><div><span class="section-label">FLOTA</span><h3>Veh&iacute;culos registrados</h3></div></div>
+                <div class="table-responsive"><table class="clients-table"><thead><tr><th>PLACA</th><th>MARCA</th><th>MODELO</th><th>A&Ntilde;O</th><th>ESTADO</th></tr></thead><tbody>
+                    <tr th:each="vehiculo : ${vehiculos}"><td th:text="${vehiculo.placa != null ? vehiculo.placa : 'Sin placa'}">Placa</td><td th:text="${vehiculo.nombreMarca}">Marca</td><td th:text="${vehiculo.nombreModelo}">Modelo</td><td th:text="${vehiculo.anioTexto}">A&ntilde;o</td><td th:text="${vehiculo.nombreEstado}">ACTIVO</td></tr>
+                    <tr th:if="${#lists.isEmpty(vehiculos)}"><td colspan="5" class="text-center">No hay veh&iacute;culos registrados.</td></tr>
+                </tbody></table></div>
+            </section>
+            <section class="content-card client-detail-card">
+                <div class="content-card-header"><div><span class="section-label">OPERACIONES</span><h3>Incidentes activos</h3></div></div>
+                <div class="table-responsive"><table class="clients-table"><thead><tr><th>#</th><th>FECHA</th><th>VEH&Iacute;CULO</th><th>TIPO</th><th>PRIORIDAD</th><th>ESTADO</th><th>ACCI&Oacute;N</th></tr></thead><tbody>
+                    <tr th:each="incidente : ${incidentesActivos}"><td th:text="${incidente.id}">1</td><td th:text="${incidente.fechaReporte}">Fecha</td><td th:text="${incidente.vehiculoEtiqueta}">Veh&iacute;culo</td><td th:text="${incidente.tipoEtiqueta}">Tipo</td><td th:text="${incidente.prioridadEtiqueta}">Prioridad</td><td th:text="${incidente.estadoEtiqueta}">Estado</td><td><a class="action-btn view" th:href="@{/incidentes/detalle/{id}(id=${incidente.id})}" title="Observar incidente"><i class="bi bi-eye"></i></a></td></tr>
+                    <tr th:if="${#lists.isEmpty(incidentesActivos)}"><td colspan="7" class="text-center">No hay incidentes activos.</td></tr>
+                </tbody></table></div>
+            </section>
+        </main>
+    </div>
+</div>
+<script src="/js/sidebar.js"></script></body>
+</html>

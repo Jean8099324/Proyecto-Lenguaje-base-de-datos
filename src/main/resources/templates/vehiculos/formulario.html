@@ -6,6 +6,7 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css" rel="stylesheet">
     <link rel="stylesheet" href="/css/usuarios.css">
+    <link rel="stylesheet" href="/css/vehiculos-formulario.css">
 </head>
 <body>
 <div class="app-layout">
@@ -16,26 +17,44 @@
         <main class="page-content">
             <section class="page-heading"><div><span class="section-label" th:text="${portalCliente == true ? 'MIS VEHÍCULOS' : 'GESTIÓN DEL SISTEMA'}">GESTIÓN DEL SISTEMA</span><h2 th:text="${esNuevo ? 'Registrar vehículo' : 'Modificar vehículo'}">Vehículo</h2><p>Seleccione la marca, el modelo y el año.</p></div><a th:href="${portalCliente == true} ? @{/cliente/inicio#mis-vehiculos} : @{/vehiculos}" class="btn-secondary-custom"><i class="bi bi-arrow-left"></i> Volver al listado</a></section>
             <div th:if="${mensajeError}" class="alert alert-danger" th:text="${mensajeError}"></div>
-            <section class="content-card">
-                <div class="content-card-header"><div><span class="section-label">REGISTRO</span><h3>Información del vehículo</h3></div></div>
+            <section class="content-card vehicle-editor-card">
+                <div class="content-card-header"><div><span class="section-label">REGISTRO</span><h3>Informaci&oacute;n del veh&iacute;culo</h3></div></div>
                 <form th:action="${portalCliente == true} ? @{/cliente/vehiculos/guardar} : @{/vehiculos/guardar}" th:object="${vehiculoForm}" method="post">
                     <input th:unless="${portalCliente == true}" type="hidden" th:field="*{id}">
-                    <div class="form-grid" style="padding:24px 25px 0;">
-                        <div th:unless="${portalCliente == true}" class="full-width"><div th:replace="~{fragments/cliente-propietario :: selector(${vehiculoForm.idUsuario})}"></div></div>
-                        <p th:if="${portalCliente == true}" class="full-width text-muted">El vehículo quedará asociado a tu cuenta.</p>
-                        <div class="form-group-custom"><label for="placa">Placa (máximo 10 caracteres)</label><input id="placa" th:field="*{placa}" maxlength="10" placeholder="Ej. ABC123"><small class="text-danger" th:if="${#fields.hasErrors('placa')}" th:errors="*{placa}"></small></div>
-                        <div class="form-group-custom"><label for="codigoChasis">Código de chasis (máximo 17)</label><input id="codigoChasis" th:field="*{codigoChasis}" maxlength="17" placeholder="Código de chasis"><small class="text-danger" th:if="${#fields.hasErrors('codigoChasis')}" th:errors="*{codigoChasis}"></small></div>
-                        <div class="form-group-custom"><label for="idMarca">Marca</label><select id="idMarca" th:field="*{idMarca}" required><option value="">Seleccione una marca</option><option th:each="m : ${marcas}" th:if="${m.estadoId == estadoActivo}" th:value="${m.id}" th:text="${m.nombre}"></option></select><small class="text-danger" th:if="${#fields.hasErrors('idMarca')}" th:errors="*{idMarca}"></small></div>
-                        <div class="form-group-custom"><label for="idModelo">Modelo</label><select id="idModelo" th:field="*{idModelo}" required><option value="">Seleccione un modelo</option><option th:each="m : ${modelos}" th:if="${m.estadoId == estadoActivo}" th:value="${m.id}" th:text="${m.nombre}" th:attr="data-padre=${m.padreId}"></option></select><small class="text-danger" th:if="${#fields.hasErrors('idModelo')}" th:errors="*{idModelo}"></small></div>
-                        <div class="form-group-custom"><label for="idAnio">Año</label><select id="idAnio" th:field="*{idAnio}" required><option value="">Seleccione un año</option><option th:each="a : ${anios}" th:if="${a.estadoId == estadoActivo}" th:value="${a.id}" th:text="${a.nombre}" th:attr="data-padre=${a.padreId}"></option></select><small class="text-danger" th:if="${#fields.hasErrors('idAnio')}" th:errors="*{idAnio}"></small></div>
-                        <div class="form-group-custom full-width"><small class="text-muted">Indica al menos la placa o el código de chasis del vehículo.</small></div>
+                    <div th:unless="${portalCliente == true}" class="vehicle-owner-card">
+                        <div th:replace="~{fragments/cliente-propietario :: selector(${vehiculoForm.idUsuario})}"></div>
+                        <div class="vehicle-owner-summary" hidden></div>
                     </div>
-                    <div class="modal-actions" style="padding:0 25px 22px;"><a th:href="${portalCliente == true} ? @{/cliente/inicio#mis-vehiculos} : @{/vehiculos}" class="btn-secondary-custom">Cancelar</a><button type="submit" class="btn-primary-custom"><i class="bi bi-check-lg"></i> Guardar vehículo</button></div>
+                    <div th:if="${portalCliente == true}" class="vehicle-owner-card vehicle-owner-note">
+                        <p class="text-muted"><i class="bi bi-info-circle" aria-hidden="true"></i> El veh&iacute;culo quedar&aacute; asociado a tu cuenta.</p>
+                    </div>
+                    <section class="vehicle-data-card" aria-labelledby="vehicleDataTitle">
+                        <div class="form-grid vehicle-form-grid">
+                            <div class="form-group-custom"><label for="placa">Placa (m&aacute;ximo 10 caracteres)</label><input id="placa" th:field="*{placa}" maxlength="10" placeholder="Ej. ABC123"><small class="text-danger" th:if="${#fields.hasErrors('placa')}" th:errors="*{placa}"></small></div>
+                            <div class="form-group-custom"><label for="codigoChasis">C&oacute;digo de chasis (m&aacute;ximo 17)</label><input id="codigoChasis" th:field="*{codigoChasis}" maxlength="17" placeholder="C&oacute;digo de chasis"><small class="text-danger" th:if="${#fields.hasErrors('codigoChasis')}" th:errors="*{codigoChasis}"></small></div>
+                            <div class="form-group-custom"><label for="idMarca">Marca</label><select id="idMarca" th:field="*{idMarca}" required><option value="">Seleccione una marca</option><option th:each="m : ${marcas}" th:if="${m.estadoId == estadoActivo}" th:value="${m.id}" th:text="${m.nombre}"></option></select><small class="text-danger" th:if="${#fields.hasErrors('idMarca')}" th:errors="*{idMarca}"></small></div>
+                            <div class="form-group-custom"><label for="idModelo">Modelo</label><select id="idModelo" th:field="*{idModelo}" required><option value="">Seleccione un modelo</option><option th:each="m : ${modelos}" th:if="${m.estadoId == estadoActivo}" th:value="${m.id}" th:text="${m.nombre}" th:attr="data-padre=${m.padreId}"></option></select><small class="text-danger" th:if="${#fields.hasErrors('idModelo')}" th:errors="*{idModelo}"></small></div>
+                            <div class="form-group-custom"><label for="idAnio">A&ntilde;o</label><select id="idAnio" th:field="*{idAnio}" required><option value="">Seleccione un a&ntilde;o</option><option th:each="a : ${anios}" th:if="${a.estadoId == estadoActivo}" th:value="${a.id}" th:text="${a.nombre}" th:attr="data-padre=${a.padreId}"></option></select><small class="text-danger" th:if="${#fields.hasErrors('idAnio')}" th:errors="*{idAnio}"></small></div>
+                            <p class="vehicle-form-note"><i class="bi bi-info-circle" aria-hidden="true"></i> Indica al menos la placa o el c&oacute;digo de chasis del veh&iacute;culo.</p>
+                        </div>
+                    </section>
+                    <div class="modal-actions vehicle-form-actions"><a th:href="${portalCliente == true} ? @{/cliente/inicio#mis-vehiculos} : @{/vehiculos}" class="btn-secondary-custom">Cancelar</a><button type="submit" class="btn-primary-custom"><i class="bi bi-check-lg"></i> Guardar veh&iacute;culo</button></div>
                 </form>
             </section>
         </main>
     </div>
 </div>
 <script src="/js/vehiculos.js"></script>
-<script th:unless="${portalCliente == true}" src="/js/cliente-propietario.js"></script><script src="/js/sidebar.js"></script></body>
+<script th:unless="${portalCliente == true}" src="/js/cliente-propietario.js"></script><script src="/js/sidebar.js"></script>
+<script th:unless="${portalCliente == true}">
+ document.addEventListener("DOMContentLoaded", () => {
+  const resumen = document.querySelector(".vehicle-owner-card .cliente-resumen");
+  const destino = document.querySelector(".vehicle-owner-summary");
+  if (!resumen || !destino) return;
+  destino.appendChild(resumen);
+  const sincronizar = () => { destino.hidden = resumen.hidden; };
+  new MutationObserver(sincronizar).observe(resumen, { attributes: true, attributeFilter: ["hidden"] });
+  sincronizar();
+ });
+</script></body>
 </html>

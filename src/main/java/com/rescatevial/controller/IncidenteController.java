@@ -44,7 +44,7 @@ public class IncidenteController {
     }
 
     @GetMapping("/listado")
-    public String listado(Model model) {
+    public String listado(@RequestParam(defaultValue = "false") boolean nuevo, Model model) {
         var incidentes = incidenteService.listar();
         model.addAttribute("incidentes", incidentes);
         model.addAttribute("totalIncidentes", incidentes.size());
@@ -56,6 +56,9 @@ public class IncidenteController {
             formulario.setHoraReporte(ahora.format(java.time.format.DateTimeFormatter.ofPattern("HH:mm")));
             formulario.setIdEstado(ESTADO_REPORTADO_ID);
             model.addAttribute("incidenteForm", formulario);
+        }
+        if (nuevo) {
+            model.addAttribute("modalAbierto", true);
         }
         return "incidentes/listado";
     }
@@ -80,7 +83,7 @@ public class IncidenteController {
             });
             if (incidente.getIdCliente() != null) {
                 usuarioService.getUsuarioPorId(incidente.getIdCliente()).ifPresent(cliente -> {
-                    incidente.setUsernameCliente(cliente.getUsername());
+                    incidente.setUsernameCliente(cliente.usernameParaMostrar());
                     incidente.setNombreCliente(cliente.getNombre());
                     incidente.setPrimerApellidoCliente(cliente.getPrimerApellido());
                     incidente.setSegundoApellidoCliente(cliente.getSegundoApellido());
@@ -136,7 +139,11 @@ public class IncidenteController {
         model.addAttribute("contactos", incidenteService.contactos(id));
         var vehiculo = incidenteService.vehiculoDetalle(incidente.getIdVehiculo()).orElse(null);
         model.addAttribute("vehiculo", vehiculo);
-        var clienteId = incidente.getIdCliente() != null ? incidente.getIdCliente() : incidente.getIdUsuario();
+        model.addAttribute("direccionesCliente", vehiculo == null
+                ? java.util.List.of() : vehiculo.getDireccionesCliente());
+        var clienteId = incidente.getIdCliente() != null ? incidente.getIdCliente()
+                : incidente.getIdUsuario() != null ? incidente.getIdUsuario()
+                : vehiculo == null ? null : vehiculo.getIdCliente();
         model.addAttribute("clienteIncidente", clienteId == null ? null
                 : usuarioService.getUsuarioPorId(clienteId).orElse(null));
         var correosCliente = clienteId == null ? java.util.List.<DatoContacto>of()
@@ -174,9 +181,8 @@ public class IncidenteController {
         if (nuevo && (incidente.getNombreReportante() == null || incidente.getNombreReportante().isBlank())) {
             result.rejectValue("nombreReportante", "required", "Indique quién reporta el incidente.");
         }
-        if (nuevo && (incidente.getTelefonoReportante() == null || incidente.getTelefonoReportante().isBlank())
-                && (incidente.getCorreoReportante() == null || incidente.getCorreoReportante().isBlank())) {
-            result.rejectValue("telefonoReportante", "required", "Indique al menos un teléfono o correo de contacto.");
+        if (nuevo && (incidente.getTelefonoReportante() == null || incidente.getTelefonoReportante().isBlank())) {
+            result.rejectValue("telefonoReportante", "required", "Indique el teléfono de la persona que reporta.");
         }
         if (!nuevo) {
             if (incidente.getIdCliente() != null) {

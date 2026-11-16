@@ -1,136 +1,122 @@
-
 package com.rescatevial.repository;
 
 import java.sql.Types;
+import java.time.LocalDate;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.SqlOutParameter;
+import org.springframework.jdbc.core.SqlParameter;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
-import org.springframework.jdbc.core.simple.SimpleJdbcCall;
 import org.springframework.stereotype.Repository;
 
 @Repository
 public class DashboardRepository {
-
     private final JdbcTemplate jdbc;
 
     public DashboardRepository(JdbcTemplate jdbc) {
         this.jdbc = jdbc;
     }
 
-    private long contarRegistros(String procedimiento, String columna) {
-
-        var llamada = new SimpleJdbcCall(jdbc)
-                .withCatalogName("FIDE_PROYECTO_FINAL_RESCATE_VIAL_CR_PCK")
-                .withProcedureName(procedimiento)
-                .withoutProcedureColumnMetaDataAccess()
-                .declareParameters(
-                        new SqlOutParameter(
-                                "P_RESULTADO",
-                                Types.REF_CURSOR,
-                                (rs, fila) -> rs.getLong(columna)
-                        )
-                );
-
-        Object resultado = llamada.execute(
-                new MapSqlParameterSource()
-        ).get("P_RESULTADO");
-
-        if (resultado instanceof List<?> registros) {
-            return registros.size();
-        }
-
-        return 0;
-    }
-
     public long contarIncidentes() {
-        return contarRegistros(
-                "FIDE_OBTENER_INCIDENTES_SP",
-                "ID_INCIDENTE"
-        );
+        return incidentes().size();
     }
 
     public long contarUnidades() {
-        return contarRegistros(
-                "FIDE_OBTENER_UNIDADES_SP",
-                "ID_UNIDAD"
-        );
+        return unidades().size();
     }
 
-    // Total de incidentes cuyo estado operativo es EN ATENCION.
     public long contarIncidentesEnAtencion() {
-        String sql = """
-                SELECT COUNT(*)
-                FROM FIDE_INCIDENTES_TB I
-                INNER JOIN FIDE_ESTADOS_TB E ON I.ID_ESTADO = E.ID_ESTADO
-                WHERE UPPER(TRIM(E.NOMBRE_ESTADO)) = 'EN ATENCION'
-                """;
-        Long total = jdbc.queryForObject(sql, Long.class);
-        return total != null ? total : 0;
+        Map<Long, String> estados = estados();
+        return incidentes().stream()
+                .filter(row -> "EN ATENCION".equalsIgnoreCase(
+                        estados.get(toLong(row.get("ID_ESTADO")))))
+                .count();
     }
 
-    // Los mismos JOIN y columnas comprobados en SQL Developer.
     public List<Map<String, String>> obtenerIncidentesRecientes() {
-        String sql = """
-                SELECT I.ID_INCIDENTE,
-                       P.NOMBRE_PROVINCIA AS UBICACION,
-                       T.NOMBRE_TIPO_INCIDENTE AS TIPO,
-                       E.NOMBRE_ESTADO AS ESTADO,
-                       I.FECHA_REPORTE,
-                       I.HORA_REPORTE
-                FROM FIDE_INCIDENTES_TB I
-                LEFT JOIN FIDE_UBICACION_INCIDENTES_TB U
-                    ON I.ID_INCIDENTE = U.ID_INCIDENTE
-                LEFT JOIN FIDE_PROVINCIAS_TB P
-                    ON U.ID_PROVINCIA = P.ID_PROVINCIA
-                LEFT JOIN FIDE_TIPOS_INCIDENTES_TB T
-                    ON I.ID_TIPO_INCIDENTE = T.ID_TIPO_INCIDENTE
-                LEFT JOIN FIDE_ESTADOS_TB E
-                    ON I.ID_ESTADO = E.ID_ESTADO
-                ORDER BY I.FECHA_REPORTE DESC NULLS LAST,
-                         I.ID_INCIDENTE DESC
-                FETCH FIRST 5 ROWS ONLY
-                """;
+        Map<Long, String> provincias = nombres("FIDE_OBTENER_PROVINCIAS_SP", "ID_PROVINCIA", "NOMBRE_PROVINCIA");
+        Map<Long, String> tipos = nombres("FIDE_OBTENER_TIPOS_INCIDENTES_SP",
+                "ID_TIPO_INCIDENTE", "NOMBRE_TIPO_INCIDENTE");
+        Map<Long, String> estados = estados();
 
-        return jdbc.query(sql, (rs, fila) -> {
-            Map<String, String> incidente = new HashMap<>();
-            String estado = texto(rs.getString("ESTADO"), "SIN ESTADO");
-            incidente.put("id", String.valueOf(rs.getLong("ID_INCIDENTE")));
-            incidente.put("ubicacion", texto(rs.getString("UBICACION"), "Sin ubicación"));
-            incidente.put("tipo", texto(rs.getString("TIPO"), "Sin tipo"));
-            incidente.put("estado", estado);
-            incidente.put("hora", texto(rs.getString("HORA_REPORTE"), "Sin hora"));
-            incidente.put("claseEstado", claseEstado(estado));
-            return incidente;
-        });
+        return incidentes().stream()
+                .sorted(Comparator
+                        .comparing((Map<String, Object> row) -> fecha(row.get("FECHA_REPORTE")),
+                                Comparator.nullsLast(Comparator.reverseOrder()))
+                        .thenComparing(row -> toLong(row.get("ID_INCIDENTE")),
+                                Comparator.nullsLast(Comparator.reverseOrder())))
+                .limit(5)
+                .map(row -> {
+                    String estado = texto(estados.get(toLong(row.get("ID_ESTADO"))), "SIN ESTADO");
+                    Map<String, String> incidente = new HashMap<>();
+                    incidente.put("id", String.valueOf(toLong(row.get("ID_INCIDENTE"))));
+                    incidente.put("ubicacion", texto(provincias.get(toLong(row.get("ID_PROVINCIA"))),
+                            "Sin ubicación"));
+                    incidente.put("tipo", texto(tipos.get(toLong(row.get("ID_TIPO_INCIDENTE"))), "Sin tipo"));
+                    incidente.put("estado", estado);
+                    incidente.put("hora", texto(row.get("HORA_REPORTE"), "Sin hora"));
+                    incidente.put("claseEstado", claseEstado(estado));
+                    return incidente;
+                })
+                .toList();
     }
 
-    // Devuelve las cantidades por estado real de cada unidad.
     public Map<String, Long> obtenerEstadosUnidades() {
-        String sql = """
-                SELECT E.NOMBRE_ESTADO, COUNT(*) AS TOTAL
-                FROM FIDE_UNIDADES_TB U
-                INNER JOIN FIDE_ESTADOS_TB E ON U.ID_ESTADO = E.ID_ESTADO
-                GROUP BY E.NOMBRE_ESTADO
-                """;
-
-        return jdbc.query(sql, rs -> {
-            Map<String, Long> estados = new HashMap<>();
-            while (rs.next()) {
-                String estado = rs.getString("NOMBRE_ESTADO");
-                if (estado != null) {
-                    estados.put(estado.trim().toUpperCase(Locale.ROOT), rs.getLong("TOTAL"));
-                }
+        Map<Long, String> estados = estados();
+        Map<String, Long> resultado = new HashMap<>();
+        unidades().forEach(row -> {
+            String nombre = estados.get(toLong(row.get("ID_ESTADO")));
+            if (nombre != null) {
+                String clave = nombre.trim().toUpperCase(Locale.ROOT);
+                resultado.merge(clave, 1L, Long::sum);
             }
-            return estados;
         });
+        return resultado;
     }
 
-    private String texto(String dato, String alternativa) {
-        return dato == null || dato.isBlank() ? alternativa : dato.trim();
+    private List<Map<String, Object>> incidentes() {
+        return filas("FIDE_OBTENER_INCIDENTES_SP");
+    }
+
+    private List<Map<String, Object>> unidades() {
+        return filas("FIDE_OBTENER_UNIDADES_SP");
+    }
+
+    private Map<Long, String> estados() {
+        return nombres("FIDE_OBTENER_ESTADOS_SP", "ID_ESTADO", "NOMBRE_ESTADO");
+    }
+
+    private Map<Long, String> nombres(String procedimiento, String id, String nombre) {
+        Map<Long, String> resultado = new HashMap<>();
+        filas(procedimiento).forEach(row -> resultado.put(toLong(row.get(id)), texto(row.get(nombre), "")));
+        return resultado;
+    }
+
+    private List<Map<String, Object>> filas(String procedimiento) {
+        return OraclePackageSupport.rows(
+                OraclePackageSupport.call(jdbc, procedimiento, OraclePackageSupport.cursor())
+                        .execute(new MapSqlParameterSource()));
+    }
+
+    private static LocalDate fecha(Object value) {
+        if (value instanceof java.sql.Date date) {
+            return date.toLocalDate();
+        }
+        return value instanceof LocalDate date ? date : null;
+    }
+
+    private static Long toLong(Object value) {
+        return value instanceof Number number ? number.longValue() : null;
+    }
+
+    private String texto(Object value, String alternativa) {
+        if (value == null || value.toString().isBlank()) {
+            return alternativa;
+        }
+        return value.toString().trim();
     }
 
     private String claseEstado(String estado) {

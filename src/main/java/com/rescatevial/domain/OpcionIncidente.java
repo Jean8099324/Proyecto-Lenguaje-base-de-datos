@@ -8,4 +8,5 @@ public class OpcionIncidente {
     private String etiqueta;
     private Long relacionId;
     private Long estadoId;
+    private boolean incidenteEnProceso;
 }

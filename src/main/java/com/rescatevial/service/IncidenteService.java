@@ -160,9 +160,9 @@ public class IncidenteService {
                 throw new IllegalArgumentException("La placa ya existe, pero el vehículo está inactivo. Consulte a un administrador.");
             }
             var propietario = repository.findVehicleDetail(existing.get().getId())
-                    .orElseThrow(() -> new IllegalStateException("No se pudo comprobar el propietario del veh?culo."));
+                    .orElseThrow(() -> new IllegalStateException("No se pudo comprobar el propietario del vehículo."));
             if (!java.util.Objects.equals(propietario.getIdCliente(), vehicle.getIdUsuario()))
-                throw new IllegalArgumentException("La placa ya pertenece a otro cliente. Seleccione el veh?culo existente o corrija su propietario desde el detalle.");
+                throw new IllegalArgumentException("La placa ya pertenece a otro cliente. Seleccione el vehículo existente o corrija su propietario desde el detalle.");
             return existing.get();
         }
         repository.insertVehicle(vehicle);

@@ -241,14 +241,17 @@ document.addEventListener("DOMContentLoaded", () => {
     };
     const newPlateInput = document.getElementById("nuevaPlaca");
     newPlateInput?.addEventListener("input", () => cleanPlateInput(newPlateInput));
-    const chooseVehicle = (id, plate) => {
-        if (plateConfirmed) plateConfirmed.hidden = false;
+    const chooseVehicle = (id, plate, ocupado = false) => {
+        if (plateConfirmed) plateConfirmed.hidden = ocupado;
         vehicleId.value = id;
         plateInput.value = normalize(plate);
         suggestions.hidden = true;
         addVehicle.hidden = true;
-        selectedMessage.textContent = `Vehículo seleccionado: ${plate}`;
+        selectedMessage.textContent = ocupado
+            ? "Esta placa ya está ligada a otro incidente en proceso."
+            : `Vehículo seleccionado: ${plate}`;
         selectedMessage.classList.add("selected");
+        selectedMessage.classList.toggle("occupied", ocupado);
     };
     const findById = id => vehicleButtons.find(button => button.dataset.id === id);
     const matchPlate = plate => vehicleButtons.find(button => normalize(button.dataset.placa) === normalize(plate));
@@ -271,6 +274,7 @@ document.addEventListener("DOMContentLoaded", () => {
         vehicleId.value = "";
         selectedMessage.textContent = "";
         selectedMessage.classList.remove("selected");
+        selectedMessage.classList.remove("occupied");
         const query = normalize(plateInput.value);
         const exactMatch = query ? matchPlate(query) : null;
         const matches = vehicleButtons.filter(button => normalize(button.dataset.placa).includes(query));
@@ -280,8 +284,11 @@ document.addEventListener("DOMContentLoaded", () => {
         selectedMessage.textContent = !query
             ? "Seleccione una placa existente."
             : exactMatch
-                ? "Seleccione el vehículo de la lista."
+                ? exactMatch.dataset.ocupado === "true"
+                    ? "La placa ya está ligada a otro incidente en proceso."
+                    : "Seleccione el vehículo de la lista."
                 : `La placa ${query} no aparece entre los vehículos activos. Puede registrarla.`;
+        selectedMessage.classList.toggle("occupied", exactMatch?.dataset.ocupado === "true");
     };
     plateInput?.addEventListener("input", updatePlateSearch);
     plateInput?.addEventListener("change", updatePlateSearch);
@@ -293,7 +300,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
     suggestions?.addEventListener("click", event => {
         const button = event.target.closest(".vehicle-suggestion");
-        if (button) chooseVehicle(button.dataset.id, button.dataset.placa);
+        if (button) chooseVehicle(button.dataset.id, button.dataset.placa, button.dataset.ocupado === "true");
     });
     addVehicle?.addEventListener("click", () => {
         document.getElementById("nuevaPlaca").value = plateInput.value.trim().toLocaleUpperCase("es");

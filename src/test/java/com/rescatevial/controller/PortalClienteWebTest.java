@@ -129,7 +129,7 @@ class PortalClienteWebTest {
         String html=mvc.perform(get("/cliente/vehiculos/nuevo").session(session("CLIENT")))
                 .andExpect(status().isOk()).andExpect(view().name("vehiculos/formulario"))
                 .andReturn().getResponse().getContentAsString(java.nio.charset.StandardCharsets.UTF_8);
-        assertTrue(html.contains("/cliente/vehiculos/guardar"));assertTrue(html.contains("El vehículo quedará asociado a tu cuenta."));
+        assertTrue(html.contains("/cliente/vehiculos/guardar"));assertTrue(html.contains("El veh&iacute;culo quedar&aacute; asociado a tu cuenta."));
         assertTrue(html.contains("idMarca"));assertTrue(html.contains("/js/vehiculos.js"));assertTrue(html.contains("_csrf"));
         assertFalse(html.contains("seleccionar-cliente"));assertFalse(html.contains("name=\"idUsuario\""));
         assertFalse(html.contains("/js/cliente-propietario.js"));
