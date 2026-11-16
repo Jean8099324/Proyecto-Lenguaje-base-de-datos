@@ -8,7 +8,6 @@ import com.rescatevial.repository.VehiculoRepository;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -32,9 +31,9 @@ public class VehiculoService {
         Map<Long, OpcionVehiculo> modelos = porId(repository.modelos());
         Map<Long, OpcionVehiculo> anios = porId(repository.anios());
         Map<Long, Usuario> propietarios = usuarios.getUsuarios(false).stream()
-                .collect(Collectors.toMap(Usuario::getId, Function.identity(), (a, b) -> a));
+                .collect(Collectors.toMap(usuario -> usuario.getId(), usuario -> usuario, (a, b) -> a));
         Map<Long, Estado> estadosPorId = estados.listar().stream()
-                .collect(Collectors.toMap(Estado::getId, Function.identity(), (a, b) -> a));
+                .collect(Collectors.toMap(estado -> estado.getId(), estado -> estado, (a, b) -> a));
         for (Vehiculo v : resultado) {
             v.setNombreMarca(nombre(marcas.get(v.getIdMarca())));
             v.setNombreModelo(nombre(modelos.get(v.getIdModelo())));
@@ -54,6 +53,19 @@ public class VehiculoService {
     }
 
     @Transactional(readOnly = true)
+    public List<Vehiculo> listarPorCliente(Long usuarioId) {
+        var marcas = porId(repository.marcas());
+        var modelos = porId(repository.modelos());
+        var anios = porId(repository.anios());
+        return repository.listar().stream().filter(v -> usuarioId.equals(v.getIdUsuario()))
+                .peek(v -> {
+                    v.setNombreMarca(nombre(marcas.get(v.getIdMarca())));
+                    v.setNombreModelo(nombre(modelos.get(v.getIdModelo())));
+                    v.setAnioTexto(nombre(anios.get(v.getIdAnio())));
+                }).toList();
+    }
+
+    @Transactional(readOnly = true)
     public List<OpcionVehiculo> marcas() { return repository.marcas(); }
 
     @Transactional(readOnly = true)
@@ -68,7 +80,7 @@ public class VehiculoService {
     private Long idEstado(String nombre) {
         return estados.listar().stream()
                 .filter(e -> nombre.equalsIgnoreCase(e.getNombreEstado()))
-                .map(Estado::getId)
+                .map(estado -> estado.getId())
                 .findFirst()
                 .orElseThrow(() -> new IllegalStateException("No existe el estado " + nombre + "."));
     }
@@ -76,8 +88,8 @@ public class VehiculoService {
     public Long estadoActivo() { return idEstado("ACTIVO"); }
 
     private static Map<Long, OpcionVehiculo> porId(List<OpcionVehiculo> opciones) {
-        return opciones.stream().collect(Collectors.toMap(OpcionVehiculo::getId,
-                Function.identity(), (a, b) -> a));
+        return opciones.stream().collect(Collectors.toMap(opcion -> opcion.getId(),
+                opcion -> opcion, (a, b) -> a));
     }
 
     private static String nombre(OpcionVehiculo opcion) {
@@ -104,36 +116,56 @@ public class VehiculoService {
     }
 
     private static String normalizar(String texto) {
-        return texto == null || texto.isBlank() ? null : texto.trim().toUpperCase();
+        return texto == null || texto.isBlank() ? null : texto.trim().toUpperCase(java.util.Locale.ROOT);
+    }
+
+    private static String placaNormalizada(String texto) {
+        String placa = com.rescatevial.domain.VehiculoIncidenteForm.normalizarPlaca(texto);
+        return placa == null || placa.isBlank() ? null : placa;
     }
 
     @Transactional
     public void guardar(Vehiculo v) {
-        v.setPlaca(normalizar(v.getPlaca()));
+        v.setPlaca(placaNormalizada(v.getPlaca()));
         v.setCodigoChasis(normalizar(v.getCodigoChasis()));
         if (v.getPlaca() == null && v.getCodigoChasis() == null) {
             throw new IllegalArgumentException("Indica la placa o el código de chasis.");
         }
         validarRelaciones(v);
-        boolean duplicado = repository.listar().stream().anyMatch(actual ->
+        var anteriores = repository.listar();
+        boolean duplicado = anteriores.stream().anyMatch(actual ->
                 (v.getId() == null || !v.getId().equals(actual.getId())) &&
-                ((v.getPlaca() != null && v.getPlaca().equalsIgnoreCase(actual.getPlaca())) ||
-                 (v.getCodigoChasis() != null && v.getCodigoChasis().equalsIgnoreCase(actual.getCodigoChasis()))));
+                ((v.getPlaca() != null && v.getPlaca().equals(placaNormalizada(actual.getPlaca()))) ||
+                 (v.getCodigoChasis() != null && v.getCodigoChasis().equals(normalizar(actual.getCodigoChasis())))));
         if (duplicado) throw new IllegalArgumentException("Ya existe un vehículo con esa placa o chasis.");
         if (v.getId() == null) {
             v.setIdEstado(estadoActivo());
-            repository.insertar(v);
+            try {
+                repository.insertar(v);
+            } catch (org.springframework.dao.DuplicateKeyException ex) {
+                throw new IllegalArgumentException("Ya existe un vehículo con esa placa o chasis.", ex);
+            }
             // Algunos procedimientos Oracle capturan errores sin propagarlos.
             // Comprobar que el registro realmente exista antes de mostrar un exito.
+            var idsAnteriores = anteriores.stream().map(Vehiculo::getId).collect(Collectors.toSet());
             boolean insertado = repository.listar().stream().anyMatch(actual ->
-                    v.getPlaca() != null && v.getPlaca().equals(actual.getPlaca()) ||
-                    v.getCodigoChasis() != null && v.getCodigoChasis().equals(actual.getCodigoChasis()));
+                    actual.getId() != null && !idsAnteriores.contains(actual.getId())
+                    && java.util.Objects.equals(v.getPlaca(), placaNormalizada(actual.getPlaca()))
+                    && java.util.Objects.equals(v.getCodigoChasis(), normalizar(actual.getCodigoChasis()))
+                    && java.util.Objects.equals(v.getIdUsuario(), actual.getIdUsuario())
+                    && java.util.Objects.equals(v.getIdMarca(), actual.getIdMarca())
+                    && java.util.Objects.equals(v.getIdModelo(), actual.getIdModelo())
+                    && java.util.Objects.equals(v.getIdAnio(), actual.getIdAnio()));
             if (!insertado) throw new IllegalStateException("Oracle no confirmó la inserción del vehículo.");
         } else {
             Vehiculo existente = repository.buscar(v.getId())
                     .orElseThrow(() -> new IllegalArgumentException("El vehículo no existe."));
             v.setIdEstado(existente.getIdEstado());
-            repository.modificar(v);
+            try {
+                repository.modificar(v);
+            } catch (org.springframework.dao.DuplicateKeyException ex) {
+                throw new IllegalArgumentException("Ya existe un vehículo con esa placa o chasis.", ex);
+            }
             Vehiculo actualizado = repository.buscar(v.getId())
                     .orElseThrow(() -> new IllegalStateException("No se encontró el vehículo luego de modificarlo."));
             if (!v.getIdMarca().equals(actualizado.getIdMarca()) ||
@@ -145,6 +177,26 @@ public class VehiculoService {
                 throw new IllegalStateException("Oracle no confirmó la modificación del vehículo.");
             }
         }
+    }
+
+    @Transactional
+    public void actualizarPlaca(Long id, String placa) {
+        Vehiculo vehiculo = buscar(id)
+                .orElseThrow(() -> new IllegalArgumentException("El vehículo no existe."));
+        String nuevaPlaca = placaNormalizada(placa);
+        if (nuevaPlaca != null && nuevaPlaca.length() > 10)
+            throw new IllegalArgumentException("La placa admite como máximo 10 caracteres.");
+        if (nuevaPlaca == null && normalizar(vehiculo.getCodigoChasis()) == null)
+            throw new IllegalArgumentException("Indica la placa o el código de chasis.");
+        if (java.util.Objects.equals(nuevaPlaca, vehiculo.getPlaca())) return;
+        if (nuevaPlaca != null && repository.listar().stream().anyMatch(actual ->
+                !id.equals(actual.getId()) && nuevaPlaca.equals(placaNormalizada(actual.getPlaca()))))
+            throw new IllegalArgumentException("Ya existe un vehículo con esa placa.");
+        vehiculo.setPlaca(nuevaPlaca);
+        repository.modificar(vehiculo);
+        Vehiculo actualizado = buscar(id).orElseThrow();
+        if (!java.util.Objects.equals(nuevaPlaca, actualizado.getPlaca()))
+            throw new IllegalStateException("Oracle no confirmó la modificación de la placa.");
     }
 
     @Transactional

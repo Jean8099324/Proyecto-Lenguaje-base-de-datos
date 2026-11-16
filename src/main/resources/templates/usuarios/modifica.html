@@ -10,19 +10,7 @@
 </head>
 <body>
 <div class="app-layout">
-    <aside class="sidebar" id="sidebar">
-        <div class="sidebar-header">
-            <a class="sidebar-brand-link" href="/dashboard" aria-label="Ir al inicio"><div class="brand-icon"><i class="bi bi-truck"></i></div>
-            <div class="brand-text"><h1>Rescate Vial CR</h1><span>Gestión de Asistencia Vial</span></div></a>
-            <button class="close-sidebar" id="closeSidebar" type="button"><i class="bi bi-x-lg"></i></button>
-        </div>
-        <nav class="sidebar-nav">
-            <div class="nav-section"><span class="nav-title">PRINCIPAL</span><a href="/dashboard" class="nav-link"><i class="bi bi-grid-1x2-fill"></i><span>Dashboard</span></a></div>
-            <div class="nav-section"><span class="nav-title">GESTIÓN</span><a href="/usuarios/listado" class="nav-link active"><i class="bi bi-person-badge"></i><span>Usuarios</span></a><a href="/usuarios/roles" class="nav-link"><i class="bi bi-person-lock"></i><span>Roles de usuario</span></a><a href="#" aria-disabled="true" onclick="return false;" class="nav-link under-construction" title="En construcción"><i class="bi bi-car-front"></i><span>Vehículos</span></a></div>
-            <div class="nav-section"><span class="nav-title">OPERACIONES</span><a href="#" aria-disabled="true" onclick="return false;" class="nav-link under-construction" title="En construcción"><i class="bi bi-exclamation-triangle"></i><span>Incidentes</span></a><a href="#" aria-disabled="true" onclick="return false;" class="nav-link under-construction" title="En construcción"><i class="bi bi-truck-front"></i><span>Unidades</span></a></div>
-        </nav>
-        <div class="sidebar-footer"><div class="system-status"><span class="status-dot"></span><div><strong>Sistema operativo</strong><span>Gestión de usuarios</span></div></div></div>
-    </aside>
+    <aside th:replace="~{fragments/sidebar :: sidebar}"></aside>
     <div class="sidebar-overlay" id="sidebarOverlay"></div>
 
     <div class="main-content">
@@ -63,5 +51,5 @@
     </div>
 </div>
 <script src="/js/usuarios.js"></script>
-</body>
+<script src="/js/sidebar.js"></script></body>
 </html>

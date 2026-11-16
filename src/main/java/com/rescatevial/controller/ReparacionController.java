@@ -83,6 +83,61 @@ public class ReparacionController {
         return "reparaciones/listado";
     }
 
+    // MOSTRAR EL FLUJO DE UNA REPARACION ESPECIFICA
+    @GetMapping("/flujo/{id}")
+    public String flujo(
+            @PathVariable Long id,
+            Model model,
+            RedirectAttributes redirectAttributes) {
+
+        Reparacion reparacion = reparacionService
+                .getReparacionPorId(id)
+                .orElse(null);
+
+        if (reparacion == null) {
+            redirectAttributes.addFlashAttribute(
+                    "mensajeError",
+                    "No se encontro la reparacion indicada.");
+            return "redirect:/reparaciones/listado";
+        }
+
+        List<String> ordenFlujo = List.of(
+                "RECIBIDO EN TALLER",
+                "REVISION INICIADA",
+                "COTIZACION GENERADA",
+                "COTIZACION APROBADA",
+                "REPARACION EN PROCESO",
+                "REPARACION FINALIZADA");
+        List<com.rescatevial.domain.Estado> catalogoEstados = estadoService.listar();
+        List<com.rescatevial.domain.Estado> estadosFlujo = ordenFlujo.stream()
+                .map(nombre -> catalogoEstados.stream()
+                        .filter(estado -> estado.getNombreEstado() != null
+                                && nombre.equalsIgnoreCase(estado.getNombreEstado().trim()))
+                        .findFirst()
+                        .orElse(null))
+                .filter(java.util.Objects::nonNull)
+                .toList();
+
+        int indiceEstadoActual = -1;
+        for (int i = 0; i < estadosFlujo.size(); i++) {
+            if (estadosFlujo.get(i).getId().equals(reparacion.getEstado())) {
+                indiceEstadoActual = i;
+                break;
+            }
+        }
+
+        model.addAttribute("reparacion", reparacion);
+        model.addAttribute("estadosFlujo", estadosFlujo);
+        model.addAttribute("indiceEstadoActual", indiceEstadoActual);
+        model.addAttribute("estadoActual", catalogoEstados.stream()
+                .filter(estado -> estado.getId().equals(reparacion.getEstado()))
+                .map(estado -> estado.getNombreEstado())
+                .findFirst()
+                .orElse("Estado sin clasificar"));
+
+        return "reparaciones/flujo";
+    }
+
     // MOSTRAR FORMULARIO PARA MODIFICAR
     @GetMapping("/modificar/{id}")
     public String modificar(

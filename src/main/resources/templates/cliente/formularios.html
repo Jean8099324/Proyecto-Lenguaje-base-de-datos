@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org"><body>
+<div th:fragment="ubicacion" class="portal-wide portal-location" data-location>
+    <label><span>Provincia <span class="portal-required" aria-hidden="true">*</span></span><select name="idProvincia" required data-province><option value="">Selecciona una provincia</option><option th:each="p : ${provincias}" th:value="${p.id}" th:text="${p.nombre}"></option></select></label>
+    <label><span>Cantón <span class="portal-required" aria-hidden="true">*</span></span><select name="idCanton" required data-canton><option value="">Selecciona un cantón</option><option th:each="c : ${cantones}" th:value="${c.id}" th:attr="data-parent=${c.idPadre}" th:text="${c.nombre}"></option></select></label>
+    <label><span>Distrito <span class="portal-required" aria-hidden="true">*</span></span><select name="idDistrito" required data-district><option value="">Selecciona un distrito</option><option th:each="d : ${distritos}" th:value="${d.id}" th:attr="data-parent=${d.idPadre}" th:text="${d.nombre}"></option></select></label>
+</div>
+<section th:fragment="contacto(tipo, titulo, registros)" class="contact-panel contact-section">
+    <div class="card-header-custom"><h3 th:text="${titulo}"></h3></div>
+    <div class="portal-body">
+        <p th:if="${#lists.isEmpty(registros)}">Aún no tienes registros.</p>
+        <article th:each="d, estado : ${registros}" class="portal-contacto">
+            <strong th:text="${d.valor}"></strong> <small th:text="${d.nombreEstado}"></small>
+            <div class="portal-contact-actions">
+                <details><summary class="portal-secondary">Editar</summary>
+                    <form th:action="@{/cliente/datos/{tipo}(tipo=${tipo})}" method="post" class="portal-form">
+                        <input type="hidden" name="editar" value="true"><input type="hidden" name="valorAnterior" th:value="${d.valor}">
+                        <label th:text="${tipo == 'correo' ? 'Correo electrónico' : 'Teléfono'}"></label>
+                        <input name="valor" th:attr="aria-label=${titulo},pattern=${tipo == 'telefono' ? '[0-9]{8}' : null}" th:type="${tipo == 'correo' ? 'email' : 'tel'}" th:maxlength="${tipo == 'correo' ? 150 : 8}" th:value="${d.valor}" required>
+                        <button class="portal-secondary" type="submit">Guardar</button>
+                    </form>
+                </details>
+                <form th:action="@{/cliente/datos/{tipo}/estado(tipo=${tipo})}" method="post">
+                    <input type="hidden" name="valor" th:value="${d.valor}"><input type="hidden" name="reactivar" th:value="${d.nombreEstado != 'ACTIVO'}">
+                    <button class="portal-secondary" type="submit" th:text="${d.nombreEstado == 'ACTIVO' ? 'Desactivar' : 'Reactivar'}"></button>
+                </form>
+                <details th:if="${estado.last}">
+                    <summary class="portal-secondary" th:text="${tipo == 'correo' ? 'Agregar correo' : 'Agregar teléfono'}"></summary>
+                    <form th:action="@{/cliente/datos/{tipo}(tipo=${tipo})}" method="post" class="portal-form">
+                        <input name="valor" th:attr="aria-label=${titulo},pattern=${tipo == 'telefono' ? '[0-9]{8}' : null}" th:type="${tipo == 'correo' ? 'email' : 'tel'}" th:maxlength="${tipo == 'correo' ? 150 : 8}" required>
+                        <button class="btn-new-incident" type="submit">Agregar</button>
+                    </form>
+                </details>
+            </div>
+        </article>
+        <details th:if="${#lists.isEmpty(registros)}"><summary class="portal-secondary" th:text="${tipo == 'correo' ? 'Agregar correo' : 'Agregar teléfono'}"></summary>
+            <form th:action="@{/cliente/datos/{tipo}(tipo=${tipo})}" method="post" class="portal-form">
+                <input name="valor" th:attr="aria-label=${titulo},pattern=${tipo == 'telefono' ? '[0-9]{8}' : null}" th:type="${tipo == 'correo' ? 'email' : 'tel'}" th:maxlength="${tipo == 'correo' ? 150 : 8}" required>
+                <button class="btn-new-incident" type="submit">Agregar</button>
+            </form>
+        </details>
+    </div>
+</section>
+</body></html>

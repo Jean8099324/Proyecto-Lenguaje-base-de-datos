@@ -1,8 +1,14 @@
 package com.rescatevial.controller;
 
 import com.rescatevial.domain.Usuario;
+import com.rescatevial.domain.DatoContacto;
 import com.rescatevial.service.ClienteService;
+import com.rescatevial.service.CorreoService;
+import com.rescatevial.service.DatoContactoService;
 import jakarta.validation.Valid;
+import java.util.List;
+import java.security.SecureRandom;
+import java.util.stream.Collectors;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -11,15 +17,24 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
 @RequestMapping("/clientes")
 public class ClienteController {
     private final ClienteService clienteService;
+    private final CorreoService correoService;
+    private final DatoContactoService datoContactoService;
+    private static final SecureRandom RANDOM = new SecureRandom();
+    private static final String CARACTERES_PASSWORD = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789";
 
-    public ClienteController(ClienteService clienteService) {
+    public ClienteController(ClienteService clienteService, CorreoService correoService,
+                             DatoContactoService datoContactoService) {
         this.clienteService = clienteService;
+        this.correoService = correoService;
+        this.datoContactoService = datoContactoService;
     }
 
     @GetMapping
@@ -31,12 +46,14 @@ public class ClienteController {
     }
 
     @GetMapping("/nuevo")
-    public String nuevo(Model model) {
+    public String nuevo(@RequestParam(required = false) String retorno, Model model) {
         Usuario cliente = new Usuario();
         cliente.setTipoUsuario(clienteService.tipoClienteId());
         cliente.setEstado(clienteService.estadoActivoId());
         model.addAttribute("clienteForm", cliente);
         model.addAttribute("esNuevo", true);
+        prepararContactos(model, cliente);
+        model.addAttribute("retorno", retornoValido(retorno) ? retorno : null);
         return "clientes/formulario";
     }
 
@@ -51,30 +68,160 @@ public class ClienteController {
         formulario.setPassword(null); // Nunca mostrar el hash de Oracle.
         model.addAttribute("clienteForm", formulario);
         model.addAttribute("esNuevo", false);
+        prepararContactos(model, formulario);
         return "clientes/formulario";
+    }
+
+    @GetMapping("/username-disponible")
+    @ResponseBody
+    public java.util.Map<String, Object> usernameDisponible(
+            @RequestParam String username,
+            @RequestParam(required = false) Long id) {
+        String valor = username == null ? "" : username.trim();
+        if (valor.isBlank()) {
+            return java.util.Map.of("disponible", false, "mensaje", "Ingrese un username.");
+        }
+        var existente = clienteService.buscarPorUsername(valor);
+        boolean disponible = existente.isEmpty() || (id != null && id.equals(existente.get().getId()));
+        return java.util.Map.of("disponible", disponible,
+                "mensaje", disponible ? "Username disponible." : "Username no disponible.");
     }
 
     @PostMapping("/guardar")
     public String guardar(@Valid @ModelAttribute("clienteForm") Usuario cliente,
-                          BindingResult errores, Model model, RedirectAttributes redireccion) {
+                          BindingResult errores, Model model, RedirectAttributes redireccion,
+                          @RequestParam(required = false) String retorno,
+                          @RequestParam(required = false) List<Long> idProvincia,
+                          @RequestParam(required = false) List<Long> idCanton,
+                          @RequestParam(required = false) List<Long> idDistrito,
+                          @RequestParam(required = false) List<String> otrasSenas,
+                          @RequestParam(name = "contactoCorreo", required = false) List<String> correos,
+                          @RequestParam(name = "telefono", required = false) List<String> telefonos) {
         boolean nuevo = cliente.getId() == null;
         if (errores.hasErrors()) {
-            cliente.setPassword(null);
             model.addAttribute("esNuevo", nuevo);
+            prepararContactos(model, cliente);
+            model.addAttribute("retorno", retornoValido(retorno) ? retorno : null);
             model.addAttribute("mensajeError", "Revisa los campos obligatorios y sus formatos.");
             return "clientes/formulario";
         }
         try {
+            List<String> destinatarios = correos == null ? List.of() : correos.stream()
+                    .filter(correo -> correo != null && !correo.isBlank())
+                    .map(String::trim)
+                    .collect(Collectors.toList());
+            if (nuevo) {
+                if (destinatarios.isEmpty()) {
+                    throw new IllegalArgumentException("Ingrese al menos un correo para enviar las credenciales.");
+                }
+                cliente.setPassword(generarPasswordTemporal());
+            }
             clienteService.guardar(cliente);
+            guardarDirecciones(cliente.getId(), idProvincia, idCanton, idDistrito, otrasSenas);
+            guardarContactos(cliente.getId(), "correo", correos);
+            guardarContactos(cliente.getId(), "telefono", telefonos);
+            if (nuevo) {
+                for (String destinatario : destinatarios) {
+                    correoService.enviarCredenciales(destinatario, cliente.getUsername(), cliente.getPassword());
+                }
+            }
+            if (nuevo && retornoValido(retorno)) {
+                return "redirect:" + retorno + "?clienteId=" + cliente.getId();
+            }
             redireccion.addFlashAttribute("mensajeExito", nuevo
                     ? "Cliente registrado correctamente." : "Cliente actualizado correctamente.");
             return "redirect:/clientes";
         } catch (Exception ex) {
-            cliente.setPassword(null);
             model.addAttribute("esNuevo", nuevo);
-            model.addAttribute("mensajeError", "No se pudo guardar el cliente. Revisa sus datos.");
+            prepararContactos(model, cliente);
+            model.addAttribute("retorno", retornoValido(retorno) ? retorno : null);
+            String detalle = ex.getMessage();
+            String mensaje = ex instanceof IllegalArgumentException || ex instanceof IllegalStateException
+                    ? detalle
+                    : "No se pudo guardar el cliente. Revisa sus datos."
+                        + (detalle == null || detalle.isBlank() ? "" : " Detalle: " + detalle);
+            model.addAttribute("mensajeError", mensaje);
             return "clientes/formulario";
         }
+    }
+
+    private static boolean retornoValido(String retorno) {
+        return retorno != null && retorno.matches("/incidentes/modificar/\\d+");
+    }
+
+    private void prepararContactos(Model model, Usuario cliente) {
+        if (cliente.getId() != null) {
+            model.addAttribute("clientesDisponibles", clienteService.listar());
+        }
+        model.addAttribute("provincias", datoContactoService.provincias());
+        model.addAttribute("cantones", datoContactoService.cantones());
+        model.addAttribute("distritos", datoContactoService.distritos());
+        if (cliente.getId() == null) {
+            model.addAttribute("direcciones", java.util.List.of());
+            model.addAttribute("telefonos", java.util.List.of());
+            model.addAttribute("correos", java.util.List.of());
+            return;
+        }
+        model.addAttribute("direcciones", datoContactoService.direcciones(cliente.getId()));
+        model.addAttribute("telefonos", datoContactoService.telefonos(cliente.getId()));
+        model.addAttribute("correos", datoContactoService.correos(cliente.getId()));
+    }
+
+    private void guardarContactos(Long clienteId, String tipo, List<String> valores) {
+        if (valores == null) {
+            return;
+        }
+        for (String valor : valores) {
+            if (valor == null || valor.isBlank()) {
+                continue;
+            }
+            DatoContacto contacto = new DatoContacto();
+            contacto.setIdUsuario(clienteId);
+            contacto.setValor(valor);
+            datoContactoService.guardar(tipo, contacto, false);
+        }
+    }
+
+    private static String generarPasswordTemporal() {
+        StringBuilder password = new StringBuilder(12);
+        for (int i = 0; i < 12; i++) {
+            password.append(CARACTERES_PASSWORD.charAt(RANDOM.nextInt(CARACTERES_PASSWORD.length())));
+        }
+        return password.toString();
+    }
+
+    private void guardarDirecciones(Long clienteId, List<Long> provincias, List<Long> cantones,
+                                    List<Long> distritos, List<String> senas) {
+        int cantidad = Math.max(Math.max(tamano(provincias), tamano(cantones)),
+                Math.max(tamano(distritos), tamano(senas)));
+        for (int i = 0; i < cantidad; i++) {
+            Long provincia = valor(provincias, i);
+            Long canton = valor(cantones, i);
+            Long distrito = valor(distritos, i);
+            String otrasSenas = valor(senas, i);
+            boolean vacia = provincia == null && canton == null && distrito == null
+                    && (otrasSenas == null || otrasSenas.isBlank());
+            if (vacia) {
+                continue;
+            }
+            if (provincia == null || canton == null || distrito == null) {
+                throw new IllegalArgumentException("Completa provincia, cantón y distrito en cada dirección.");
+            }
+            DatoContacto direccion = new DatoContacto();
+            direccion.setIdProvincia(provincia);
+            direccion.setIdCanton(canton);
+            direccion.setIdDistrito(distrito);
+            direccion.setOtrasSenas(otrasSenas);
+            datoContactoService.crearDireccionDesdeIncidente(clienteId, direccion);
+        }
+    }
+
+    private static int tamano(List<?> valores) {
+        return valores == null ? 0 : valores.size();
+    }
+
+    private static <T> T valor(List<T> valores, int indice) {
+        return valores != null && indice < valores.size() ? valores.get(indice) : null;
     }
 
     @PostMapping("/{id}/desactivar")

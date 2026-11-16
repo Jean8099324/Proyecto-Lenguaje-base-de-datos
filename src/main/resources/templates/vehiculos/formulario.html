@@ -9,36 +9,33 @@
 </head>
 <body>
 <div class="app-layout">
-    <aside class="sidebar" id="sidebar">
-        <div class="sidebar-header"><a class="sidebar-brand-link" href="/dashboard" aria-label="Ir al inicio"><div class="brand-icon"><i class="bi bi-truck"></i></div><div class="brand-text"><h1>Rescate Vial CR</h1><span>Gestión de Asistencia Vial</span></div></a><button type="button" class="close-sidebar" id="closeSidebar"><i class="bi bi-x-lg"></i></button></div>
-        <nav class="sidebar-nav"><div class="nav-section"><span class="nav-title">PRINCIPAL</span><a class="nav-link" href="/dashboard"><i class="bi bi-grid-1x2-fill"></i><span>Dashboard</span></a></div><div class="nav-section"><span class="nav-title">GESTIÓN</span><a class="nav-link" href="/usuarios/listado"><i class="bi bi-person-badge"></i><span>Usuarios</span></a><a class="nav-link" href="/usuarios/roles"><i class="bi bi-person-lock"></i><span>Roles de usuario</span></a><a class="nav-link" href="/clientes"><i class="bi bi-people"></i><span>Clientes</span></a><a class="nav-link active" href="/vehiculos"><i class="bi bi-car-front"></i><span>Vehículos</span></a></div></nav>
-        <div class="sidebar-footer"><div class="system-status"><span class="status-dot"></span><div><strong>Sistema operativo</strong><span>Gestión de vehículos</span></div></div></div>
-    </aside>
+    <aside th:replace="${portalCliente == true} ? ~{cliente/sidebar :: sidebar} : ~{fragments/sidebar :: sidebar}"></aside>
     <div class="sidebar-overlay" id="sidebarOverlay"></div>
     <div class="main-content">
-        <header class="topbar"><div class="topbar-left"><button type="button" class="menu-button" id="menuButton"><i class="bi bi-list"></i></button><div><h2 th:text="${esNuevo ? 'Nuevo vehículo' : 'Editar vehículo'}">Vehículo</h2><span>Administración de vehículos</span></div></div><div class="topbar-right"><div class="user-divider"></div><div class="user-profile"><div class="user-avatar" th:text="${session.inicialesUsuario != null ? session.inicialesUsuario : 'U'}">U</div><div class="user-info"><strong th:text="${session.nombreUsuario != null ? session.nombreUsuario : #authentication.name}">Usuario</strong><span th:text="${session.usernameUsuario != null ? session.usernameUsuario : #authentication.name}">usuario</span></div></div><form th:action="@{/logout}" method="post"><button type="submit" class="topbar-action" title="Cerrar sesión"><i class="bi bi-box-arrow-right"></i></button></form></div></header>
+        <header class="topbar"><div class="topbar-left"><button type="button" class="menu-button" id="menuButton"><i class="bi bi-list"></i></button><div><h2 th:text="${esNuevo ? 'Nuevo vehículo' : 'Editar vehículo'}">Vehículo</h2><span th:text="${portalCliente == true ? 'Portal del cliente' : 'Administración de vehículos'}">Administración de vehículos</span></div></div><div class="topbar-right"><div class="user-divider"></div><div class="user-profile"><div class="user-avatar" th:text="${session.inicialesUsuario != null ? session.inicialesUsuario : 'U'}">U</div><div class="user-info"><strong th:text="${session.nombreUsuario != null ? session.nombreUsuario : #authentication.name}">Usuario</strong><span th:text="${session.usernameUsuario != null ? session.usernameUsuario : #authentication.name}">usuario</span></div></div><form th:action="@{/logout}" method="post"><button type="submit" class="topbar-action" title="Cerrar sesión"><i class="bi bi-box-arrow-right"></i></button></form></div></header>
         <main class="page-content">
-            <section class="page-heading"><div><span class="section-label">GESTIÓN DEL SISTEMA</span><h2 th:text="${esNuevo ? 'Registrar vehículo' : 'Modificar vehículo'}">Vehículo</h2><p>Seleccione el propietario, la marca, el modelo y el año.</p></div><a href="/vehiculos" class="btn-secondary-custom"><i class="bi bi-arrow-left"></i> Volver al listado</a></section>
+            <section class="page-heading"><div><span class="section-label" th:text="${portalCliente == true ? 'MIS VEHÍCULOS' : 'GESTIÓN DEL SISTEMA'}">GESTIÓN DEL SISTEMA</span><h2 th:text="${esNuevo ? 'Registrar vehículo' : 'Modificar vehículo'}">Vehículo</h2><p>Seleccione la marca, el modelo y el año.</p></div><a th:href="${portalCliente == true} ? @{/cliente/inicio#mis-vehiculos} : @{/vehiculos}" class="btn-secondary-custom"><i class="bi bi-arrow-left"></i> Volver al listado</a></section>
             <div th:if="${mensajeError}" class="alert alert-danger" th:text="${mensajeError}"></div>
             <section class="content-card">
                 <div class="content-card-header"><div><span class="section-label">REGISTRO</span><h3>Información del vehículo</h3></div></div>
-                <form th:action="@{/vehiculos/guardar}" th:object="${vehiculoForm}" method="post">
-                    <input type="hidden" th:field="*{id}">
+                <form th:action="${portalCliente == true} ? @{/cliente/vehiculos/guardar} : @{/vehiculos/guardar}" th:object="${vehiculoForm}" method="post">
+                    <input th:unless="${portalCliente == true}" type="hidden" th:field="*{id}">
                     <div class="form-grid" style="padding:24px 25px 0;">
+                        <div th:unless="${portalCliente == true}" class="full-width"><div th:replace="~{fragments/cliente-propietario :: selector(${vehiculoForm.idUsuario})}"></div></div>
+                        <p th:if="${portalCliente == true}" class="full-width text-muted">El vehículo quedará asociado a tu cuenta.</p>
                         <div class="form-group-custom"><label for="placa">Placa (máximo 10 caracteres)</label><input id="placa" th:field="*{placa}" maxlength="10" placeholder="Ej. ABC123"><small class="text-danger" th:if="${#fields.hasErrors('placa')}" th:errors="*{placa}"></small></div>
                         <div class="form-group-custom"><label for="codigoChasis">Código de chasis (máximo 17)</label><input id="codigoChasis" th:field="*{codigoChasis}" maxlength="17" placeholder="Código de chasis"><small class="text-danger" th:if="${#fields.hasErrors('codigoChasis')}" th:errors="*{codigoChasis}"></small></div>
-                        <div class="form-group-custom"><label for="idUsuario">Propietario</label><select id="idUsuario" th:field="*{idUsuario}" required><option value="">Seleccione un propietario</option><option th:each="u : ${propietarios}" th:value="${u.id}" th:text="${u.nombre + ' ' + u.primerApellido + ' (' + u.username + ')'}"></option></select><small class="text-danger" th:if="${#fields.hasErrors('idUsuario')}" th:errors="*{idUsuario}"></small></div>
                         <div class="form-group-custom"><label for="idMarca">Marca</label><select id="idMarca" th:field="*{idMarca}" required><option value="">Seleccione una marca</option><option th:each="m : ${marcas}" th:if="${m.estadoId == estadoActivo}" th:value="${m.id}" th:text="${m.nombre}"></option></select><small class="text-danger" th:if="${#fields.hasErrors('idMarca')}" th:errors="*{idMarca}"></small></div>
                         <div class="form-group-custom"><label for="idModelo">Modelo</label><select id="idModelo" th:field="*{idModelo}" required><option value="">Seleccione un modelo</option><option th:each="m : ${modelos}" th:if="${m.estadoId == estadoActivo}" th:value="${m.id}" th:text="${m.nombre}" th:attr="data-padre=${m.padreId}"></option></select><small class="text-danger" th:if="${#fields.hasErrors('idModelo')}" th:errors="*{idModelo}"></small></div>
                         <div class="form-group-custom"><label for="idAnio">Año</label><select id="idAnio" th:field="*{idAnio}" required><option value="">Seleccione un año</option><option th:each="a : ${anios}" th:if="${a.estadoId == estadoActivo}" th:value="${a.id}" th:text="${a.nombre}" th:attr="data-padre=${a.padreId}"></option></select><small class="text-danger" th:if="${#fields.hasErrors('idAnio')}" th:errors="*{idAnio}"></small></div>
-                        <div class="form-group-custom full-width"><small class="text-muted">Indica al menos placa o código de chasis. El sistema guarda el vehículo mediante procedimientos del paquete Oracle.</small></div>
+                        <div class="form-group-custom full-width"><small class="text-muted">Indica al menos la placa o el código de chasis del vehículo.</small></div>
                     </div>
-                    <div class="modal-actions" style="padding:0 25px 22px;"><a href="/vehiculos" class="btn-secondary-custom">Cancelar</a><button type="submit" class="btn-primary-custom"><i class="bi bi-check-lg"></i> Guardar vehículo</button></div>
+                    <div class="modal-actions" style="padding:0 25px 22px;"><a th:href="${portalCliente == true} ? @{/cliente/inicio#mis-vehiculos} : @{/vehiculos}" class="btn-secondary-custom">Cancelar</a><button type="submit" class="btn-primary-custom"><i class="bi bi-check-lg"></i> Guardar vehículo</button></div>
                 </form>
             </section>
         </main>
     </div>
 </div>
 <script src="/js/vehiculos.js"></script>
-</body>
+<script th:unless="${portalCliente == true}" src="/js/cliente-propietario.js"></script><script src="/js/sidebar.js"></script></body>
 </html>

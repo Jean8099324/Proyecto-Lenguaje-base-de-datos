@@ -11,13 +11,7 @@
 </head>
 <body>
 <div class="app-layout">
-    <aside class="sidebar" id="sidebar">
-        <div class="sidebar-header"><a class="sidebar-brand-link" href="/dashboard" aria-label="Ir al inicio"><div class="brand-icon"><i class="bi bi-truck"></i></div><div class="brand-text"><h1>Rescate Vial CR</h1><span>Gestión de Asistencia Vial</span></div></a><button type="button" class="close-sidebar" id="closeSidebar" aria-label="Cerrar men?"><i class="bi bi-x-lg"></i></button></div>
-        <nav class="sidebar-nav">
-            <div class="nav-section"><span class="nav-title">PRINCIPAL</span><a href="/dashboard" class="nav-link"><i class="bi bi-grid-1x2-fill"></i><span>Dashboard</span></a></div>
-            <div class="nav-section"><span class="nav-title">OPERACIONES</span><a href="/incidentes/listado" class="nav-link"><i class="bi bi-exclamation-triangle"></i><span>Incidentes</span></a><a href="/despacho" class="nav-link active"><i class="bi bi-send"></i><span>Despacho</span></a></div>
-        </nav>
-    </aside>
+    <aside th:replace="~{fragments/sidebar :: sidebar}"></aside>
     <div class="sidebar-overlay" id="sidebarOverlay"></div>
     <div class="main-content">
         <header class="topbar">

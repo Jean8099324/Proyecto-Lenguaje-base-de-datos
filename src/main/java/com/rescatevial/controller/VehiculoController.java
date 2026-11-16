@@ -18,7 +18,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 public class VehiculoController {
     private final VehiculoService servicio;
 
-    public VehiculoController(VehiculoService servicio) {
+    public VehiculoController(VehiculoService servicio, com.rescatevial.service.UsuarioService usuarios) {
         this.servicio = servicio;
     }
 
@@ -53,7 +53,8 @@ public class VehiculoController {
 
     @PostMapping("/guardar")
     public String guardar(@Valid @ModelAttribute("vehiculoForm") Vehiculo vehiculo,
-                          BindingResult errores, Model model, RedirectAttributes redirect) {
+                          BindingResult errores, Model model, RedirectAttributes redirect,
+                          org.springframework.security.core.Authentication authentication) {
         boolean nuevo = vehiculo.getId() == null;
         if (errores.hasErrors()) {
             model.addAttribute("mensajeError", "Revisa los campos obligatorios.");
@@ -61,6 +62,8 @@ public class VehiculoController {
             return "vehiculos/formulario";
         }
         try {
+            if (vehiculo.getIdUsuario() == null)
+                throw new IllegalArgumentException("Seleccione el cliente propietario del veh?culo.");
             servicio.guardar(vehiculo);
             redirect.addFlashAttribute("mensajeExito", nuevo ?
                     "Vehículo registrado correctamente." : "Vehículo actualizado correctamente.");
@@ -101,7 +104,6 @@ public class VehiculoController {
         model.addAttribute("marcas", servicio.marcas());
         model.addAttribute("modelos", servicio.modelos());
         model.addAttribute("anios", servicio.anios());
-        model.addAttribute("propietarios", servicio.propietarios());
         model.addAttribute("estadoActivo", servicio.estadoActivo());
     }
 }

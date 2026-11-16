@@ -1,15 +1,12 @@
 package com.rescatevial.service;
 
 import com.rescatevial.domain.DatoContacto;
-import com.rescatevial.domain.Estado;
 import com.rescatevial.domain.OpcionUbicacion;
 import com.rescatevial.domain.Usuario;
 import com.rescatevial.repository.DatoContactoRepository;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -26,7 +23,7 @@ public class DatoContactoService {
     }
     private Long estado(String nombre) {
         return estados.listar().stream().filter(e -> nombre.equalsIgnoreCase(e.getNombreEstado()))
-            .map(Estado::getId).findFirst()
+            .map(estado -> estado.getId()).findFirst()
             .orElseThrow(() -> new IllegalStateException("No existe el estado " + nombre + " en Oracle."));
     }
     private Long activo() { return estado("ACTIVO"); }
@@ -48,7 +45,7 @@ public class DatoContactoService {
     }
     private void nombres(List<DatoContacto> datos) {
         Map<Long,String> etiquetas = estados.listar().stream()
-            .collect(Collectors.toMap(Estado::getId, Estado::getNombreEstado, (a,b) -> a));
+            .collect(Collectors.toMap(estado -> estado.getId(), estado -> estado.getNombreEstado(), (a,b) -> a));
         datos.forEach(d -> d.setNombreEstado(etiquetas.getOrDefault(d.getIdEstado(), "SIN ESTADO")));
     }
     @Transactional(readOnly = true)
@@ -60,9 +57,9 @@ public class DatoContactoService {
         usuario(id);
         var datos = repo.direcciones(id);
         nombres(datos);
-        var p = repo.provincias().stream().collect(Collectors.toMap(OpcionUbicacion::getId, OpcionUbicacion::getNombre, (a,b)->a));
-        var c = repo.cantones().stream().collect(Collectors.toMap(OpcionUbicacion::getId, OpcionUbicacion::getNombre, (a,b)->a));
-        var d = repo.distritos().stream().collect(Collectors.toMap(OpcionUbicacion::getId, OpcionUbicacion::getNombre, (a,b)->a));
+        var p = repo.provincias().stream().collect(Collectors.toMap(opcion -> opcion.getId(), opcion -> opcion.getNombre(), (a,b)->a));
+        var c = repo.cantones().stream().collect(Collectors.toMap(opcion -> opcion.getId(), opcion -> opcion.getNombre(), (a,b)->a));
+        var d = repo.distritos().stream().collect(Collectors.toMap(opcion -> opcion.getId(), opcion -> opcion.getNombre(), (a,b)->a));
         datos.forEach(dato -> {
             dato.setNombreProvincia(p.getOrDefault(dato.getIdProvincia(), "Sin provincia"));
             dato.setNombreCanton(c.getOrDefault(dato.getIdCanton(), "Sin cantón"));
@@ -70,9 +67,9 @@ public class DatoContactoService {
         });
         return datos;
     }
-    public List<OpcionUbicacion> provincias() { return repo.provincias().stream().filter(o -> activo().equals(o.getIdEstado())).toList(); }
-    public List<OpcionUbicacion> cantones() { return repo.cantones().stream().filter(o -> activo().equals(o.getIdEstado())).toList(); }
-    public List<OpcionUbicacion> distritos() { return repo.distritos().stream().filter(o -> activo().equals(o.getIdEstado())).toList(); }
+    public List<OpcionUbicacion> provincias() { Long estadoActivo = activo(); return repo.provincias().stream().filter(o -> estadoActivo.equals(o.getIdEstado())).toList(); }
+    public List<OpcionUbicacion> cantones() { Long estadoActivo = activo(); return repo.cantones().stream().filter(o -> estadoActivo.equals(o.getIdEstado())).toList(); }
+    public List<OpcionUbicacion> distritos() { Long estadoActivo = activo(); return repo.distritos().stream().filter(o -> estadoActivo.equals(o.getIdEstado())).toList(); }
 
     public DatoContacto buscar(String tipo, Long id, String valor, Long provincia, Long canton, Long distrito) {
         usuario(id);
@@ -103,22 +100,44 @@ public class DatoContactoService {
             || !activo().equals(canton.get().getIdEstado())
             || !activo().equals(distrito.get().getIdEstado()))
             throw new IllegalArgumentException("La provincia, el cantón y el distrito no corresponden entre sí o están inactivos.");
-        dato.setOtrasSenas(limpiar(dato.getOtrasSenas()));
+        dato.setOtrasSenas(normalizarSenas(dato.getOtrasSenas()));
         if (dato.getOtrasSenas() != null && dato.getOtrasSenas().length() > 200)
             throw new IllegalArgumentException("Las otras señas deben tener 200 caracteres como máximo.");
     }
     private boolean existeValor(String tipo, Long id, String valor, Long estado) {
         var datos = "telefono".equals(tipo) ? repo.telefonos(id) : repo.correos(id);
-        return datos.stream().anyMatch(d -> Objects.equals(d.getValor(), valor)
+        return datos.stream().anyMatch(d -> Objects.equals(limpiar(d.getValor()), limpiar(valor))
                 && Objects.equals(d.getIdEstado(), estado));
     }
+    private static String normalizarSenas(String valor) {
+        String limpio = limpiar(valor);
+        return limpio == null || limpio.isEmpty() ? null : limpio;
+    }
+
+    private void insertarOReactivarDireccion(DatoContacto nueva) {
+        var existente = repo.direcciones(nueva.getIdUsuario()).stream().filter(d ->
+                Objects.equals(d.getIdProvincia(), nueva.getIdProvincia())
+                && Objects.equals(d.getIdCanton(), nueva.getIdCanton())
+                && Objects.equals(d.getIdDistrito(), nueva.getIdDistrito())).findFirst();
+        nueva.setIdEstado(activo());
+        if (existente.isPresent()) {
+            if (activo().equals(existente.get().getIdEstado()))
+                throw new IllegalArgumentException("El cliente ya tiene esa dirección registrada.");
+            repo.modificarDireccion(nueva);
+        } else {
+            repo.insertarDireccion(nueva);
+        }
+        if (!existeDireccion(nueva, nueva.getIdEstado()))
+            throw new IllegalStateException("Oracle no confirmó la dirección del cliente.");
+    }
+
     private boolean existeDireccion(DatoContacto dato, Long estado) {
         return repo.direcciones(dato.getIdUsuario()).stream().anyMatch(d ->
             Objects.equals(d.getIdProvincia(), dato.getIdProvincia())
             && Objects.equals(d.getIdCanton(), dato.getIdCanton())
             && Objects.equals(d.getIdDistrito(), dato.getIdDistrito())
             && Objects.equals(d.getIdEstado(), estado)
-            && Objects.equals(d.getOtrasSenas(), dato.getOtrasSenas()));
+            && Objects.equals(normalizarSenas(d.getOtrasSenas()), normalizarSenas(dato.getOtrasSenas())));
     }
 
     @Transactional
@@ -126,6 +145,7 @@ public class DatoContactoService {
         usuario(dato.getIdUsuario());
         if ("telefono".equals(tipo) || "correo".equals(tipo)) {
             String valor = requerido(dato.getValor(), "El dato");
+            dato.setValor(valor);
             int maximo = "telefono".equals(tipo) ? 8 : 150;
             if (valor.length() > maximo) throw new IllegalArgumentException("El valor supera la longitud permitida.");
             if ("telefono".equals(tipo) && !valor.matches("\\d{8}"))
@@ -141,8 +161,9 @@ public class DatoContactoService {
                     throw new IllegalStateException("Oracle no confirmó la modificación.");
             } else {
                 if (("telefono".equals(tipo) ? repo.telefonos(dato.getIdUsuario()) : repo.correos(dato.getIdUsuario()))
-                    .stream().anyMatch(d -> Objects.equals(d.getValor(), valor)))
-                    throw new IllegalArgumentException("Este dato ya existe para el usuario. Reactívalo si está inactivo.");
+                    .stream().anyMatch(d -> Objects.equals(limpiar(d.getValor()), limpiar(valor))))
+                    throw new IllegalArgumentException("Este " + ("telefono".equals(tipo) ? "teléfono" : "correo")
+                        + " ya existe para este usuario. Reactívalo si está inactivo.");
                 dato.setValor(valor); dato.setIdEstado(activo());
                 if ("telefono".equals(tipo)) repo.insertarTelefono(dato); else repo.insertarCorreo(dato);
                 if (!existeValor(tipo, dato.getIdUsuario(), valor, activo()))
@@ -165,6 +186,45 @@ public class DatoContactoService {
             if (!existeDireccion(dato, dato.getIdEstado()))
                 throw new IllegalStateException("Oracle no confirmó los cambios de la dirección.");
         } else throw new IllegalArgumentException("Tipo de dato no válido.");
+    }
+
+    @Transactional
+    public void actualizarDireccionDesdeIncidente(Long usuarioId, Long provinciaOriginal,
+                                                   Long cantonOriginal, Long distritoOriginal,
+                                                   DatoContacto nueva) {
+        usuario(usuarioId);
+        nueva.setIdUsuario(usuarioId);
+        validarDireccion(nueva);
+        DatoContacto anterior = buscar("direccion", usuarioId, null,
+                provinciaOriginal, cantonOriginal, distritoOriginal);
+        boolean mismaClave = Objects.equals(provinciaOriginal, nueva.getIdProvincia())
+                && Objects.equals(cantonOriginal, nueva.getIdCanton())
+                && Objects.equals(distritoOriginal, nueva.getIdDistrito());
+        if (mismaClave) {
+            nueva.setIdEstado(anterior.getIdEstado());
+            repo.modificarDireccion(nueva);
+            if (!existeDireccion(nueva, nueva.getIdEstado()))
+                throw new IllegalStateException("Oracle no confirmo la direccion actualizada.");
+            return;
+        }
+        insertarOReactivarDireccion(nueva);
+        anterior.setIdEstado(inactivo());
+        repo.eliminarDireccion(anterior);
+        boolean anteriorActiva = repo.direcciones(usuarioId).stream().anyMatch(d ->
+                Objects.equals(d.getIdProvincia(), provinciaOriginal)
+                && Objects.equals(d.getIdCanton(), cantonOriginal)
+                && Objects.equals(d.getIdDistrito(), distritoOriginal)
+                && !inactivo().equals(d.getIdEstado()));
+        if (anteriorActiva)
+            throw new IllegalStateException("Oracle no confirmó la desactivación de la dirección anterior.");
+    }
+
+    @Transactional
+    public void crearDireccionDesdeIncidente(Long usuarioId, DatoContacto nueva) {
+        usuario(usuarioId);
+        nueva.setIdUsuario(usuarioId);
+        validarDireccion(nueva);
+        insertarOReactivarDireccion(nueva);
     }
 
     @Transactional

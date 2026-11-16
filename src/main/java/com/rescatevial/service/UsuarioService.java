@@ -3,6 +3,7 @@ package com.rescatevial.service;
 import com.rescatevial.domain.Usuario;
 import com.rescatevial.domain.Rol;
 import com.rescatevial.repository.UsuarioRepository;
+import com.rescatevial.repository.DatoContactoRepository;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -13,10 +14,15 @@ import org.springframework.transaction.annotation.Transactional;
 public class UsuarioService {
     private final UsuarioRepository usuarioRepository;
     private final PasswordEncoder passwordEncoder;
+    private final DatoContactoRepository datoContactoRepository;
+    private final EstadoService estadoService;
 
-    public UsuarioService(UsuarioRepository usuarioRepository, PasswordEncoder passwordEncoder) {
+    public UsuarioService(UsuarioRepository usuarioRepository, PasswordEncoder passwordEncoder,
+                          DatoContactoRepository datoContactoRepository, EstadoService estadoService) {
         this.usuarioRepository = usuarioRepository;
         this.passwordEncoder = passwordEncoder;
+        this.datoContactoRepository = datoContactoRepository;
+        this.estadoService = estadoService;
     }
 
     @Transactional(readOnly = true)
@@ -44,15 +50,33 @@ public class UsuarioService {
 
     @Transactional
     public void save(Usuario usuario) {
+        boolean cliente = usuarioRepository.esPerfilCliente(usuario.getTipoUsuario());
+        if (cliente) usuario.setRolesNombresSeleccionados(java.util.Set.of("CLIENT"));
         if (usuario.getId() == null) {// Si el usuario es nuevo
             if (usuario.getPassword() == null || usuario.getPassword().isBlank()) {
                 throw new IllegalArgumentException("La contraseña es obligatoria para un usuario nuevo.");
             }
             // Oracle genera el ID; la aplicación solo envía la contraseña cifrada al procedimiento.
             usuarioRepository.insertUsingProcedure(usuario, passwordEncoder.encode(usuario.getPassword()));
-            // Permite asignar varios roles desde el formulario; CLIENT es el rol inicial predeterminado.
+            Usuario creado = usuarioRepository.findByUsername(usuario.getUsername())
+                    .orElseThrow(() -> new IllegalStateException("No se pudo recuperar el usuario creado."));
+            if (usuario.getCorreo() != null && !usuario.getCorreo().isBlank()) {
+                var correo = new com.rescatevial.domain.DatoContacto();
+                correo.setIdUsuario(creado.getId());
+                correo.setValor(usuario.getCorreo().trim());
+                correo.setIdEstado(estadoService.listar().stream()
+                        .filter(estado -> "ACTIVO".equalsIgnoreCase(estado.getNombreEstado()))
+                        .map(estado -> estado.getId()).findFirst()
+                        .orElseThrow(() -> new IllegalStateException("No existe el estado ACTIVO en Oracle.")));
+                datoContactoRepository.insertarCorreo(correo);
+            }
+            // Los clientes reciben exclusivamente CLIENT, según su perfil.
             var rolesSeleccionados = rolesSeleccionados(usuario.getRolesNombresSeleccionados());
-            if (rolesSeleccionados.isEmpty()) rolesSeleccionados = java.util.Set.of("CLIENT");
+            if (rolesSeleccionados.isEmpty()) rolesSeleccionados = java.util.Set.of("GUEST");
+            if (cliente) {
+                actualizarRoles(creado, java.util.Set.of("CLIENT"));
+                return;
+            }
             for (String rol : rolesSeleccionados) {
                 asignarRolPorUsername(usuario.getUsername(), rol);
             }
@@ -71,6 +95,30 @@ public class UsuarioService {
         usuario.setRoles(usuarioExistente.getRoles());
         usuarioRepository.updateUsingProcedure(usuario, usuario.getPassword());
         actualizarRoles(usuarioExistente, rolesSeleccionados(usuario.getRolesNombresSeleccionados()));
+    }
+
+    @Transactional
+    public void actualizarNombreDesdeIncidente(Long id, String nombre, String primerApellido, String segundoApellido) {
+        Usuario existente = usuarioRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("No se encontro el cliente asociado al vehiculo."));
+        existente.setNombre(nombre == null ? "" : nombre.trim());
+        existente.setPrimerApellido(primerApellido == null ? "" : primerApellido.trim());
+        existente.setSegundoApellido(segundoApellido == null || segundoApellido.isBlank() ? null : segundoApellido.trim());
+        usuarioRepository.updateUsingProcedure(existente, existente.getPassword());
+    }
+
+    @Transactional
+    public void cambiarPasswordPropia(String username, String actual, String nueva, String confirmacion) {
+        Usuario usuario = getUsuarioPorUsername(username).orElseThrow();
+        if (actual == null || !passwordEncoder.matches(actual, usuario.getPassword()))
+            throw new IllegalArgumentException("La contraseña actual no es correcta.");
+        if (nueva == null || nueva.length() < 8 || nueva.getBytes(java.nio.charset.StandardCharsets.UTF_8).length > 72)
+            throw new IllegalArgumentException("La nueva contraseña debe tener al menos 8 caracteres y un máximo de 72 bytes.");
+        if (!nueva.equals(confirmacion)) throw new IllegalArgumentException("Las contraseñas no coinciden.");
+        usuarioRepository.updateUsingProcedure(usuario, passwordEncoder.encode(nueva));
+        Usuario actualizado = getUsuarioPorUsername(username).orElseThrow();
+        if (!passwordEncoder.matches(nueva, actualizado.getPassword()))
+            throw new IllegalStateException("Oracle no confirmó el cambio de contraseña.");
     }
 
     private static java.util.Set<String> rolesSeleccionados(java.util.Set<String> nombres) {
@@ -103,6 +151,13 @@ public class UsuarioService {
     public Usuario asignarRolPorUsername(String username, String nombreRol) {
         Usuario usuario = getUsuarioPorUsername(username)
                 .orElseThrow(() -> new IllegalArgumentException("Usuario no encontrado: " + username));
+        if (usuarioRepository.esPerfilCliente(usuario.getTipoUsuario())) {
+            if (!"CLIENT".equalsIgnoreCase(nombreRol.trim())) {
+                throw new IllegalArgumentException("El perfil CLIENTE solo puede tener el rol CLIENT.");
+            }
+            actualizarRoles(usuario, java.util.Set.of("CLIENT"));
+            return getUsuarioPorUsername(username).orElseThrow();
+        }
         Long idRol = usuarioRepository.findRoleIdByName(nombreRol)
                 .orElseThrow(() -> new IllegalArgumentException("Rol no encontrado: " + nombreRol));
         boolean yaAsignado = usuarioRepository.findRolesByUserId(usuario.getId()).stream()
@@ -131,6 +186,10 @@ public class UsuarioService {
     public Usuario eliminarRol(String username, Long idRol) {
         Usuario usuario = getUsuarioPorUsername(username)
                 .orElseThrow(() -> new IllegalArgumentException("Usuario no encontrado: " + username));
+        if (usuarioRepository.esPerfilCliente(usuario.getTipoUsuario())
+                && usuarioRepository.findRoleIdByName("CLIENT").filter(idRol::equals).isPresent()) {
+            throw new IllegalArgumentException("El perfil CLIENTE debe conservar el rol CLIENT.");
+        }
         usuarioRepository.removeRoleFromUser(usuario.getId(), idRol);
         return getUsuarioPorUsername(username)
                 .orElseThrow(() -> new IllegalArgumentException("Usuario no encontrado: " + username));

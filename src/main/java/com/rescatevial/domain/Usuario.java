@@ -5,6 +5,7 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.Email;
 import java.io.Serializable;
 import java.time.LocalDate;
 import java.time.Instant;
@@ -29,6 +30,8 @@ public class Usuario implements Serializable {
     private LocalDate fechaNacimiento;
     @NotBlank @Size(max = 100)
     private String username;
+    @Email @Size(max = 150)
+    private String correo;
     @Pattern(regexp = "^$|.{8,512}$", message = "La contraseña debe tener al menos 8 caracteres.")
     @ToString.Exclude
     private String password;

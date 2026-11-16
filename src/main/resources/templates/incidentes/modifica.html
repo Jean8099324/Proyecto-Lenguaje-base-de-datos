@@ -1,11 +1,123 @@
 <!DOCTYPE html>
 <html lang="es" xmlns:th="http://www.thymeleaf.org">
 <head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Rescate Vial CR | Modificar incidente</title><link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css"><link rel="stylesheet" href="/css/usuarios.css"><link rel="stylesheet" href="/css/incidentes.css"></head>
-<body><div class="app-layout"><aside class="sidebar"><div class="sidebar-header"><a class="sidebar-brand-link" href="/dashboard" aria-label="Ir al inicio"><div class="brand-icon"><i class="bi bi-truck"></i></div><div class="brand-text"><h1>Rescate Vial CR</h1><span>Gestión de Asistencia Vial</span></div></a><button type="button" class="close-sidebar" id="closeSidebar" aria-label="Cerrar men?"><i class="bi bi-x-lg"></i></button></div><nav class="sidebar-nav"><div class="nav-section"><span class="nav-title">PRINCIPAL</span><a href="/dashboard" class="nav-link"><i class="bi bi-grid-1x2-fill"></i><span>Dashboard</span></a></div><div class="nav-section"><span class="nav-title">OPERACIONES</span><a href="/incidentes/listado" class="nav-link active"><i class="bi bi-exclamation-triangle"></i><span>Incidentes</span></a><a href="/despacho" class="nav-link"><i class="bi bi-send"></i><span>Despacho</span></a></div></nav></aside><div class="sidebar-overlay" id="sidebarOverlay"></div><div class="main-content"><header class="topbar"><div class="topbar-left"><button type="button" class="menu-button" id="menuButton" aria-label="Abrir men?"><i class="bi bi-list"></i></button><div><h2>Modificar incidente</h2><span>Actualizar registro</span></div></div><div class="topbar-right"><div class="user-profile"><div class="user-avatar" th:text="${session.inicialesUsuario != null ? session.inicialesUsuario : 'U'}">U</div><div class="user-info"><strong th:text="${session.nombreUsuario != null ? session.nombreUsuario : #authentication.name}">Usuario</strong><span th:text="${session.usernameUsuario != null ? session.usernameUsuario : #authentication.name}">usuario</span></div></div><form th:action="@{/logout}" method="post"><input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"><button type="submit" class="topbar-action"><i class="bi bi-box-arrow-right"></i></button></form></div></header>
-<main class="page-content"><section class="page-heading"><div><span class="section-label">OPERACIONES</span><h2>Modificar incidente <span th:text="${incidenteForm.id}">1</span></h2><p>Actualice los datos del reporte y guarde los cambios.</p></div></section><div th:if="${mensajeError}" class="alert alert-danger" th:text="${mensajeError}"></div>
-<section class="content-card edit-incident-card"><form th:action="@{/incidentes/guardar}" th:object="${incidenteForm}" method="post"><input type="hidden" th:field="*{id}"><p class="required-fields-note"><span aria-hidden="true">*</span> Campos obligatorios</p><div class="form-grid">
-<div class="form-group-custom"><label>Vehículo</label><select th:field="*{idVehiculo}" required><option th:each="v : ${vehiculos}" th:value="${v.id}" th:text="${v.etiqueta}"></option></select></div><div class="form-group-custom"><label>Fecha de reporte</label><input type="date" th:field="*{fechaReporte}"></div><div class="form-group-custom"><label>Hora de reporte</label><input type="time" th:field="*{horaReporte}"></div>
-<div class="form-group-custom"><label class="required-label">Tipo de incidente</label><select th:field="*{idTipoIncidente}" required><option th:each="o : ${tiposIncidente}" th:value="${o.id}" th:text="${o.etiqueta}"></option></select></div><div class="form-group-custom"><label class="required-label">Prioridad</label><select th:field="*{idPrioridad}" required><option th:each="o : ${prioridades}" th:value="${o.id}" th:text="${o.etiqueta}"></option></select></div>
-<fieldset class="location-section full-width"><legend>Ubicación del incidente</legend><div class="location-grid"><div class="form-group-custom"><label>Provincia</label><select id="incidenteProvincia" th:field="*{idProvincia}" required><option th:each="o : ${provincias}" th:value="${o.id}" th:text="${o.etiqueta}"></option></select></div><div class="form-group-custom"><label>Cantón</label><select id="incidenteCanton" th:field="*{idCanton}" required><option th:each="o : ${cantones}" th:value="${o.id}" th:text="${o.etiqueta}" th:attr="data-provincia=${o.relacionId}"></option></select></div><div class="form-group-custom"><label>Distrito</label><select id="incidenteDistrito" th:field="*{idDistrito}" required><option th:each="o : ${distritos}" th:value="${o.id}" th:text="${o.etiqueta}" th:attr="data-canton=${o.relacionId}"></option></select></div><div class="form-group-custom location-notes"><label>Otras señas</label><textarea rows="2" maxlength="200" th:field="*{otrasSenas}"></textarea></div></div></fieldset>
-<div class="form-group-custom"><label>Estado</label><select th:field="*{idEstado}" required><option th:each="o : ${estadosIncidente}" th:value="${o.id}" th:text="${o.nombreEstado}"></option></select></div><div class="form-group-custom"><label>Fecha de cierre</label><input type="date" th:field="*{fechaCierre}"></div><div class="form-group-custom"><label>Hora de cierre</label><input type="time" th:field="*{horaCierre}"></div><div class="form-group-custom full-width"><label>Detalle</label><textarea rows="4" maxlength="500" th:field="*{detalles}"></textarea></div>
-</div><div class="modal-actions"><a href="/incidentes/listado" class="btn-secondary-custom">Cancelar</a><button type="submit" class="btn-primary-custom"><i class="bi bi-check-lg"></i> Guardar cambios</button></div></form></section></main></div></div><script src="/js/sidebar.js"></script><script src="/js/incidentes.js"></script></body></html>
+<body><div class="app-layout"><aside th:replace="~{fragments/sidebar :: sidebar}"></aside><div class="sidebar-overlay" id="sidebarOverlay"></div><div class="main-content"><header class="topbar"><div class="topbar-left"><button type="button" class="menu-button" id="menuButton" aria-label="Abrir menú"><i class="bi bi-list"></i></button><div><h2>Modificar incidente</h2><span>Actualizar registro</span></div></div><div class="topbar-right"><div class="user-profile"><div class="user-avatar" th:text="${session.inicialesUsuario != null ? session.inicialesUsuario : 'U'}">U</div><div class="user-info"><strong th:text="${session.nombreUsuario != null ? session.nombreUsuario : #authentication.name}">Usuario</strong><span th:text="${session.usernameUsuario != null ? session.usernameUsuario : #authentication.name}">usuario</span></div></div><form th:action="@{/logout}" method="post"><input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"><button type="submit" class="topbar-action"><i class="bi bi-box-arrow-right"></i></button></form></div></header>
+<main class="page-content">
+<section class="page-heading incident-detail-heading">
+    <div><span class="section-label">OPERACIONES</span><h2>Modificar incidente</h2><p>Actualice los datos del incidente y guarde los cambios.</p></div>
+    <div class="detail-heading-actions"><a href="/incidentes/listado" class="btn-secondary-custom"><i class="bi bi-arrow-left"></i> Volver</a></div>
+</section>
+<div th:if="${mensajeError}" class="alert alert-danger" th:text="${mensajeError}"></div>
+<section class="content-card edit-incident-card incident-edit-card">
+<form th:action="@{/incidentes/guardar}" th:object="${incidenteForm}" method="post">
+    <input type="hidden" th:field="*{id}">
+    <input type="hidden" th:field="*{idVehiculo}">
+    <p class="required-fields-note"><span aria-hidden="true">*</span> Campos obligatorios</p>
+    <section class="incident-edit-identity">
+        <div><span>Consecutivo del incidente</span><strong th:text="${incidenteForm.id}">1</strong></div>
+        <div><span>Placa del vehículo</span><div class="incident-edit-plate"><strong th:text="${incidenteForm.placaVehiculo ?: 'Sin placa'}">ABC123</strong><button type="button" class="btn-secondary-custom btn-edit-vehicle" id="btnEditarVehiculo" th:disabled="${vehiculoForm == null}"><i class="bi bi-pencil-square"></i> Actualizar vehículo</button></div></div>
+        <div><span>Fecha y hora del reporte</span><div class="incident-edit-datetime"><input type="date" th:field="*{fechaReporte}"><input type="time" th:field="*{horaReporte}"></div></div>
+    </section>
+    <input type="hidden" th:field="*{idContactoIncidente}">
+    <input type="hidden" th:field="*{idProvinciaClienteOriginal}">
+    <input type="hidden" th:field="*{idCantonClienteOriginal}">
+    <input type="hidden" th:field="*{idDistritoClienteOriginal}">
+    <div class="incident-edit-grid">
+        <section class="incident-edit-section incident-edit-client">
+            <h3><i class="bi bi-person-lines-fill"></i> Cliente</h3>
+            <div class="form-grid incident-edit-client-fields">
+                <div class="client-selector-row">
+                    <div class="form-group-custom client-selector-field"><label>Cliente vinculado</label><select id="clienteIncidente" th:field="*{idCliente}"><option value="">Sin cliente</option><option th:each="cliente : ${clientes}" th:value="${cliente.id}" th:text="${cliente.nombre + ' ' + cliente.primerApellido + (cliente.segundoApellido != null ? ' ' + cliente.segundoApellido : '') + ' (' + cliente.username + ')'}" th:attr="data-username=${cliente.username},data-nombre=${cliente.nombre},data-primer-apellido=${cliente.primerApellido},data-segundo-apellido=${cliente.segundoApellido}">Cliente</option></select></div>
+                    <a class="btn-secondary-custom client-add-button" th:href="@{/clientes/nuevo(retorno=${'/incidentes/modificar/' + incidenteForm.id})}"><i class="bi bi-person-plus"></i> Agregar cliente</a>
+                </div>
+                <div class="form-group-custom client-dependent" th:classappend="${incidenteForm.idCliente == null} ? 'client-dependent-hidden' : ''"><label>Nombre</label><input type="text" maxlength="100" th:field="*{nombreCliente}"></div>
+                <div class="form-group-custom client-dependent" th:classappend="${incidenteForm.idCliente == null} ? 'client-dependent-hidden' : ''"><label>Primer apellido</label><input type="text" maxlength="100" th:field="*{primerApellidoCliente}"></div>
+                <div class="form-group-custom client-dependent" th:classappend="${incidenteForm.idCliente == null} ? 'client-dependent-hidden' : ''"><label>Segundo apellido</label><input type="text" maxlength="100" th:field="*{segundoApellidoCliente}"></div>
+                <div class="form-group-custom client-dependent" th:classappend="${incidenteForm.idCliente == null} ? 'client-dependent-hidden' : ''"><label>Username</label><input id="usernameCliente" type="text" th:value="${incidenteForm.usernameCliente}" readonly></div>
+            </div>
+        <div class="incident-edit-client-subsection client-dependent" th:classappend="${incidenteForm.idCliente == null} ? 'client-dependent-hidden' : ''">
+            <h3><i class="bi bi-geo-alt"></i> Dirección del cliente</h3>
+            <div class="form-grid incident-edit-client-address">
+                <div class="form-group-custom"><label class="required-label">Provincia</label><select id="clienteProvincia" th:field="*{idProvinciaCliente}" required><option th:each="o : ${provincias}" th:value="${o.id}" th:text="${o.etiqueta}"></option></select></div>
+                <div class="form-group-custom"><label class="required-label">Cantón</label><select id="clienteCanton" th:field="*{idCantonCliente}" required><option th:each="o : ${cantones}" th:value="${o.id}" th:text="${o.etiqueta}" th:attr="data-provincia=${o.relacionId}"></option></select></div>
+                <div class="form-group-custom"><label class="required-label">Distrito</label><select id="clienteDistrito" th:field="*{idDistritoCliente}" required><option th:each="o : ${distritos}" th:value="${o.id}" th:text="${o.etiqueta}" th:attr="data-canton=${o.relacionId}"></option></select></div>
+                <div class="form-group-custom full-width"><label>Otras señas</label><textarea rows="2" maxlength="200" th:field="*{otrasSenasCliente}"></textarea></div>
+            </div>
+        </div>
+        <div class="incident-edit-client-subsection client-dependent" th:classappend="${incidenteForm.idCliente == null} ? 'client-dependent-hidden' : ''">
+            <h3><i class="bi bi-telephone"></i> Correos y teléfonos del cliente</h3>
+            <div class="client-contact-columns">
+                <div>
+                    <div class="client-contact-heading"><div class="incident-edit-subheading">Correos</div><button type="button" class="add-client-contact" data-contact-add="correo" aria-label="Agregar correo"><i class="bi bi-plus-lg"></i></button></div>
+                    <div class="client-contact-list" data-contact-list="correo">
+                        <p th:if="${#lists.isEmpty(correosCliente)}" class="client-contact-empty">Sin correos registrados.</p>
+                        <a th:each="correo : ${correosCliente}" class="client-contact-value" th:href="${'mailto:' + correo.valor}" th:text="${correo.valor}">correo@ejemplo.com</a>
+                    </div>
+                </div>
+                <div>
+                    <div class="client-contact-heading"><div class="incident-edit-subheading">Teléfonos</div><button type="button" class="add-client-contact" data-contact-add="telefono" aria-label="Agregar teléfono"><i class="bi bi-plus-lg"></i></button></div>
+                    <div class="client-contact-list" data-contact-list="telefono">
+                        <p th:if="${#lists.isEmpty(telefonosCliente)}" class="client-contact-empty">Sin teléfonos registrados.</p>
+                        <a th:each="telefono : ${telefonosCliente}" class="client-contact-value" th:href="${'tel:' + telefono.valor}" th:text="${telefono.valor}">88888888</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        </section>
+        <section class="incident-edit-section incident-edit-contact">
+            <h3><i class="bi bi-person-vcard"></i> Contacto del incidente</h3>
+            <div class="form-grid incident-edit-contact-fields">
+                <div class="form-group-custom"><label th:classappend="${incidenteForm.idContactoIncidente != null ? 'required-label' : ''}">Nombre</label><input type="text" maxlength="100" th:field="*{nombreContactoIncidente}" th:required="${incidenteForm.idContactoIncidente != null}"></div>
+                <div class="form-group-custom"><label th:classappend="${incidenteForm.idContactoIncidente != null ? 'required-label' : ''}">Primer apellido</label><input type="text" maxlength="100" th:field="*{primerApellidoContactoIncidente}" th:required="${incidenteForm.idContactoIncidente != null}"></div>
+                <div class="form-group-custom"><label>Segundo apellido</label><input type="text" maxlength="100" th:field="*{segundoApellidoContactoIncidente}"></div>
+                <div class="form-group-custom"><label>Teléfono</label><input type="tel" maxlength="20" th:field="*{telefonoContactoIncidente}"></div>
+            </div>
+        </section>
+        <section class="incident-edit-section incident-edit-report">
+            <h3><i class="bi bi-file-earmark-text"></i> Detalles del reporte</h3>
+            <div class="form-grid incident-edit-report-fields">
+                <div class="form-group-custom"><label class="required-label">Tipo de incidente</label><select th:field="*{idTipoIncidente}" required><option th:each="o : ${tiposIncidente}" th:value="${o.id}" th:text="${o.etiqueta}"></option></select></div>
+                <div class="form-group-custom"><label class="required-label">Prioridad</label><select th:field="*{idPrioridad}" required><option th:each="o : ${prioridades}" th:value="${o.id}" th:text="${o.etiqueta}"></option></select></div>
+                <div class="form-group-custom"><label>Fecha de cierre</label><input type="date" th:field="*{fechaCierre}"></div>
+                <div class="form-group-custom"><label>Hora de cierre</label><input type="time" th:field="*{horaCierre}"></div>
+                <div class="form-group-custom"><label class="required-label">Estado actual</label><select th:field="*{idEstado}" required><option th:each="o : ${estadosIncidente}" th:value="${o.id}" th:text="${o.nombreEstado}"></option></select></div>
+                <div class="form-group-custom full-width"><label>Detalle del incidente</label><textarea rows="3" maxlength="500" th:field="*{detalles}"></textarea></div>
+            </div>
+            <fieldset class="location-section incident-edit-location">
+                <legend><i class="bi bi-geo-alt"></i> Ubicación del incidente</legend>
+                <div class="location-grid">
+                    <div class="form-group-custom"><label class="required-label">Provincia</label><select id="incidenteProvincia" th:field="*{idProvincia}" required><option th:each="o : ${provincias}" th:value="${o.id}" th:text="${o.etiqueta}"></option></select></div>
+                    <div class="form-group-custom"><label class="required-label">Cantón</label><select id="incidenteCanton" th:field="*{idCanton}" required><option th:each="o : ${cantones}" th:value="${o.id}" th:text="${o.etiqueta}" th:attr="data-provincia=${o.relacionId}"></option></select></div>
+                    <div class="form-group-custom"><label class="required-label">Distrito</label><select id="incidenteDistrito" th:field="*{idDistrito}" required><option th:each="o : ${distritos}" th:value="${o.id}" th:text="${o.etiqueta}" th:attr="data-canton=${o.relacionId}"></option></select></div>
+                    <div class="form-group-custom location-notes"><label>Otras señas</label><textarea rows="2" maxlength="200" th:field="*{otrasSenas}"></textarea></div>
+                </div>
+            </fieldset>
+        </section>
+    </div>
+    <div class="modal-actions"><a href="/incidentes/listado" class="btn-secondary-custom">Cancelar</a><button type="submit" class="btn-primary-custom"><i class="bi bi-check-lg"></i> Guardar cambios</button></div>
+</form>
+</section>
+</main></div></div>
+<div class="custom-modal" id="modalEditarVehiculo" th:if="${vehiculoForm != null}">
+    <div class="modal-backdrop-custom" id="editarVehiculoBackdrop"></div>
+    <div class="modal-panel vehicle-modal-panel">
+        <div class="modal-header-custom">
+            <div><span class="section-label">VEHÍCULO ASOCIADO</span><h3>Actualizar datos del vehículo</h3><p>La placa no se puede modificar desde este formulario.</p></div>
+            <button class="modal-close" id="cerrarEditarVehiculo" type="button" aria-label="Cerrar"><i class="bi bi-x-lg"></i></button>
+        </div>
+        <form th:action="@{/incidentes/vehiculo/actualizar}" th:object="${vehiculoForm}" method="post">
+            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+            <input type="hidden" name="incidenteId" th:value="${incidenteForm.id}">
+            <input type="hidden" th:field="*{id}">
+            <div class="form-grid vehicle-form-grid">
+                <div class="form-group-custom"><label for="placaVehiculoModal">Placa</label><input id="placaVehiculoModal" th:field="*{placa}" readonly></div>
+                <div class="form-group-custom"><label for="codigoChasisVehiculo">Código de chasis</label><input id="codigoChasisVehiculo" th:field="*{codigoChasis}" maxlength="17"></div>
+                <div class="form-group-custom"><label for="marcaVehiculoModal">Marca</label><select id="marcaVehiculoModal" th:field="*{idMarca}" required><option value="">Seleccione marca</option><option th:each="o : ${marcasVehiculo}" th:value="${o.id}" th:text="${o.etiqueta}"></option></select></div>
+                <div class="form-group-custom"><label for="modeloVehiculoModal">Modelo</label><select id="modeloVehiculoModal" th:field="*{idModelo}" required><option value="">Seleccione modelo</option><option th:each="o : ${modelosVehiculo}" th:value="${o.id}" th:data-marca="${o.relacionId}" th:text="${o.etiqueta}"></option></select></div>
+                <div class="form-group-custom"><label for="anioVehiculoModal">Año</label><select id="anioVehiculoModal" th:field="*{idAnio}" required><option value="">Seleccione año</option><option th:each="o : ${aniosVehiculo}" th:value="${o.id}" th:data-modelo="${o.relacionId}" th:text="${o.etiqueta}"></option></select></div>
+            </div>
+            <div class="modal-actions"><button type="button" class="btn-secondary-custom" id="cancelarEditarVehiculo">Cancelar</button><button type="submit" class="btn-primary-custom"><i class="bi bi-check-lg"></i> Guardar cambios</button></div>
+        </form>
+    </div>
+</div>
+<script src="/js/sidebar.js"></script><script src="/js/incidentes.js"></script></body></html>

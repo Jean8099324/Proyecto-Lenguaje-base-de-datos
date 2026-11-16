@@ -10,29 +10,7 @@
 </head>
 <body>
 <div class="app-layout">
-    <aside class="sidebar" id="sidebar">
-        <div class="sidebar-header">
-            <a class="sidebar-brand-link" href="/dashboard" aria-label="Ir al inicio"><div class="brand-icon"><i class="bi bi-truck"></i></div>
-            <div class="brand-text"><h1>Rescate Vial CR</h1><span>Gestión de Asistencia Vial</span></div></a>
-            <button type="button" class="close-sidebar" id="closeSidebar"><i class="bi bi-x-lg"></i></button>
-        </div>
-        <nav class="sidebar-nav">
-            <div class="nav-section"><span class="nav-title">PRINCIPAL</span>
-                <a class="nav-link" href="/dashboard"><i class="bi bi-grid-1x2-fill"></i><span>Dashboard</span></a>
-            </div>
-            <div class="nav-section"><span class="nav-title">GESTIÓN</span>
-                <a class="nav-link" href="/usuarios/listado"><i class="bi bi-person-badge"></i><span>Usuarios</span></a>
-                <a class="nav-link" href="/usuarios/roles"><i class="bi bi-person-lock"></i><span>Roles de usuario</span></a>
-                <a class="nav-link" href="/clientes"><i class="bi bi-people"></i><span>Clientes</span></a>
-                <a class="nav-link" href="/vehiculos"><i class="bi bi-car-front"></i><span>Vehículos</span></a>
-                <a class="nav-link" href="/personal"><i class="bi bi-person-workspace"></i><span>Personal</span></a>
-                <a class="nav-link active" href="/contactos"><i class="bi bi-person-lines-fill"></i><span>Contactos</span></a>
-            </div>
-        </nav>
-        <div class="sidebar-footer"><div class="system-status"><span class="status-dot"></span>
-            <div><strong>Sistema operativo</strong><span>Gestión de contactos</span></div>
-        </div></div>
-    </aside>
+    <aside th:replace="~{fragments/sidebar :: sidebar}"></aside>
     <div class="sidebar-overlay" id="sidebarOverlay"></div>
     <div class="main-content">
         <header class="topbar">
@@ -93,5 +71,5 @@
     </div>
 </div>
 <script src="/js/contactos.js"></script>
-</body>
+<script src="/js/sidebar.js"></script></body>
 </html>

@@ -10,6 +10,7 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 
 @Configuration
 public class SecurityConfig {
@@ -22,8 +23,11 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http.authorizeHttpRequests(authorize -> authorize
                 .requestMatchers("/", "/login", "/error", "/css/**", "/js/**", "/img/**", "/fav/**",
-                        "/webjars/**", "/favicon.ico")
+                        "/webjars/**", "/favicon.ico", "/error/**")
                 .permitAll()
+                .requestMatchers("/incidentes/clientes/asociar/**").hasRole("ADMIN")
+                .requestMatchers("/cliente/**").hasAnyRole("ADMIN", "CLIENT")
+                .requestMatchers("/incidentes/clientes/**", "/incidentes/clientes").hasRole("ADMIN")
                 .requestMatchers("/usuarios/**").hasRole("ADMIN")
                 .requestMatchers("/clientes/**").hasRole("ADMIN")
                 .requestMatchers("/vehiculos/**").hasRole("ADMIN")
@@ -31,12 +35,20 @@ public class SecurityConfig {
                 .requestMatchers("/contactos/**").hasRole("ADMIN")
                 .requestMatchers("/datos-contacto/**").hasRole("ADMIN")
                 .requestMatchers("/configuracion/**").hasRole("ADMIN")
-                .requestMatchers("/dashboard").authenticated()
-                .anyRequest().authenticated())
+                .requestMatchers("/dashboard",
+                        "/incidentes/**",
+                        "/despacho/**",
+                        "/detalle-reparaciones/**",
+                        "/facturas/**",
+                        "/reparaciones/**",
+                        "/repuestos/**",
+                        "/unidades/**").hasRole("ADMIN")
+                .requestMatchers("/menu/estado").authenticated()
+                .anyRequest().hasRole("ADMIN"))
                 .formLogin(form -> form
                         .loginPage("/login")
                         .loginProcessingUrl("/login")
-                        .defaultSuccessUrl("/dashboard", true)
+                        .successHandler(authenticationSuccessHandler())
                         .failureUrl("/login?error=true")
                         .permitAll())
                 .logout(logout -> logout
@@ -45,10 +57,29 @@ public class SecurityConfig {
                         .invalidateHttpSession(true)
                         .deleteCookies("JSESSIONID")
                         .permitAll())
+                .exceptionHandling(exception -> exception
+                        .accessDeniedPage("/error/403"))
                 .sessionManagement(session -> session
                         .maximumSessions(1)
                         .maxSessionsPreventsLogin(false));
         return http.build();
+    }
+
+    @Bean
+    public AuthenticationSuccessHandler authenticationSuccessHandler() {
+        return (request, response, authentication) -> {
+            boolean administrador = authentication.getAuthorities().stream()
+                    .anyMatch(authority -> "ROLE_ADMIN".equals(authority.getAuthority()));
+            boolean cliente = authentication.getAuthorities().stream()
+                    .anyMatch(authority -> "ROLE_CLIENT".equals(authority.getAuthority()));
+            if (administrador) {
+                response.sendRedirect("/dashboard");
+            } else if (cliente) {
+                response.sendRedirect("/cliente/inicio");
+            } else {
+                response.sendRedirect("/error/403");
+            }
+        };
     }
 
     /**

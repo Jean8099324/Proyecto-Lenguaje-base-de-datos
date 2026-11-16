@@ -1,3 +1,5 @@
+@import url("form-controls.css");
+
 * {
     margin: 0;
     padding: 0;
@@ -296,7 +298,7 @@ body {
 }
 
 .input-group-custom input::placeholder {
-    color: #a5adb6;
+    color: var(--input-placeholder);
 }
 
 .input-group-custom input:focus {

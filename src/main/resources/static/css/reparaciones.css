@@ -1,3 +1,5 @@
+@import url("form-controls.css");
+
 * {
     margin: 0;
     padding: 0;
@@ -709,6 +711,10 @@ textarea {
     color: var(--primary-light);
 }
 
+.action-btn.flow {
+    color: #21845a;
+}
+
 .action-btn.edit {
     color: #b17a00;
 }
@@ -987,6 +993,158 @@ a.action-btn {
     display: inline-flex;
     align-items: center;
     justify-content: center;
+}
+
+.repair-flow-page {
+    max-width: 1120px;
+    margin: 0 auto;
+}
+
+.repair-flow-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.repair-flow-summary {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 18px;
+    margin-bottom: 20px;
+    padding: 20px 24px;
+}
+
+.repair-flow-summary > div {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.repair-flow-summary span {
+    color: var(--muted);
+    font-size: 12px;
+    text-transform: uppercase;
+}
+
+.repair-flow-summary strong {
+    color: var(--primary);
+    font-size: 16px;
+}
+
+.repair-flow-current {
+    width: fit-content;
+    padding: 6px 11px;
+    border-radius: 999px;
+    background: #e8f3fb;
+    color: #256493 !important;
+}
+
+.repair-flow-current.is-unclassified {
+    background: #eff1f3;
+    color: #66717a !important;
+}
+
+.repair-flow-card {
+    padding-bottom: 20px;
+}
+
+.repair-flow-steps {
+    display: grid;
+    gap: 0;
+    margin: 0;
+    padding: 8px 26px 0;
+    list-style: none;
+}
+
+.repair-flow-steps li {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-height: 54px;
+    color: #83909c;
+}
+
+.repair-flow-steps li:not(:last-child)::after {
+    position: absolute;
+    top: 34px;
+    left: 12px;
+    width: 2px;
+    height: 25px;
+    background: #dfe5ea;
+    content: "";
+}
+
+.repair-flow-marker {
+    z-index: 1;
+    display: grid;
+    width: 26px;
+    height: 26px;
+    place-items: center;
+    border: 2px solid #cbd4dc;
+    border-radius: 50%;
+    background: #fff;
+    color: #a2adb7;
+}
+
+.repair-flow-step-name {
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.repair-flow-steps .is-complete {
+    color: #21845a;
+}
+
+.repair-flow-steps .is-complete .repair-flow-marker,
+.repair-flow-steps .is-current .repair-flow-marker {
+    border-color: #21845a;
+    background: #e8f6ee;
+    color: #21845a;
+}
+
+.repair-flow-steps .is-current {
+    color: #256493;
+}
+
+.repair-flow-steps .is-current .repair-flow-marker {
+    border-color: #256493;
+    background: #e8f3fb;
+    color: #256493;
+}
+
+.repair-flow-steps .is-current .repair-flow-step-name {
+    font-weight: 800;
+}
+
+.repair-flow-badge {
+    padding: 5px 9px;
+    border-radius: 999px;
+    background: #e8f3fb;
+    color: #256493;
+    font-size: 11px;
+    font-weight: 700;
+}
+
+.repair-flow-badge.done {
+    background: #f0f7f3;
+}
+
+.repair-flow-note {
+    margin: 14px 24px 0;
+    color: #9a6400;
+    font-size: 13px;
+}
+
+@media (max-width: 700px) {
+    .repair-flow-summary {
+        grid-template-columns: 1fr;
+    }
+
+    .repair-flow-steps {
+        padding-right: 16px;
+        padding-left: 16px;
+    }
 }
 
 /* =========================

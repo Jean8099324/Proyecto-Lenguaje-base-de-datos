@@ -2,6 +2,7 @@ package com.rescatevial.controller;
 
 import com.rescatevial.domain.Usuario;
 import com.rescatevial.service.EstadoService;
+import com.rescatevial.service.CorreoService;
 import com.rescatevial.service.TipoUsuarioService;
 import com.rescatevial.service.UsuarioService;
 import jakarta.validation.Valid;
@@ -22,12 +23,14 @@ public class UsuarioController {
     private final UsuarioService usuarioService;
     private final TipoUsuarioService tipoUsuarioService;
     private final EstadoService estadoService;
+    private final CorreoService correoService;
 
     public UsuarioController(UsuarioService usuarioService, TipoUsuarioService tipoUsuarioService,
-                             EstadoService estadoService) {
+                             EstadoService estadoService, CorreoService correoService) {
         this.usuarioService = usuarioService;
         this.tipoUsuarioService = tipoUsuarioService;
         this.estadoService = estadoService;
+        this.correoService = correoService;
     }
 
     @GetMapping("/listado")
@@ -80,12 +83,25 @@ public class UsuarioController {
         }
 
         try {
+            boolean nuevo = usuario.getId() == null;
+            String passwordTemporal = usuario.getPassword();
+            String destinatario = usuario.getCorreo();
+            if (nuevo && (destinatario == null || destinatario.isBlank())) {
+                throw new IllegalArgumentException("El correo es obligatorio para enviar las credenciales.");
+            }
             usuarioService.save(usuario);
-            redirectAttributes.addFlashAttribute("mensajeExito",
-                    usuario.getId() == null ? "Usuario registrado correctamente." : "Usuario actualizado correctamente.");
+            if (nuevo) {
+                correoService.enviarCredenciales(destinatario, usuario.getUsername(), passwordTemporal);
+                redirectAttributes.addFlashAttribute("mensajeExito",
+                        "Usuario registrado y credenciales enviadas al correo indicado.");
+            } else {
+                redirectAttributes.addFlashAttribute("mensajeExito", "Usuario actualizado correctamente.");
+            }
             return "redirect:/usuarios/listado";
         } catch (DataIntegrityViolationException ex) {
             redirectAttributes.addFlashAttribute("mensajeError", "No se pudo guardar: revisa el username, tipo y estado.");
+        } catch (IllegalStateException ex) {
+            redirectAttributes.addFlashAttribute("mensajeError", ex.getMessage());
         } catch (Exception ex) {
             redirectAttributes.addFlashAttribute("mensajeError", "No se pudo guardar el usuario: " + ex.getMessage());
         }

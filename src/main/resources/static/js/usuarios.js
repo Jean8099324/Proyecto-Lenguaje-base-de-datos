@@ -18,6 +18,16 @@
     // Cada rol mantiene su propio checkbox; al enviar, se recopilan los seleccionados
     // bajo el nombre que espera el modelo Usuario en el backend.
     document.querySelectorAll("#formUsuario").forEach(form => {
+        const perfil = form.querySelector("select[name='tipoUsuario']");
+        const ajustarRoles = () => {
+            const cliente = perfil?.selectedOptions[0]?.textContent.trim().toUpperCase() === "CLIENTE";
+            form.querySelectorAll(".role-access-toggle").forEach(toggle => {
+                toggle.disabled = cliente;
+                if (cliente) toggle.checked = toggle.value === "CLIENT";
+            });
+        };
+        perfil?.addEventListener("change", ajustarRoles);
+        ajustarRoles();
         form.addEventListener("submit", event => {
             form.querySelectorAll("input[name='rolesNombresSeleccionados']").forEach(input => input.remove());
             const selectedRoles = [...form.querySelectorAll(".role-access-toggle:checked")];

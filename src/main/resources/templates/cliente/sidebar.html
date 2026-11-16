@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org"><body>
+    <aside th:fragment="sidebar" class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <a class="sidebar-brand-link" th:href="@{/cliente/inicio}" aria-label="Ir a mi inicio">
+                <div class="brand-icon"><i class="bi bi-truck" aria-hidden="true"></i></div>
+                <div class="brand-text"><h1>Rescate Vial CR</h1><span>Gestión de Asistencia Vial</span></div>
+            </a>
+            <button class="close-sidebar" id="closeSidebar" type="button" aria-label="Cerrar menú"><i class="bi bi-x-lg"></i></button>
+        </div>
+        <nav class="sidebar-nav" aria-label="Menú del cliente">
+            <div class="nav-section">
+                <span class="nav-title">PRINCIPAL</span>
+                <a th:href="@{/cliente/inicio}" class="nav-link active" aria-current="page"><i class="bi bi-grid-1x2-fill"></i><span>Mi inicio</span></a>
+            </div>
+            <div class="nav-section">
+                <span class="nav-title">ASISTENCIA VIAL</span>
+                <a class="nav-link" th:href="@{/cliente/inicio(abrirIncidente=true)}" data-open-incident><i class="bi bi-exclamation-triangle"></i><span>Reportar incidente</span></a>
+            </div>
+            <div class="nav-section">
+                <span class="nav-title">MI CUENTA</span>
+                <a th:href="@{/cliente/cuenta}" class="nav-link"><i class="bi bi-person-circle"></i><span>Mi cuenta</span></a>
+            </div>
+        </nav>
+        <div class="sidebar-footer"><div class="system-status"><i class="bi bi-shield-check"></i><div><strong>Portal del cliente</strong><span>Tu espacio de asistencia vial</span></div></div></div>
+    </aside>
+</body></html>

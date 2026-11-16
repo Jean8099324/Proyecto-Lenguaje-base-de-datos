@@ -40,6 +40,7 @@ public class UsuarioRolController {
             var asignados = usuario.getRoles().stream().toList();
             var nombresAsignados = asignados.stream().map(rol -> rol.getNombre()).toList();
             var disponibles = usuarioService.getRolesNombres().stream()
+                    .filter(nombre -> !"CLIENTE".equalsIgnoreCase(usuario.getTipoUsuarioNombre()) || "CLIENT".equalsIgnoreCase(nombre))
                     .filter(nombre -> nombresAsignados.stream().noneMatch(asignado -> asignado.equalsIgnoreCase(nombre)))
                     .toList();
             model.addAttribute("rolesAsignados", asignados);

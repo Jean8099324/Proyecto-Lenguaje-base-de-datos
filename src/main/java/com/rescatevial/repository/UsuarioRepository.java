@@ -94,6 +94,12 @@ public class UsuarioRepository {
         return usuarioEncontrado;
     }
 
+    public boolean esPerfilCliente(Long tipoUsuario) {
+        return new TipoUsuarioRepository(jdbc).findAllActivos().stream()
+                .anyMatch(tipo -> java.util.Objects.equals(tipo.getId(), tipoUsuario)
+                        && "CLIENTE".equalsIgnoreCase(tipo.getNombreTipoUsuario().trim()));
+    }
+
     public boolean existsByUsername(String username) {
         return findByUsername(username).isPresent();
     }

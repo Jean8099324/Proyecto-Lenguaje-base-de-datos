@@ -25,120 +25,7 @@
         <!-- MENU LATERAL -->
         <!-- ===================================== -->
 
-        <aside class="sidebar" id="sidebar">
-
-            <div class="sidebar-header">
-
-                <a class="sidebar-brand-link" href="/dashboard" aria-label="Ir al inicio"><div class="brand-icon">
-                    <i class="bi bi-truck"></i>
-                </div>
-
-                <div class="brand-text">
-                    <h1>Rescate Vial CR</h1>
-                    <span>Gestión de Asistencia Vial</span>
-                </div></a>
-
-                <button class="close-sidebar" id="closeSidebar" type="button">
-
-                    <i class="bi bi-x-lg"></i>
-
-                </button>
-
-            </div>
-
-            <nav class="sidebar-nav">
-
-                <!-- PRINCIPAL -->
-                <div class="nav-section">
-
-                    <span class="nav-title">PRINCIPAL</span>
-
-                    <a th:href="@{/dashboard}" class="nav-link">
-
-                        <i class="bi bi-grid-1x2-fill"></i>
-                        <span>Dashboard</span>
-
-                    </a>
-
-                </div>
-
-                <!-- GESTION -->
-                <div class="nav-section">
-
-                    <span class="nav-title">GESTIÓN</span>
-
-                    <a th:href="@{/usuarios/listado}" class="nav-link">
-
-                        <i class="bi bi-person-badge"></i>
-                        <span>Usuarios</span>
-
-                    </a>
-
-                    <a th:href="@{/usuarios/roles}" class="nav-link">
-
-                        <i class="bi bi-person-lock"></i>
-                        <span>Roles de usuario</span>
-
-                    </a>
-
-                    <a href="#" class="nav-link under-construction" aria-disabled="true" onclick="return false;">
-
-                        <i class="bi bi-car-front"></i>
-                        <span>Vehículos</span>
-
-                    </a>
-
-                </div>
-
-                <!-- OPERACIONES -->
-                <div class="nav-section">
-
-                    <span class="nav-title">OPERACIONES</span>
-
-                    <a href="#" class="nav-link under-construction" aria-disabled="true" onclick="return false;">
-
-                        <i class="bi bi-exclamation-triangle"></i>
-                        <span>Incidentes</span>
-
-                    </a>
-
-                    <!-- PANTALLA 20 -->
-                    <a th:href="@{/reparaciones/listado}" class="nav-link active">
-
-                        <i class="bi bi-tools"></i>
-                        <span>Reparaciones</span>
-
-                    </a>
-
-                    <!-- PANTALLA 21: NUEVO ACCESO -->
-                    <a th:href="@{/detalle-reparaciones/listado}" class="nav-link">
-
-                        <i class="bi bi-list-check"></i>
-                        <span>Detalle de reparaciones</span>
-
-                    </a>
-
-                </div>
-
-            </nav>
-
-            <!-- ESTADO DEL SISTEMA -->
-            <div class="sidebar-footer">
-
-                <div class="system-status">
-
-                    <span class="status-dot"></span>
-
-                    <div>
-                        <strong>Sistema operativo</strong>
-                        <span>Gestión de reparaciones</span>
-                    </div>
-
-                </div>
-
-            </div>
-
-        </aside>
+        <aside th:replace="~{fragments/sidebar :: sidebar}"></aside>
 
         <!-- FONDO DEL MENU MOVIL -->
         <div class="sidebar-overlay" id="sidebarOverlay"></div>
@@ -309,7 +196,7 @@
                             <thead>
 
                                 <tr>
-                                    <th>ID</th>
+                                    <th>ID_INCIDENTE</th>
                                     <th>DESCRIPCIÓN</th>
                                     <th>HORAS</th>
                                     <th>TARIFA/HORA</th>
@@ -318,7 +205,6 @@
                                     <th>INICIO</th>
                                     <th>FIN</th>
                                     <th>SALIDA</th>
-                                    <th>INCIDENTE</th>
                                     <th>MECÁNICO</th>
                                     <th>ESTADO</th>
                                     <th>ACCIONES</th>
@@ -331,8 +217,8 @@
                                 <!-- REGISTROS DE ORACLE -->
                                 <tr th:each="reparacion : ${reparaciones}" data-reparacion="true">
 
-                                    <!-- ID -->
-                                    <td th:text="${reparacion.id}">
+                                    <!-- ID DEL INCIDENTE ASOCIADO -->
+                                    <td th:text="${reparacion.idIncidente}">
                                     </td>
 
                                     <!-- DESCRIPCION -->
@@ -373,10 +259,6 @@
                                         th:text="${reparacion.fechaSalidaTaller != null ? #temporals.format(reparacion.fechaSalidaTaller, 'dd/MM/yyyy') : '—'}">
                                     </td>
 
-                                    <!-- INCIDENTE -->
-                                    <td th:text="${reparacion.idIncidente}">
-                                    </td>
-
                                     <!-- MECANICO -->
                                     <td th:text="${reparacion.idMecanico}">
                                     </td>
@@ -389,6 +271,18 @@
                                     <td>
 
                                         <div class="action-buttons">
+
+                                            <!-- VER HISTORIAL DEL INCIDENTE -->
+                                            <a class="action-btn view" title="Ver historial" aria-label="Ver historial del incidente"
+                                                th:href="@{/incidentes/detalle/{id}(id=${reparacion.idIncidente})}">
+                                                <i class="bi bi-eye"></i>
+                                            </a>
+
+                                            <!-- INGRESAR AL FLUJO DE ESTA REPARACION -->
+                                            <a class="action-btn flow" title="Ingresar al flujo" aria-label="Ingresar al flujo de reparacion"
+                                                th:href="@{/reparaciones/flujo/{id}(id=${reparacion.id})}">
+                                                <i class="bi bi-diagram-3"></i>
+                                            </a>
 
                                             <!-- MODIFICAR -->
                                             <a class="action-btn edit" title="Editar reparación"
@@ -420,7 +314,7 @@
                                 <!-- SIN REGISTROS -->
                                 <tr th:if="${#lists.isEmpty(reparaciones)}">
 
-                                    <td colspan="13" class="text-center">
+                                    <td colspan="12" class="text-center">
 
                                         No hay reparaciones registradas.
 
@@ -695,6 +589,6 @@
     <!-- JAVASCRIPT ORIGINAL -->
     <script th:src="@{/js/reparaciones.js}"></script>
 
-</body>
+<script src="/js/sidebar.js"></script></body>
 
 </html>
