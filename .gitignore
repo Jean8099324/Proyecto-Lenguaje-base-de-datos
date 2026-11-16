@@ -35,5 +35,3 @@ build/
 ### CONFIGURACION PRIVADA DE ORACLE ###
 src/main/resources/application.properties
 
-### RESPALDO DE SCRIPTS DE ORACLE ###
-/scrips_respaldo/
