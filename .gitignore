@@ -1,4 +1,5 @@
-﻿HELP.md
+﻿
+HELP.md
 target/
 !**/src/main/**/target/
 !**/src/test/**/target/
@@ -30,4 +31,9 @@ build/
 
 ### VS Code ###
 .vscode/
+
+### CONFIGURACION PRIVADA DE ORACLE ###
 src/main/resources/application.properties
+
+### RESPALDO DE SCRIPTS DE ORACLE ###
+/scrips_respaldo/
