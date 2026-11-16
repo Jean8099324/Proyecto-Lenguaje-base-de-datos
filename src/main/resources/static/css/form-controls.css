@@ -1,0 +1,26 @@
+/* Ayudas de entrada compartidas por los formularios del sistema. */
+:root {
+    --input-placeholder: #a5adb6;
+}
+
+input::placeholder,
+textarea::placeholder {
+    color: var(--input-placeholder);
+    font-weight: 400;
+    opacity: 1;
+}
+
+/* Un select vacío funciona visualmente como el placeholder de un input. */
+select:not([multiple]):has(> option[value=""]:checked) {
+    color: var(--input-placeholder);
+    font-weight: 400;
+}
+
+select option {
+    color: var(--text, #17202a);
+    font-weight: 400;
+}
+
+select option[value=""] {
+    color: var(--input-placeholder);
+}

@@ -120,6 +120,7 @@
                 </div>
 
                 <!-- Formulario conectado con Spring Security -->
+                <div th:if="${param.passwordChanged}" class="alert alert-success" role="status">Contraseña actualizada. Inicia sesión con tu nueva contraseña.</div>
                 <form id="loginForm" th:action="@{/login}" method="post">
 
                     <!-- Protección CSRF -->

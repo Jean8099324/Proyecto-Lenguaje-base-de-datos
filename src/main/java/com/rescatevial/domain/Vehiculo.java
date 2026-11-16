@@ -20,7 +20,6 @@ public class Vehiculo {
     @NotNull @Positive
     private Long idAnio;
     private Long idEstado;
-    @NotNull @Positive
     private Long idUsuario;
 
     private String nombreMarca;

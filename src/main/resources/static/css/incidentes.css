@@ -150,6 +150,53 @@
 .reporter-section legend { float: none; width: auto; margin: 0; padding: 0 6px; color: var(--primary); font-size: 12px; font-weight: 700; }
 .reporter-help { margin: 0 0 14px; color: var(--muted); font-size: 11px; }
 .reporter-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+.incident-edit-card { max-width: 1400px; margin-inline: auto; padding: 18px 22px; }
+.incident-edit-card form { margin: 0; }
+.incident-edit-identity { display: grid; grid-template-columns: minmax(0, .8fr) minmax(0, 1.2fr) minmax(0, 1.5fr); gap: 12px; margin-bottom: 16px; }
+.incident-edit-identity > div { display: flex; flex-direction: column; gap: 4px; padding: 10px 13px; border: 1px solid var(--border); border-radius: 9px; background: #f8fafc; }
+.incident-edit-identity span { color: #40566b; font-size: 11px; font-weight: 700; text-transform: uppercase; }
+.incident-edit-identity strong { display: flex; gap: 8px; color: #6c7885; font-size: 14px; font-weight: 500; }
+.incident-edit-datetime { display: flex; gap: 8px; }
+.incident-edit-datetime input { min-width: 0; padding: 5px 8px; border: 1px solid var(--border); border-radius: 7px; color: var(--text); background: #fff; }
+.incident-edit-plate { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.incident-edit-plate strong { min-width: 0; overflow-wrap: anywhere; }
+.btn-edit-vehicle { min-height: 32px; padding: 0 10px; font-size: 11px; white-space: nowrap; }
+.btn-edit-vehicle:disabled { cursor: not-allowed; opacity: .55; }
+.vehicle-edit-help { margin: 0; color: var(--muted); font-size: 13px; line-height: 1.5; }
+.incident-edit-grid { display: grid; grid-template-columns: minmax(0, 1fr); gap: 14px; }
+.incident-edit-section { min-width: 0; padding: 14px; border: 1px solid var(--border); border-radius: 10px; background: #fff; }
+.incident-edit-section h3 { display: flex; align-items: center; gap: 8px; margin: 0 0 12px; color: var(--primary); font-size: 14px; font-weight: 700; }
+.incident-edit-section h3 i { color: var(--accent); }
+.incident-edit-client-subsection { margin-top: 18px; padding-top: 14px; }
+.client-dependent-hidden { display: none !important; }
+.incident-edit-subheading { margin: 10px 0 7px; color: #40566b; font-size: 11px; font-weight: 800; text-transform: uppercase; }
+.incident-edit-client-fields { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+.client-selector-row { grid-column: 1 / -1; display: flex; align-items: flex-end; gap: 10px; width: 50%; }
+.client-selector-field { flex: 1; min-width: 0; }
+.incident-edit-client-address, .incident-edit-contact-fields { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+.incident-edit-client-address .form-group-custom.full-width { grid-column: 1 / -1; }
+.client-contact-columns { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; }
+.client-contact-columns > div { min-width: 0; padding: 10px 12px; border-radius: 8px; background: #f8fafc; }
+.client-contact-heading { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.client-contact-heading .incident-edit-subheading { margin: 0; }
+.add-client-contact { display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; border: 1px solid var(--primary-light); border-radius: 7px; color: #fff; background: var(--primary-light); cursor: pointer; }
+.add-client-contact:hover { background: var(--primary); }
+.client-contact-list { display: grid; gap: 7px; margin-top: 8px; }
+.client-contact-list .client-contact-value { margin: 0; }
+.new-client-contact { width: 100%; min-height: 38px; padding: 7px 10px; border: 1px solid var(--border); border-radius: 7px; color: var(--text); background: #fff; font-size: 13px; }
+.new-client-contact:focus { outline: 0; border-color: var(--primary-light); box-shadow: 0 0 0 3px rgba(21,58,91,.1); }
+.client-contact-empty { margin: 0; color: var(--muted); font-size: 13px; }
+.client-contact-value { display: block; margin: 4px 0; color: var(--primary-light); font-size: 14px; text-decoration: none; }
+.client-contact-value:hover { text-decoration: underline; }
+.incident-edit-contact-fields { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.incident-edit-report { grid-column: 1 / -1; }
+.incident-edit-report-fields { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.incident-edit-report-fields .form-group-custom.full-width { grid-column: 1 / -1; }
+.incident-edit-location { grid-column: 1 / -1; margin: 0; padding: 12px 14px; }
+.incident-edit-location legend { margin-bottom: 8px; }
+.incident-edit-location .location-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+.incident-edit-location .location-notes { grid-column: 1 / -1; }
+.incident-edit-card .modal-actions { margin-top: 14px; padding-top: 12px; }
 .required-fields-note { margin: 0 0 16px; color: var(--muted); font-size: 11px; }
 .required-fields-note span, .required-label::after,
 .form-group-custom label:not(.required-label):has(+ input[required])::after,
@@ -174,4 +221,307 @@
     .timeline-content dl, .billing-cards { grid-template-columns: 1fr; }
     .incident-detail-body { padding: 16px; }
     .detail-fields .detail-wide { grid-column: auto; }
+}
+
+/* Vista compacta del detalle para mantener el historial a la vista. */
+.incident-detail-heading,
+.incident-detail-card {
+    max-width: 1400px;
+}
+
+.incident-detail-body {
+    display: grid;
+    grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
+    grid-template-areas:
+        "identity identity"
+        "contact vehicle"
+        "report report"
+        "billing billing"
+        "history history";
+    gap: 0 20px;
+    padding: 14px 18px;
+}
+
+.incident-identity { grid-area: identity; padding-bottom: 10px; }
+.report-details { grid-area: report; }
+.incident-history-section { grid-area: history; }
+.incident-contact-section { grid-area: contact; }
+.vehicle-detail-section { grid-area: vehicle; }
+.billing-section { grid-area: billing; }
+
+.detail-section {
+    min-width: 0;
+    padding-bottom: 10px;
+    margin-bottom: 10px;
+}
+
+.detail-section h3 {
+    margin-bottom: 7px;
+}
+
+.incident-identity > div {
+    padding: 9px 12px;
+}
+
+.incident-contact-panel,
+.vehicle-detail-section .vehicle-fields {
+    padding: 8px 12px;
+    border-radius: 8px;
+    background: #f8fafc;
+}
+
+.incident-contact-row,
+.vehicle-fields > div {
+    display: grid;
+    grid-template-columns: minmax(135px, 36%) minmax(0, 1fr);
+    align-items: baseline;
+    gap: 10px;
+    padding: 7px 0;
+}
+
+.incident-contact-row > span,
+.vehicle-fields dt {
+    color: #40566b;
+    font-size: 11px;
+    font-weight: 700;
+    line-height: 1.35;
+    text-transform: uppercase;
+}
+
+.incident-contact-row > strong,
+.incident-contact-row > a,
+.vehicle-fields dd {
+    margin: 0;
+    color: #6c7885;
+    font-size: 13px;
+    font-weight: 400;
+    line-height: 1.4;
+    overflow-wrap: anywhere;
+}
+
+.incident-contact-row > a {
+    text-decoration: none;
+}
+
+.incident-contact-row > a:hover {
+    text-decoration: underline;
+}
+
+.incident-contact-people {
+    margin-top: 4px;
+    padding-top: 5px;
+}
+
+.contact-details-divider {
+    height: 10px;
+}
+
+.vehicle-detail-section .vehicle-fields {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0;
+}
+
+.vehicle-detail-section .vehicle-fields dt {
+    margin: 0;
+}
+
+.vehicle-detail-section .vehicle-fields dd {
+    margin: 0;
+}
+
+.report-overview {
+    grid-template-columns: minmax(0, 1fr);
+    grid-column: 2;
+    grid-row: 2;
+    align-content: start;
+    margin: 0;
+    padding: 8px 12px;
+    gap: 0;
+}
+
+.report-overview > div {
+    display: grid;
+    grid-template-columns: minmax(170px, 22%) minmax(0, 1fr);
+    align-items: baseline;
+    gap: 12px;
+    padding: 7px 0;
+}
+
+.report-overview span {
+    margin: 0;
+}
+
+.report-overview strong,
+.report-overview .priority-pill,
+.report-overview .status-pill {
+    justify-self: start;
+    text-align: left;
+}
+
+.report-overview .status-pill {
+    padding: 4px 9px;
+    border-radius: 999px;
+}
+
+.report-overview .status-pill.status-reported { color: #d93658; background: #ffebf0; }
+.report-overview .status-pill.status-assigned,
+.report-overview .status-pill.status-dispatched { color: #256493; background: #e8f3fb; }
+.report-overview .status-pill.status-attending { color: #a96b00; background: #fff4d8; }
+.report-overview .status-pill.status-transfer { color: #087f8c; background: #e2f7f8; }
+.report-overview .status-pill.status-completed { color: #198754; background: #e7f7ed; }
+
+.report-details .detail-fields {
+    grid-column: 1;
+    grid-row: 2;
+    grid-template-columns: minmax(0, 1fr);
+    align-content: start;
+    gap: 0;
+}
+
+.report-details .detail-fields .detail-wide {
+    grid-column: auto;
+}
+
+.report-details .detail-fields > div {
+    display: grid;
+    grid-template-columns: minmax(210px, 30%) minmax(0, 1fr);
+    align-items: baseline;
+    gap: 12px;
+    padding: 8px 10px;
+    background: #f8fafc;
+}
+
+.report-details .detail-fields > div:first-child {
+    border-radius: 8px 8px 0 0;
+}
+
+.report-details .detail-fields > div:last-child {
+    border-radius: 0 0 8px 8px;
+}
+
+.report-details .detail-fields dt {
+    margin: 0;
+}
+
+.vehicle-detail-section .detail-fields {
+    border-radius: 8px;
+    background: #f8fafc;
+}
+
+.report-details .detail-description {
+    min-height: 0;
+}
+
+.report-details .report-overview,
+.report-details .detail-fields {
+    min-width: 0;
+}
+
+.report-details {
+    display: grid;
+    grid-template-columns: minmax(0, 1.35fr) minmax(280px, 0.65fr);
+    grid-template-rows: auto 1fr;
+    column-gap: 16px;
+}
+
+.report-details > h3 {
+    grid-column: 1 / -1;
+}
+
+.reporter-cards {
+    grid-template-columns: 1fr;
+    gap: 7px;
+}
+
+.reporter-card {
+    padding: 8px 10px;
+}
+
+.reporter-card > strong {
+    margin-bottom: 3px;
+}
+
+.service-timeline article {
+    padding-bottom: 8px;
+}
+
+.timeline-content {
+    padding: 8px 10px;
+}
+
+.timeline-resource {
+    margin: 2px 0 5px;
+}
+
+.timeline-content dl {
+    gap: 8px;
+}
+
+.timeline-content dt,
+.billing-card dt {
+    font-size: 10px;
+}
+
+.timeline-content dd,
+.billing-card dd {
+    font-size: 12px;
+}
+
+.timeline-content > p:last-child {
+    margin-top: 5px;
+    font-size: 12px;
+}
+
+.billing-cards {
+    gap: 8px;
+}
+
+.billing-card {
+    padding: 9px 11px;
+}
+
+@media (max-width: 700px) {
+    .incident-detail-body {
+        grid-template-columns: minmax(0, 1fr);
+        grid-template-areas:
+            "identity"
+            "contact"
+            "vehicle"
+            "report"
+            "billing"
+            "history";
+        gap: 0;
+        padding: 12px;
+    }
+
+    .report-details .detail-fields,
+    .timeline-content dl {
+        grid-template-columns: 1fr;
+    }
+
+    .report-details .detail-fields > div {
+        grid-template-columns: minmax(130px, 38%) minmax(0, 1fr);
+        gap: 8px;
+    }
+
+    .report-details {
+        grid-template-columns: minmax(0, 1fr);
+        grid-template-rows: auto;
+    }
+
+    .report-details .detail-fields,
+    .report-details .report-overview {
+        grid-column: 1;
+        grid-row: auto;
+    }
+
+    .incident-edit-card { padding: 14px; }
+    .incident-edit-identity, .incident-edit-grid, .incident-edit-report-fields,
+    .incident-edit-location .location-grid, .incident-edit-client-fields,
+    .incident-edit-client-address, .incident-edit-contact-fields, .client-contact-columns { grid-template-columns: minmax(0, 1fr); }
+    .client-selector-row { width: 100%; }
+    .incident-edit-location, .incident-edit-report-fields .form-group-custom.full-width,
+    .incident-edit-location .location-notes, .incident-edit-report,
+    .incident-edit-client-address .form-group-custom.full-width { grid-column: 1; }
 }

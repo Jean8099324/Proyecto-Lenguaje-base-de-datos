@@ -24,212 +24,7 @@
         <!-- =========================
          MENÚ LATERAL
          ========================= -->
-        <aside class="sidebar" id="sidebar">
-
-            <div class="sidebar-header">
-
-                <div class="brand-icon">
-                    <i class="bi bi-truck"></i>
-                </div>
-
-                <div class="brand-text">
-                    <h1>Rescate Vial CR</h1>
-                    <span>Gestión de Asistencia Vial</span>
-                </div>
-
-                <button class="close-sidebar" id="closeSidebar">
-                    <i class="bi bi-x-lg"></i>
-                </button>
-
-            </div>
-
-            <nav class="sidebar-nav">
-
-                <!-- PRINCIPAL -->
-                <div class="nav-section">
-
-                    <span class="nav-title">PRINCIPAL</span>
-
-                    <a href="/dashboard" class="nav-link active">
-                        <i class="bi bi-grid-1x2-fill"></i>
-                        <span>Dashboard</span>
-                    </a>
-
-                </div>
-
-                <!-- OPERACIONES -->
-                <div class="nav-section">
-
-                    <span class="nav-title">OPERACIONES</span>
-
-                    <a href="/incidentes/listado" class="nav-link">
-                        <i class="bi bi-exclamation-triangle"></i>
-                        <span>Incidentes</span>
-                        <span class="nav-badge" th:text="${incidentesRegistrados}">0</span>
-                    </a>
-
-                    <a href="/despacho" class="nav-link">
-                        <i class="bi bi-send"></i>
-                        <span>Despacho</span>
-                    </a>
-
-                    <a href="/unidades" class="nav-link">
-                        <i class="bi bi-truck-front"></i>
-                        <span>Unidades</span>
-                    </a>
-
-                    <a href="#" aria-disabled="true" onclick="return false;" class="nav-link under-construction"
-                        title="En construcción">
-                        <i class="bi bi-camera"></i>
-                        <span>Evidencias</span>
-                    </a>
-
-                </div>
-
-                <!-- GESTIÓN -->
-                <div class="nav-section">
-
-                    <span class="nav-title">GESTIÓN</span>
-
-                    <!-- CLIENTES -->
-                    <a th:if="${esAdministrador}" href="/clientes" class="nav-link">
-                        <i class="bi bi-people"></i>
-                        <span>Clientes</span>
-                    </a>
-
-                    <!-- USUARIOS -->
-                    <a th:if="${esAdministrador}" href="/usuarios/listado" class="nav-link">
-                        <i class="bi bi-person-badge"></i>
-                        <span>Usuarios</span>
-                    </a>
-
-                    <!-- ROLES DE USUARIO -->
-                    <a th:if="${esAdministrador}" href="/usuarios/roles" class="nav-link">
-                        <i class="bi bi-person-lock"></i>
-                        <span>Roles de usuario</span>
-                    </a>
-
-                    <!-- VEHÍCULOS -->
-                    <a th:if="${esAdministrador}" href="/vehiculos" class="nav-link">
-                        <i class="bi bi-car-front"></i>
-                        <span>Vehículos</span>
-                    </a>
-
-                    <!-- PERSONAL -->
-                    <a th:if="${esAdministrador}" href="/personal" class="nav-link">
-                        <i class="bi bi-person-badge"></i>
-                        <span>Personal</span>
-                    </a>
-
-                    <!-- CONTACTOS -->
-                    <a th:if="${esAdministrador}" href="/contactos" class="nav-link">
-                        <i class="bi bi-person-lines-fill"></i>
-                        <span>Contactos</span>
-                    </a>
-
-                    <!-- DATOS DE CONTACTO -->
-                    <a th:if="${esAdministrador}" href="/datos-contacto" class="nav-link">
-                        <i class="bi bi-envelope-at"></i>
-                        <span>Datos de contacto</span>
-                    </a>
-
-                    <!-- UBICACIONES Y CONFIGURACIÓN -->
-                    <a th:if="${esAdministrador}" href="/configuracion" class="nav-link">
-                        <i class="bi bi-geo-alt"></i>
-                        <span>Ubicaciones y configuración</span>
-                    </a>
-
-                    <!-- TALLERES -->
-                    <a href="#" aria-disabled="true" onclick="return false;" class="nav-link under-construction"
-                        title="En construcción">
-                        <i class="bi bi-tools"></i>
-                        <span>Talleres</span>
-                    </a>
-
-                </div>
-
-                <!-- SERVICIOS -->
-                <div class="nav-section">
-
-                    <span class="nav-title">SERVICIOS</span>
-
-                    <a href="#" aria-disabled="true" onclick="return false;" class="nav-link under-construction"
-                        title="En construcción">
-                        <i class="bi bi-clipboard-check"></i>
-                        <span>Inspecciones</span>
-                    </a>
-
-                    <!-- PANTALLA 20: REPARACIONES -->
-                    <a th:href="@{/reparaciones/listado}" class="nav-link">
-                        <i class="bi bi-wrench-adjustable"></i>
-                        <span>Reparaciones</span>
-                    </a>
-
-                    <!-- PANTALLA 21: DETALLE DE REPARACIONES -->
-                    <a th:href="@{/detalle-reparaciones/listado}" class="nav-link">
-                        <i class="bi bi-list-check"></i>
-                        <span>Detalle de reparaciones</span>
-                    </a>
-
-                    <a th:href="@{/repuestos/listado}" class="nav-link">
-                        <i class="bi bi-box-seam"></i>
-                        <span>Repuestos</span>
-                    </a>
-
-                </div>
-
-                <!-- FINANZAS -->
-                <div class="nav-section">
-
-                    <span class="nav-title">FINANZAS</span>
-
-
-                    <!-- PANTALLA 24: FACTURACION -->
-                    <a th:href="@{/facturas/listado}" class="nav-link">
-                        <i class="bi bi-receipt"></i>
-                        <span>Facturación</span>
-                    </a>
-
-
-                    <a href="#" aria-disabled="true" onclick="return false;" class="nav-link under-construction"
-                        title="En construcción">
-                        <i class="bi bi-credit-card"></i>
-                        <span>Pagos</span>
-                    </a>
-
-                </div>
-
-                <!-- CONTROL -->
-                <div class="nav-section">
-
-                    <span class="nav-title">CONTROL</span>
-
-                    <a href="#" aria-disabled="true" onclick="return false;" class="nav-link under-construction"
-                        title="En construcción">
-                        <i class="bi bi-clock-history"></i>
-                        <span>Historial</span>
-                    </a>
-
-                </div>
-
-            </nav>
-
-            <div class="sidebar-footer">
-
-                <div class="system-status">
-
-                    <span class="status-dot"></span>
-
-                    <div>
-                        <strong>Sistema operativo</strong>
-                        <span>Todos los servicios activos</span>
-                    </div>
-
-                </div>
-
-            </div>
-
-        </aside>
+        <aside th:replace="~{fragments/sidebar :: sidebar}"></aside>
 
         <!-- Fondo móvil -->
         <div class="sidebar-overlay" id="sidebarOverlay"></div>
@@ -334,7 +129,7 @@
                 <section class="stats-grid">
 
                     <!-- INCIDENTES -->
-                    <article class="stat-card">
+                    <a class="stat-card stat-card-link" href="/incidentes/listado" aria-label="Ver incidentes registrados">
 
                         <div class="stat-icon danger">
                             <i class="bi bi-exclamation-triangle"></i>
@@ -352,10 +147,10 @@
 
                         </div>
 
-                    </article>
+                    </a>
 
                     <!-- UNIDADES -->
-                    <article class="stat-card">
+                    <a class="stat-card stat-card-link" href="/unidades" aria-label="Ver unidades registradas">
 
                         <div class="stat-icon success">
                             <i class="bi bi-truck-front"></i>
@@ -373,10 +168,10 @@
 
                         </div>
 
-                    </article>
+                    </a>
 
                     <!-- EN ATENCIÓN -->
-                    <article class="stat-card">
+                    <a class="stat-card stat-card-link" href="/despacho" aria-label="Ver incidentes en atención">
 
                         <div class="stat-icon warning">
                             <i class="bi bi-clock"></i>
@@ -394,10 +189,10 @@
 
                         </div>
 
-                    </article>
+                    </a>
 
                     <!-- CLIENTES -->
-                    <article class="stat-card">
+                    <a class="stat-card stat-card-link" href="/clientes" aria-label="Ver clientes registrados">
 
                         <div class="stat-icon primary">
                             <i class="bi bi-people"></i>
@@ -415,7 +210,7 @@
 
                         </div>
 
-                    </article>
+                    </a>
 
                 </section>
 
@@ -439,9 +234,9 @@
 
                             </div>
 
-                            <a href="#" aria-disabled="true" onclick="return false;" title="En construcción">
+                            <a href="/incidentes/listado">
                                 Ver todos
-                                <i class="bi bi-cone-striped"></i>
+                                <i class="bi bi-arrow-right"></i>
                             </a>
 
                         </div>
@@ -453,7 +248,7 @@
                                 <thead>
 
                                     <tr>
-                                        <th>INCIDENTE</th>
+                                        <th>#INCIDENTE</th>
                                         <th>UBICACIÓN</th>
                                         <th>TIPO</th>
                                         <th>ESTADO</th>
@@ -467,7 +262,7 @@
                                     <!-- Registros reales consultados desde Oracle -->
                                     <tr th:each="incidente : ${incidentesRecientes}">
                                         <td>
-                                            <strong th:text="${'#RV-' + incidente.id}">#RV-1</strong>
+                                            <strong th:text="${incidente.id}">1</strong>
                                         </td>
                                         <td>
                                             <i class="bi bi-geo-alt"></i>
@@ -495,7 +290,7 @@
                     <!-- =========================
                      ESTADO DE UNIDADES
                      ========================= -->
-                    <article class="dashboard-card units-card">
+                    <a class="dashboard-card units-card units-card-link" href="/unidades" aria-label="Ver estado y listado de unidades">
 
                         <div class="card-header-custom">
 
@@ -509,9 +304,7 @@
 
                             </div>
 
-                            <button class="more-button" type="button" disabled title="Opciones en construcción">
-                                <i class="bi bi-cone-striped"></i>
-                            </button>
+                            <span class="more-button" aria-hidden="true"><i class="bi bi-arrow-right"></i></span>
 
                         </div>
 
@@ -568,7 +361,7 @@
 
                         </div>
 
-                    </article>
+                    </a>
 
                 </section>
 
@@ -708,6 +501,6 @@
 
     <script src="/js/dashboard.js"></script>
 
-</body>
+<script src="/js/sidebar.js"></script></body>
 
 </html>

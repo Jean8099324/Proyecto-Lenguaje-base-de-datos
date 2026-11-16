@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flujo de reparación</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="/css/usuarios.css">
+    <link rel="stylesheet" href="/css/reparaciones.css">
+</head>
+<body>
+<main class="page-content repair-flow-page">
+    <section class="page-heading">
+        <div>
+            <span class="section-label">PROCESO DE TALLER</span>
+            <h2>Flujo de reparación</h2>
+            <p>Seguimiento de la reparación vinculada al incidente <strong th:text="${reparacion.idIncidente}">1</strong>.</p>
+        </div>
+        <div class="repair-flow-actions">
+            <a class="btn-secondary-custom" th:href="@{/incidentes/detalle/{id}(id=${reparacion.idIncidente})}">
+                <i class="bi bi-eye"></i> Historial del incidente
+            </a>
+            <a class="btn-secondary-custom" href="/reparaciones/listado">Volver a reparaciones</a>
+        </div>
+    </section>
+
+    <section class="content-card repair-flow-summary">
+        <div>
+            <span>Incidente asociado</span>
+            <strong th:text="${reparacion.idIncidente}">1</strong>
+        </div>
+        <div>
+            <span>Estado actual</span>
+            <strong class="repair-flow-current"
+                    th:classappend="${indiceEstadoActual >= 0 ? ' is-current' : ' is-unclassified'}"
+                    th:text="${estadoActual}">Estado</strong>
+        </div>
+        <div>
+            <span>Mecánico asignado</span>
+            <strong th:text="${reparacion.idMecanico}">1</strong>
+        </div>
+    </section>
+
+    <section class="content-card repair-flow-card">
+        <div class="content-card-header">
+            <div>
+                <span class="section-label">ETAPAS</span>
+                <h3>Proceso de reparación</h3>
+            </div>
+        </div>
+
+        <ol class="repair-flow-steps" th:if="${!#lists.isEmpty(estadosFlujo)}">
+            <li th:each="etapa, iter : ${estadosFlujo}"
+                th:classappend="${iter.index < indiceEstadoActual ? ' is-complete' : (iter.index == indiceEstadoActual ? ' is-current' : ' is-pending')}">
+                <span class="repair-flow-marker">
+                    <i class="bi" th:classappend="${iter.index < indiceEstadoActual ? ' bi-check-lg' : (iter.index == indiceEstadoActual ? ' bi-record-circle' : ' bi-circle')}"></i>
+                </span>
+                <span class="repair-flow-step-name" th:text="${etapa.nombreEstado}">Etapa</span>
+                <span class="repair-flow-badge" th:if="${iter.index == indiceEstadoActual}">Estado actual</span>
+                <span class="repair-flow-badge done" th:if="${iter.index < indiceEstadoActual}">Completada</span>
+            </li>
+        </ol>
+
+        <p class="detail-empty" th:if="${#lists.isEmpty(estadosFlujo)}">
+            No se encuentran los estados del flujo. Ejecute ESTADOS_REPARACION_MIGRACION.sql y vuelva a cargar la página.
+        </p>
+        <p class="repair-flow-note" th:if="${indiceEstadoActual < 0 and !#lists.isEmpty(estadosFlujo)}">
+            El estado asignado a esta reparación no corresponde a una etapa del flujo de taller.
+        </p>
+    </section>
+</main>
+</body>
+</html>

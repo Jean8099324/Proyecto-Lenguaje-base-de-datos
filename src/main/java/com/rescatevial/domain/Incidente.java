@@ -11,6 +11,7 @@ public class Incidente implements Serializable {
     private static final long serialVersionUID = 1L;
 
     private Long id;
+    private Long idUsuario;
     @NotNull private Long idVehiculo;
     @org.springframework.format.annotation.DateTimeFormat(iso = org.springframework.format.annotation.DateTimeFormat.ISO.DATE)
     private LocalDate fechaReporte;
@@ -33,9 +34,29 @@ public class Incidente implements Serializable {
     @NotNull private Long idEstado;
     private LocalDate fechaCierre;
     private String horaCierre;
+    @Size(max = 10) private String placaVehiculo;
     private String vehiculoEtiqueta;
     private String ubicacionEtiqueta;
     private String tipoEtiqueta;
     private String prioridadEtiqueta;
     private String estadoEtiqueta;
+
+    // Datos editables del propietario del vehiculo y del contacto del incidente.
+    private Long idCliente;
+    private String usernameCliente;
+    private String nombreCliente;
+    private String primerApellidoCliente;
+    private String segundoApellidoCliente;
+    private Long idProvinciaCliente;
+    private Long idCantonCliente;
+    private Long idDistritoCliente;
+    private Long idProvinciaClienteOriginal;
+    private Long idCantonClienteOriginal;
+    private Long idDistritoClienteOriginal;
+    private String otrasSenasCliente;
+    private Long idContactoIncidente;
+    private String nombreContactoIncidente;
+    private String primerApellidoContactoIncidente;
+    private String segundoApellidoContactoIncidente;
+    private String telefonoContactoIncidente;
 }

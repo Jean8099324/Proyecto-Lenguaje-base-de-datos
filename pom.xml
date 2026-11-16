@@ -81,6 +81,12 @@
             <artifactId>spring-boot-starter-webmvc</artifactId>
         </dependency>
 
+        <!-- ENVIO DE CORREOS -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-mail</artifactId>
+        </dependency>
+
         <!-- HERRAMIENTAS DE DESARROLLO -->
         <dependency>
             <groupId>org.springframework.boot</groupId>

@@ -14,71 +14,7 @@
     <div class="app-layout">
 
         <!-- MENU LATERAL -->
-        <aside class="sidebar" id="sidebar">
-            <div class="sidebar-header">
-                <div class="brand-icon">
-                    <i class="bi bi-truck"></i>
-                </div>
-                <div class="brand-text">
-                    <h1>Rescate Vial CR</h1>
-                    <span>Gestión de Asistencia Vial</span>
-                </div>
-                <button class="close-sidebar" id="closeSidebar" type="button">
-                    <i class="bi bi-x-lg"></i>
-                </button>
-            </div>
-
-            <nav class="sidebar-nav">
-                <div class="nav-section">
-                    <span class="nav-title">PRINCIPAL</span>
-                    <a href="/dashboard" class="nav-link">
-                        <i class="bi bi-grid-1x2-fill"></i>
-                        <span>Dashboard</span>
-                    </a>
-                </div>
-
-                <div class="nav-section">
-                    <span class="nav-title">GESTIÓN</span>
-                    <a href="/usuarios/listado" class="nav-link">
-                        <i class="bi bi-person-badge"></i>
-                        <span>Usuarios</span>
-                    </a>
-                    <a href="/usuarios/roles" class="nav-link">
-                        <i class="bi bi-person-lock"></i>
-                        <span>Roles de usuario</span>
-                    </a>
-                    <a href="#" class="nav-link under-construction" aria-disabled="true" onclick="return false;">
-                        <i class="bi bi-car-front"></i>
-                        <span>Vehículos</span>
-                    </a>
-                </div>
-
-                <div class="nav-section">
-                    <span class="nav-title">OPERACIONES</span>
-                    <a href="#" class="nav-link under-construction" aria-disabled="true" onclick="return false;">
-                        <i class="bi bi-exclamation-triangle"></i>
-                        <span>Incidentes</span>
-                    </a>
-                    <a href="/reparaciones/listado" class="nav-link">
-                        <i class="bi bi-tools"></i>
-                        <span>Reparaciones</span>
-                    </a>
-                    <a th:href="@{/detalle-reparaciones/listado}" class="nav-link active">
-                        <i class="bi bi-list-check"></i><span>Detalle de reparaciones</span>
-                    </a>
-                </div>
-            </nav>
-
-            <div class="sidebar-footer">
-                <div class="system-status">
-                    <span class="status-dot"></span>
-                    <div>
-                        <strong>Sistema operativo</strong>
-                        <span>Gestión de detalles de reparación</span>
-                    </div>
-                </div>
-            </div>
-        </aside>
+        <aside th:replace="~{fragments/sidebar :: sidebar}"></aside>
 
         <div class="sidebar-overlay" id="sidebarOverlay"></div>
 
@@ -262,6 +198,6 @@
         </div>
     </div>
     <script th:src="@{/js/detalle-reparaciones.js}"></script>
-</body>
+<script src="/js/sidebar.js"></script></body>
 
 </html>

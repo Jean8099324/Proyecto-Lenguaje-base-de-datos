@@ -2,7 +2,6 @@ package com.rescatevial.controller;
 
 import com.rescatevial.domain.DatoContacto;
 import com.rescatevial.service.DatoContactoService;
-import java.util.List;
 import java.util.Set;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;

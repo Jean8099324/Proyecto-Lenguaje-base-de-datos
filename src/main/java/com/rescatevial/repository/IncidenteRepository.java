@@ -47,6 +47,15 @@ public class IncidenteRepository {
         return IncidenteRepository.<Incidente>cursor(result).stream().findFirst();
     }
 
+    public boolean existsActiveIncidentForVehicle(Long vehicleId, Long excludedIncidentId) {
+        var activos = new EstadoRepository(jdbc).findAll().stream()
+                .filter(e -> java.util.Set.of("REPORTADO", "ASIGNADO", "UNIDAD EN CAMINO", "EN ATENCION", "TRASLADO")
+                        .contains(e.getNombreEstado().trim().toUpperCase(java.util.Locale.ROOT)))
+                .map(e -> e.getId()).collect(java.util.stream.Collectors.toSet());
+        return findAll().stream().anyMatch(i -> java.util.Objects.equals(vehicleId, i.getIdVehiculo())
+                && !java.util.Objects.equals(excludedIncidentId, i.getId()) && activos.contains(i.getIdEstado()));
+    }
+
     public void insert(Incidente incidente) {
         var call = new SimpleJdbcCall(jdbc).withCatalogName("FIDE_PROYECTO_FINAL_RESCATE_VIAL_CR_PCK")
                 .withProcedureName("FIDE_INSERTAR_INCIDENTES_SP").withoutProcedureColumnMetaDataAccess()
@@ -73,6 +82,10 @@ public class IncidenteRepository {
     }
 
     public List<OpcionIncidente> findVehicles() {
+        return findVehicles(null);
+    }
+
+    public List<OpcionIncidente> findVehicles(Long incidentId) {
         var call = new SimpleJdbcCall(jdbc).withCatalogName("FIDE_PROYECTO_FINAL_RESCATE_VIAL_CR_PCK")
                 .withProcedureName("FIDE_OBTENER_VEHICULOS_SP").withoutProcedureColumnMetaDataAccess()
                 .declareParameters(new SqlOutParameter("P_RESULTADO", Types.REF_CURSOR, (rs, row) -> {
@@ -82,8 +95,28 @@ public class IncidenteRepository {
                     option.setEstadoId(rs.getLong("ID_ESTADO"));
                     return option;
                 }));
-        return IncidenteRepository.<OpcionIncidente>cursor(call.execute(new MapSqlParameterSource())).stream()
+        List<OpcionIncidente> vehicles = IncidenteRepository.<OpcionIncidente>cursor(
+                call.execute(new MapSqlParameterSource())).stream()
                 .filter(vehicle -> Long.valueOf(1).equals(vehicle.getEstadoId())).toList();
+        String sql = """
+                SELECT DISTINCT i.ID_VEHICULO
+                  FROM FIDE_INCIDENTES_TB i
+                  JOIN FIDE_ESTADOS_TB e ON e.ID_ESTADO = i.ID_ESTADO
+                 WHERE UPPER(TRIM(e.NOMBRE_ESTADO)) IN (
+                     'REPORTADO', 'ASIGNADO', 'UNIDAD EN CAMINO', 'EN ATENCION', 'TRASLADO'
+                 )
+                   AND (? IS NULL OR i.ID_INCIDENTE <> ?)
+                """;
+        java.util.Set<Long> busyVehicleIds = new java.util.HashSet<>(jdbc.query(
+                sql, (rs, row) -> rs.getLong("ID_VEHICULO"), incidentId, incidentId));
+        return vehicles.stream().filter(vehicle -> !busyVehicleIds.contains(vehicle.getId())
+                || (incidentId != null && existsVehicleForIncident(vehicle.getId(), incidentId))).toList();
+    }
+
+    private boolean existsVehicleForIncident(Long vehicleId, Long incidentId) {
+        Integer count = jdbc.queryForObject("SELECT COUNT(*) FROM FIDE_INCIDENTES_TB WHERE ID_VEHICULO = ? AND ID_INCIDENTE = ?",
+                Integer.class, vehicleId, incidentId);
+        return count != null && count > 0;
     }
 
     public List<OpcionIncidente> findBrands() {
@@ -199,7 +232,7 @@ public class IncidenteRepository {
                 .addValue("P_ID_ESTADO", 1L, Types.NUMERIC);
     }
 
-    private void insertReporter(Incidente incidente) {
+    public void insertReporter(Incidente incidente) {
         var contactCall = new SimpleJdbcCall(jdbc).withCatalogName("FIDE_PROYECTO_FINAL_RESCATE_VIAL_CR_PCK")
                 .withProcedureName("FIDE_INSERTAR_CONTACTOS_SP").withoutProcedureColumnMetaDataAccess()
                 .declareParameters(new SqlParameter("P_NOMBRE_CONTACTO", Types.VARCHAR),
@@ -216,6 +249,8 @@ public class IncidenteRepository {
                 .addValue("P_TELEFONO_CONTACTO", emptyToNull(incidente.getTelefonoReportante()), Types.VARCHAR)
                 .addValue("P_CORREO_CONTACTO", emptyToNull(incidente.getCorreoReportante()), Types.VARCHAR)
                 .addValue("P_ID_ESTADO", 1L, Types.NUMERIC));
+        if (!(result.get("P_ID_CONTACTO") instanceof Number))
+            throw new IllegalStateException("Oracle no registró el contacto del incidente.");
         Long contactId = ((Number) result.get("P_ID_CONTACTO")).longValue();
         var relationCall = new SimpleJdbcCall(jdbc).withCatalogName("FIDE_PROYECTO_FINAL_RESCATE_VIAL_CR_PCK")
                 .withProcedureName("FIDE_INSERTAR_INCIDENTES_CONTACTOS_SP").withoutProcedureColumnMetaDataAccess()
@@ -226,6 +261,8 @@ public class IncidenteRepository {
                 .addValue("P_ID_INCIDENTE", incidente.getId(), Types.NUMERIC)
                 .addValue("P_ID_CONTACTO", contactId, Types.NUMERIC)
                 .addValue("P_ID_ESTADO", 1L, Types.NUMERIC));
+        if (findContactsByIncident(incidente.getId()).stream().noneMatch(c -> contactId.equals(c.getId())))
+            throw new IllegalStateException("Oracle no asoció el contacto al incidente.");
     }
 
     public List<ContactoIncidente> findContactsByIncident(Long incidentId) {
@@ -247,15 +284,41 @@ public class IncidenteRepository {
 
     public Optional<VehiculoDetalleIncidente> findVehicleDetail(Long vehicleId) {
         String sql = """
-                SELECT v.PLACA, v.CODIGO_CHASIS, m.NOMBRE_MARCA, mo.NOMBRE_MODELO, a.ANIO
+                SELECT v.ID_USUARIO AS ID_CLIENTE, v.PLACA, v.CODIGO_CHASIS, m.NOMBRE_MARCA, mo.NOMBRE_MODELO, a.ANIO,
+                       u.NOMBRE AS NOMBRE_CLIENTE, u.PRIMER_APELLIDO AS PRIMER_APELLIDO_CLIENTE,
+                       u.SEGUNDO_APELLIDO AS SEGUNDO_APELLIDO_CLIENTE,
+                       (SELECT LISTAGG(TRIM(
+                                   NVL(p.NOMBRE_PROVINCIA, '') ||
+                                   CASE WHEN p.NOMBRE_PROVINCIA IS NOT NULL THEN ', ' ELSE '' END ||
+                                   NVL(c.NOMBRE_CANTON, '') ||
+                                   CASE WHEN c.NOMBRE_CANTON IS NOT NULL THEN ', ' ELSE '' END ||
+                                   NVL(d.NOMBRE_DISTRITO, '') ||
+                                   CASE WHEN dir.OTRAS_SENAS IS NOT NULL THEN ' - ' || dir.OTRAS_SENAS ELSE '' END
+                               ), ' | ') WITHIN GROUP (
+                                   ORDER BY p.NOMBRE_PROVINCIA, c.NOMBRE_CANTON, d.NOMBRE_DISTRITO
+                               )
+                          FROM FIDE_DIRECCIONES_TB dir
+                          JOIN FIDE_ESTADOS_TB ed ON ed.ID_ESTADO = dir.ID_ESTADO
+                          LEFT JOIN FIDE_PROVINCIAS_TB p ON p.ID_PROVINCIA = dir.ID_PROVINCIA
+                          LEFT JOIN FIDE_CANTONES_TB c ON c.ID_CANTON = dir.ID_CANTON
+                          LEFT JOIN FIDE_DISTRITOS_TB d ON d.ID_DISTRITO = dir.ID_DISTRITO
+                         WHERE dir.ID_USUARIO = u.ID_USUARIO
+                           AND UPPER(TRIM(ed.NOMBRE_ESTADO)) = 'ACTIVO') AS DIRECCION_CLIENTE
                   FROM FIDE_VEHICULOS_TB v
                   JOIN FIDE_MARCAS_TB m ON m.ID_MARCA = v.ID_MARCA
                   JOIN FIDE_MODELOS_TB mo ON mo.ID_MARCA = v.ID_MARCA AND mo.ID_MODELO = v.ID_MODELO
                   JOIN FIDE_ANIOS_TB a ON a.ID_MODELO = v.ID_MODELO AND a.ID_ANIO = v.ID_ANIO
+                  JOIN FIDE_USUARIOS_TB u ON u.ID_USUARIO = v.ID_USUARIO
                  WHERE v.ID_VEHICULO = ?
                 """;
         return jdbc.query(sql, (rs, row) -> {
             VehiculoDetalleIncidente vehicle = new VehiculoDetalleIncidente();
+            vehicle.setIdCliente(rs.getLong("ID_CLIENTE"));
+            vehicle.setNombreCliente(fullName(
+                    rs.getString("NOMBRE_CLIENTE"),
+                    rs.getString("PRIMER_APELLIDO_CLIENTE"),
+                    rs.getString("SEGUNDO_APELLIDO_CLIENTE")));
+            vehicle.setDireccionCliente(rs.getString("DIRECCION_CLIENTE"));
             vehicle.setPlaca(rs.getString("PLACA"));
             vehicle.setCodigoChasis(rs.getString("CODIGO_CHASIS"));
             vehicle.setMarca(rs.getString("NOMBRE_MARCA"));
@@ -313,7 +376,7 @@ public class IncidenteRepository {
             item.setFechaFin(toLocalDate(rs.getDate("FECHA_SALIDA_TALLER")));
             return item;
         }, incidentId));
-        history.sort(Comparator.comparing(HistorialServicioIncidente::getFechaInicio,
+        history.sort(Comparator.comparing((HistorialServicioIncidente item) -> item.getFechaInicio(),
                 Comparator.nullsLast(Comparator.naturalOrder())));
         return history;
     }
@@ -428,7 +491,7 @@ public class IncidenteRepository {
                 .addValue("P_ID_TIPO_INCIDENTE", i.getIdTipoIncidente(), Types.NUMERIC)
                 .addValue("P_ID_PRIORIDAD", i.getIdPrioridad(), Types.NUMERIC)
                 .addValue("P_ID_ESTADO", i.getIdEstado(), Types.NUMERIC)
-                .addValue("P_ID_USUARIO", null, Types.NUMERIC)
+                .addValue("P_ID_USUARIO", i.getIdUsuario(), Types.NUMERIC)
                 .addValue("P_FECHA_CIERRE", sqlDate(i.getFechaCierre()), Types.DATE)
                 .addValue("P_HORA_CIERRE", i.getHoraCierre(), Types.VARCHAR);
     }
@@ -440,6 +503,9 @@ public class IncidenteRepository {
     private static Incidente mapIncidente(java.sql.ResultSet rs) throws java.sql.SQLException {
         Incidente i = new Incidente();
         i.setId(rs.getLong("ID_INCIDENTE"));
+        Number usuarioId = (Number) rs.getObject("ID_USUARIO");
+        i.setIdUsuario(usuarioId == null ? null : usuarioId.longValue());
+        i.setIdCliente(usuarioId == null ? null : usuarioId.longValue());
         i.setIdVehiculo(rs.getLong("ID_VEHICULO"));
         i.setFechaReporte(rs.getDate("FECHA_REPORTE") == null ? null : rs.getDate("FECHA_REPORTE").toLocalDate());
         i.setHoraReporte(rs.getString("HORA_REPORTE"));

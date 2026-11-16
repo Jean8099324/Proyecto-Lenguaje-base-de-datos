@@ -70,6 +70,12 @@ public class DatoContactoRepository {
         return resultado(proc.execute(new MapSqlParameterSource("P_ID_USUARIO", usuario)));
     }
 
+    public List<DatoContacto> correos() {
+        var proc = procedimiento("FIDE_OBTENER_CORREOS_SP",
+            new SqlOutParameter("P_RESULTADO", Types.REF_CURSOR, DatoContactoRepository::correo));
+        return resultado(proc.execute(new MapSqlParameterSource()));
+    }
+
 public List<DatoContacto> direcciones(Long usuario) {
     var proc = procedimiento("FIDE_OBTENER_DIRECCIONES_SP",
         new SqlOutParameter("P_RESULTADO", Types.REF_CURSOR, DatoContactoRepository::direccion));

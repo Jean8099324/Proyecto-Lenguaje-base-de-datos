@@ -17,19 +17,7 @@
 </head>
 <body>
 <div class="app-layout">
-    <aside class="sidebar" id="sidebar">
-        <div class="sidebar-header">
-            <div class="brand-icon"><i class="bi bi-truck"></i></div>
-            <div class="brand-text"><h1>Rescate Vial CR</h1><span>Gestión de Asistencia Vial</span></div>
-            <button class="close-sidebar" id="closeSidebar"><i class="bi bi-x-lg"></i></button>
-        </div>
-        <nav class="sidebar-nav">
-            <div class="nav-section"><span class="nav-title">PRINCIPAL</span><a href="/dashboard" class="nav-link"><i class="bi bi-grid-1x2-fill"></i><span>Dashboard</span></a></div>
-            <div class="nav-section"><span class="nav-title">GESTIÓN</span><a href="/usuarios/listado" class="nav-link"><i class="bi bi-person-badge"></i><span>Usuarios</span></a><a href="/usuarios/roles" class="nav-link active"><i class="bi bi-person-lock"></i><span>Roles de usuario</span></a></div>
-            <div class="nav-section"><span class="nav-title">OPERACIONES</span><a href="#" aria-disabled="true" onclick="return false;" class="nav-link under-construction" title="En construcción"><i class="bi bi-exclamation-triangle"></i><span>Incidentes</span></a><a href="#" aria-disabled="true" onclick="return false;" class="nav-link under-construction" title="En construcción"><i class="bi bi-truck-front"></i><span>Unidades</span></a></div>
-        </nav>
-        <div class="sidebar-footer"><div class="system-status"><span class="status-dot"></span><div><strong>Sistema operativo</strong><span>Administración de roles</span></div></div></div>
-    </aside>
+    <aside th:replace="~{fragments/sidebar :: sidebar}"></aside>
     <div class="sidebar-overlay" id="sidebarOverlay"></div>
     <div class="main-content">
         <header class="topbar">
@@ -102,5 +90,5 @@
         });
     })();
 </script>
-</body>
+<script src="/js/sidebar.js"></script></body>
 </html>

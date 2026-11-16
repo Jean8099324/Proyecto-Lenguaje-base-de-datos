@@ -30,6 +30,10 @@ public class ClienteService {
         return usuarioService.getUsuarioPorId(id).filter(this::esCliente);
     }
 
+    public Optional<Usuario> buscarPorUsername(String username) {
+        return usuarioService.getUsuarioPorUsername(username);
+    }
+
     public Long tipoClienteId() {
         return tipoUsuarioService.listarActivos().stream()
                 .filter(tipo -> "CLIENTE".equalsIgnoreCase(tipo.getNombreTipoUsuario()))
@@ -60,6 +64,11 @@ public class ClienteService {
                     .map(rol -> rol.getNombre()).collect(Collectors.toSet()));
         }
         usuarioService.save(formulario);
+        if (formulario.getId() == null) {
+            formulario.setId(usuarioService.getUsuarioPorUsername(formulario.getUsername())
+                    .orElseThrow(() -> new IllegalStateException("No se pudo recuperar el cliente creado."))
+                    .getId());
+        }
     }
 
     public void desactivar(Long id) {

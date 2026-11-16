@@ -27,9 +27,16 @@ public class UsuarioDetailsService implements UserDetailsService {
                 .findByUsernameAndActivoTrue(username)
                 .orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado o inactivo."));
 
+        if (usuario.getPassword() == null || usuario.getPassword().isBlank())
+            throw new UsernameNotFoundException("Este cliente no tiene acceso habilitado.");
         var roles = usuario.getRoles().stream()
                 .map(rol -> new SimpleGrantedAuthority("ROLE_" + rol.getNombre().trim().toUpperCase(Locale.ROOT)))
                 .collect(java.util.stream.Collectors.toSet());
+
+        // El perfil CLIENTE nunca hereda permisos superiores de asignaciones antiguas.
+        if (usuarioRepository.esPerfilCliente(usuario.getTipoUsuario())) {
+            roles = java.util.Set.of(new SimpleGrantedAuthority("ROLE_CLIENT"));
+        }
 
         // Se prepara el nombre que usarán el saludo y el perfil del dashboard.
         String nombreCompleto = java.util.stream.Stream.of(

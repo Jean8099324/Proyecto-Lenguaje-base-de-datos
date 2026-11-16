@@ -9,7 +9,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -27,7 +26,7 @@ public class ContactoService {
     private Long idEstado(String nombre) {
         return estados.listar().stream()
                 .filter(e -> nombre.equalsIgnoreCase(e.getNombreEstado()))
-                .map(Estado::getId)
+                .map(estado -> estado.getId())
                 .findFirst()
                 .orElseThrow(() -> new IllegalStateException("No existe el estado " + nombre + " en Oracle."));
     }
@@ -38,7 +37,7 @@ public class ContactoService {
     @Transactional(readOnly = true)
     public List<Contacto> listar() {
         Map<Long, Estado> nombres = estados.listar().stream()
-                .collect(Collectors.toMap(Estado::getId, Function.identity(), (a, b) -> a));
+                .collect(Collectors.toMap(estado -> estado.getId(), estado -> estado, (a, b) -> a));
         List<Contacto> contactos = repository.listar();
         contactos.forEach(c -> {
             Estado estado = nombres.get(c.getIdEstado());
@@ -54,6 +53,12 @@ public class ContactoService {
 
     private static String limpiar(String dato) {
         return dato == null || dato.isBlank() ? null : dato.trim();
+    }
+
+    private static String requerido(String dato, String campo) {
+        String valor = limpiar(dato);
+        if (valor == null) throw new IllegalArgumentException(campo + " es obligatorio.");
+        return valor;
     }
 
     private static boolean coincide(Contacto uno, Contacto otro) {
@@ -101,6 +106,18 @@ public class ContactoService {
     }
 
     @Transactional
+    public void actualizarDesdeIncidente(Long id, String nombre, String primerApellido,
+                                         String segundoApellido, String telefono) {
+        Contacto contacto = repository.buscar(id)
+                .orElseThrow(() -> new IllegalArgumentException("El contacto del incidente no existe."));
+        contacto.setNombreContacto(requerido(nombre, "El nombre del contacto"));
+        contacto.setPrimerApellido(requerido(primerApellido, "El primer apellido del contacto"));
+        contacto.setSegundoApellido(limpiar(segundoApellido));
+        contacto.setTelefonoContacto(limpiar(telefono));
+        guardar(contacto);
+    }
+
+    @Transactional
     public void desactivar(Long id) {
         Contacto contacto = repository.buscar(id)
                 .orElseThrow(() -> new IllegalArgumentException("Contacto no encontrado."));
@@ -137,7 +154,7 @@ public class ContactoService {
     @Transactional(readOnly = true)
     public List<ContactoIncidente> relaciones(Long idContacto) {
         Map<Long, Estado> estadosPorId = estados.listar().stream()
-                .collect(Collectors.toMap(Estado::getId, Function.identity(), (a, b) -> a));
+                .collect(Collectors.toMap(estado -> estado.getId(), estado -> estado, (a, b) -> a));
         return repository.relaciones().stream()
                 .filter(r -> r.getIdContacto().equals(idContacto))
                 .peek(r -> {

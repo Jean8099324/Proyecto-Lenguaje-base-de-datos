@@ -3,7 +3,6 @@ package com.rescatevial.service;
 import com.rescatevial.domain.OpcionVehiculo;
 import java.sql.Types;
 import java.util.List;
-import java.util.Map;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.SqlOutParameter;
 import org.springframework.jdbc.core.simple.SimpleJdbcCall;

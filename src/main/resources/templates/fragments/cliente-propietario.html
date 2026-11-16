@@ -1,0 +1,21 @@
+<!doctype html><html xmlns:th="http://www.thymeleaf.org"><body>
+<section th:fragment="selector(actual)" class="form-group-custom full-width cliente-propietario" th:attr="data-actual=${actual}">
+ <label>Cliente due?o del veh?culo</label>
+ <input type="search" class="buscar-cliente" placeholder="Buscar cliente por nombre o n?mero de registro" aria-label="Buscar cliente">
+ <select name="idUsuario" class="seleccionar-cliente" required aria-label="Cliente due?o del veh?culo"><option value="">Seleccione cliente</option></select>
+ <button type="button" class="btn-secondary-custom abrir-cliente">Crear cliente nuevo</button>
+ <fieldset class="nuevo-cliente" hidden><legend>Datos del nuevo cliente</legend><p>Registra sus datos sin habilitar una cuenta de acceso.</p>
+ <div class="form-grid">
+ <div class="form-group-custom"><label>Nombre<input data-campo="nombre" maxlength="100"></label></div>
+ <div class="form-group-custom"><label>Primer apellido<input data-campo="primerApellido" maxlength="100"></label></div>
+ <div class="form-group-custom"><label>Segundo apellido<input data-campo="segundoApellido" maxlength="100"></label></div>
+ <div class="form-group-custom"><label>Provincia<select data-campo="idProvincia"></select></label></div>
+ <div class="form-group-custom"><label>Cant?n<select data-campo="idCanton"></select></label></div>
+ <div class="form-group-custom"><label>Distrito<select data-campo="idDistrito"></select></label></div>
+ <div class="form-group-custom full-width"><label>Otras se?as<textarea data-campo="otrasSenas" maxlength="200"></textarea></label></div>
+ <div class="form-group-custom"><label>Tel?fono<input data-campo="telefono" type="tel" maxlength="8"></label></div>
+ <div class="form-group-custom"><label>Correo<input data-campo="correo" type="email" maxlength="150"></label></div>
+ </div><button type="button" class="btn-primary-custom guardar-cliente">Guardar y seleccionar cliente</button>
+ <button type="button" class="btn-secondary-custom cancelar-cliente">Cancelar</button></fieldset>
+ <p class="error-cliente text-danger" role="alert"></p>
+</section></body></html>

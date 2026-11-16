@@ -12,27 +12,114 @@ document.addEventListener("DOMContentLoaded", () => {
         };
         pill.classList.add(clases[estado] || "status-default");
     });
-    const provincia = document.getElementById("incidenteProvincia");
-    const canton = document.getElementById("incidenteCanton");
-    const distrito = document.getElementById("incidenteDistrito");
-    const filtrarOpciones = (select, atributo, valor) => {
-        [...(select?.options || [])].forEach((option, index) => {
-            if (index === 0) return;
-            option.hidden = Boolean(valor) && option.dataset[atributo] !== valor;
+    const configurarDireccion = (prefijo) => {
+        const provincia = document.getElementById(`${prefijo}Provincia`);
+        const canton = document.getElementById(`${prefijo}Canton`);
+        const distrito = document.getElementById(`${prefijo}Distrito`);
+        if (!provincia || !canton || !distrito) return;
+        const cantones = [...canton.options].filter(option => option.value);
+        const distritos = [...distrito.options].filter(option => option.value);
+        const filtrar = (select, opciones, atributo, padre, etiqueta) => {
+            const anterior = select.value;
+            const disponibles = opciones.filter(option => padre && option.dataset[atributo] === padre);
+            select.replaceChildren(new Option(etiqueta, ""), ...disponibles);
+            select.value = disponibles.some(option => option.value === anterior) ? anterior : "";
+            select.disabled = !padre;
+        };
+        const actualizarDistritos = () =>
+            filtrar(distrito, distritos, "canton", canton.value, "Seleccione distrito");
+        const actualizarCantones = () => {
+            filtrar(canton, cantones, "provincia", provincia.value, "Seleccione cantón");
+            actualizarDistritos();
+        };
+        provincia.addEventListener("change", () => {
+            canton.value = "";
+            distrito.value = "";
+            actualizarCantones();
+        });
+        canton.addEventListener("change", () => {
+            distrito.value = "";
+            actualizarDistritos();
+        });
+        actualizarCantones();
+    };
+    configurarDireccion("incidente");
+    configurarDireccion("cliente");
+    const clienteIncidente = document.getElementById("clienteIncidente");
+    const usernameCliente = document.getElementById("usernameCliente");
+    const clientDependent = [...document.querySelectorAll(".client-dependent")];
+    const toggleClientFields = () => {
+        const hasClient = Boolean(clienteIncidente?.value);
+        clientDependent.forEach(container => {
+            container.classList.toggle("client-dependent-hidden", !hasClient);
+            container.querySelectorAll("input, select, textarea").forEach(field => {
+                field.disabled = !hasClient;
+            });
         });
     };
-    provincia?.addEventListener("change", () => {
-        canton.value = "";
-        distrito.value = "";
-        filtrarOpciones(canton, "provincia", provincia.value);
-        filtrarOpciones(distrito, "canton", "");
+    const renderClientContacts = (tipo, valores) => {
+        const list = document.querySelector(`[data-contact-list="${tipo}"]`);
+        if (!list) return;
+        list.replaceChildren();
+        if (!valores.length) {
+            const empty = document.createElement("p");
+            empty.className = "client-contact-empty";
+            empty.textContent = `Sin ${tipo === "correo" ? "correos" : "teléfonos"} registrados.`;
+            list.appendChild(empty);
+            return;
+        }
+        valores.forEach(valor => {
+            const link = document.createElement("a");
+            link.className = "client-contact-value";
+            link.href = `${tipo === "correo" ? "mailto:" : "tel:"}${valor}`;
+            link.textContent = valor;
+            list.appendChild(link);
+        });
+    };
+    const cargarCliente = async id => {
+        if (!id) return;
+        const response = await fetch(`/incidentes/clientes/${id}`, {headers: {Accept: "application/json"}});
+        if (!response.ok) throw new Error("No se pudieron cargar los datos del cliente.");
+        return response.json();
+    };
+    clienteIncidente?.addEventListener("change", async () => {
+        const opcion = clienteIncidente.selectedOptions[0];
+        if (usernameCliente) usernameCliente.value = opcion?.dataset.username ?? "";
+        const nombre = document.getElementById("nombreCliente");
+        const primerApellido = document.getElementById("primerApellidoCliente");
+        const segundoApellido = document.getElementById("segundoApellidoCliente");
+        if (nombre) nombre.value = opcion?.dataset.nombre ?? "";
+        if (primerApellido) primerApellido.value = opcion?.dataset.primerApellido ?? "";
+        if (segundoApellido) segundoApellido.value = opcion?.dataset.segundoApellido ?? "";
+        const idContacto = document.getElementById("idContactoIncidente");
+        const contactoFields = ["nombreContactoIncidente", "primerApellidoContactoIncidente",
+            "segundoApellidoContactoIncidente", "telefonoContactoIncidente"];
+        if (idContacto) idContacto.value = "";
+        contactoFields.forEach(id => { const field = document.getElementById(id); if (field) field.value = ""; });
+        if (clienteIncidente.value) {
+            try {
+                const cliente = await cargarCliente(clienteIncidente.value);
+                const direccion = cliente.direccion;
+                const provincia = document.getElementById("clienteProvincia");
+                const canton = document.getElementById("clienteCanton");
+                const distrito = document.getElementById("clienteDistrito");
+                const senas = document.getElementById("otrasSenasCliente");
+                if (provincia) { provincia.value = direccion?.provincia ?? ""; provincia.dispatchEvent(new Event("change")); }
+                if (canton) { canton.value = direccion?.canton ?? ""; canton.dispatchEvent(new Event("change")); }
+                if (distrito) distrito.value = direccion?.distrito ?? "";
+                if (senas) senas.value = direccion?.otrasSenas ?? "";
+                renderClientContacts("correo", cliente.correos ?? []);
+                renderClientContacts("telefono", cliente.telefonos ?? []);
+            } catch (error) {
+                console.error(error);
+            }
+        } else {
+            renderClientContacts("correo", []);
+            renderClientContacts("telefono", []);
+        }
+        toggleClientFields();
     });
-    canton?.addEventListener("change", () => {
-        distrito.value = "";
-        filtrarOpciones(distrito, "canton", canton.value);
-    });
-    filtrarOpciones(canton, "provincia", provincia?.value || "");
-    filtrarOpciones(distrito, "canton", canton?.value || "");
+    toggleClientFields();
     const fillReportDateTime = () => {
         const parts = Object.fromEntries(new Intl.DateTimeFormat("en-GB", {
             timeZone: "America/Costa_Rica", year: "numeric", month: "2-digit",
@@ -117,7 +204,24 @@ document.addEventListener("DOMContentLoaded", () => {
         if (row.dataset.detalleUrl) window.location.href = row.dataset.detalleUrl;
     }));
 
-    const plateInput = document.getElementById("placaVehiculo");
+    document.querySelectorAll(".add-client-contact").forEach(button => {
+        button.addEventListener("click", () => {
+            const tipo = button.dataset.contactAdd;
+            const list = document.querySelector(`[data-contact-list="${tipo}"]`);
+            if (!list) return;
+            const input = document.createElement("input");
+            input.type = tipo === "correo" ? "email" : "tel";
+            input.name = tipo === "correo" ? "correosClienteNuevos" : "telefonosClienteNuevos";
+            input.maxLength = tipo === "correo" ? 150 : 8;
+            if (tipo === "telefono") input.pattern = "[0-9]{8}";
+            input.placeholder = tipo === "correo" ? "correo@ejemplo.com" : "Ej. 88888888";
+            input.className = "new-client-contact";
+            list.appendChild(input);
+            input.focus();
+        });
+    });
+
+    const plateInput = document.querySelector("#modalIncidente #placaVehiculo");
     const plateConfirmed = document.getElementById("placaConfirmada");
     const vehicleId = document.querySelector('#modalIncidente input[name="idVehiculo"]');
     const suggestions = document.getElementById("vehiculosSugeridos");
@@ -226,6 +330,49 @@ document.addEventListener("DOMContentLoaded", () => {
         model.disabled = true;
         year.disabled = true;
     }
+
+    const editVehicleModal = document.getElementById("modalEditarVehiculo");
+    const editVehicleButton = document.getElementById("btnEditarVehiculo");
+    const editVehicleBrand = document.getElementById("marcaVehiculoModal");
+    const editVehicleModel = document.getElementById("modeloVehiculoModal");
+    const editVehicleYear = document.getElementById("anioVehiculoModal");
+    const filterVehicleOptions = (select, attribute, parentValue, selectedValue) => {
+        if (!select) return;
+        [...select.options].forEach(option => {
+            const available = !option.value || (parentValue && option.dataset[attribute] === parentValue);
+            option.hidden = !available;
+            option.disabled = !available;
+        });
+        if (selectedValue && [...select.options].some(option => option.value === selectedValue && !option.disabled))
+            select.value = selectedValue;
+    };
+    const syncEditVehicleCatalog = () => {
+        const modelValue = editVehicleModel?.value;
+        filterVehicleOptions(editVehicleModel, "marca", editVehicleBrand?.value, modelValue);
+        filterVehicleOptions(editVehicleYear, "modelo", editVehicleModel?.value, editVehicleYear?.value);
+        if (editVehicleModel) editVehicleModel.disabled = !editVehicleBrand?.value;
+        if (editVehicleYear) editVehicleYear.disabled = !editVehicleModel?.value;
+    };
+    editVehicleBrand?.addEventListener("change", () => {
+        if (editVehicleModel) editVehicleModel.value = "";
+        if (editVehicleYear) editVehicleYear.value = "";
+        syncEditVehicleCatalog();
+    });
+    editVehicleModel?.addEventListener("change", () => {
+        if (editVehicleYear) editVehicleYear.value = "";
+        syncEditVehicleCatalog();
+    });
+    syncEditVehicleCatalog();
+    const closeEditVehicleModal = () => {
+        editVehicleModal?.classList.remove("show");
+        document.body.style.overflow = "";
+    };
+    editVehicleButton?.addEventListener("click", () => {
+        editVehicleModal?.classList.add("show");
+        document.body.style.overflow = "hidden";
+    });
+    ["cerrarEditarVehiculo", "cancelarEditarVehiculo", "editarVehiculoBackdrop"].forEach(id =>
+        document.getElementById(id)?.addEventListener("click", closeEditVehicleModal));
 
     vehicleForm?.addEventListener("submit", async event => {
         event.preventDefault();
