@@ -108,10 +108,12 @@ public class VehiculoService {
                 !estadoActivo().equals(anio.getEstadoId())) {
             throw new IllegalArgumentException("La marca, modelo o año no corresponden entre sí o están inactivos.");
         }
-        boolean existePropietario = propietarios().stream()
-                .anyMatch(u -> u.getId().equals(v.getIdUsuario()));
-        if (!existePropietario) {
-            throw new IllegalArgumentException("Selecciona un propietario válido.");
+        if (v.getIdUsuario() != null) {
+            boolean existePropietario = propietarios().stream()
+                    .anyMatch(u -> java.util.Objects.equals(u.getId(), v.getIdUsuario()));
+            if (!existePropietario) {
+                throw new IllegalArgumentException("Selecciona un propietario válido.");
+            }
         }
     }
 
@@ -124,12 +126,21 @@ public class VehiculoService {
         return placa == null || placa.isBlank() ? null : placa;
     }
 
+    @Transactional(readOnly = true)
+    public boolean placaRegistrada(String placa, Long excluirId) {
+        String normalizada = placaNormalizada(placa);
+        if (normalizada == null) return false;
+        return repository.listar().stream().anyMatch(actual ->
+                !java.util.Objects.equals(actual.getId(), excluirId)
+                        && normalizada.equals(placaNormalizada(actual.getPlaca())));
+    }
+
     @Transactional
     public void guardar(Vehiculo v) {
         v.setPlaca(placaNormalizada(v.getPlaca()));
         v.setCodigoChasis(normalizar(v.getCodigoChasis()));
-        if (v.getPlaca() == null && v.getCodigoChasis() == null) {
-            throw new IllegalArgumentException("Indica la placa o el código de chasis.");
+        if (v.getPlaca() == null) {
+            throw new IllegalArgumentException("La placa es obligatoria.");
         }
         validarRelaciones(v);
         var anteriores = repository.listar();

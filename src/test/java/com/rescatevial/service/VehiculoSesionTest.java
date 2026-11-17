@@ -44,10 +44,12 @@ class VehiculoSesionTest {
                 new ExtendedModelMap(), new RedirectAttributesModelMap(), auth);
         verify(vehiculos).guardar(argThat(d -> Long.valueOf(999).equals(d.getIdUsuario())));
     }
-    @Test void noRegistraSinPropietario() {
-        Vehiculo v = new Vehiculo();
-        new VehiculoController(vehiculos, usuarios).guardar(v, new BeanPropertyBindingResult(v, "vehiculoForm"),
-                new ExtendedModelMap(), new RedirectAttributesModelMap(), null);
-        verify(vehiculos, never()).guardar(any());
+    @Test void registraSinPropietario() {
+        Vehiculo v = new Vehiculo(); v.setPlaca("ABC123"); v.setIdMarca(1L); v.setIdModelo(2L); v.setIdAnio(3L);
+        var result = new VehiculoController(vehiculos, usuarios).guardar(v,
+                new BeanPropertyBindingResult(v, "vehiculoForm"), new ExtendedModelMap(),
+                new RedirectAttributesModelMap(), auth);
+        assertEquals("redirect:/vehiculos", result);
+        verify(vehiculos).guardar(argThat(d -> d.getIdUsuario() == null && "ABC123".equals(d.getPlaca())));
     }
 }

@@ -22,6 +22,82 @@ document.addEventListener("DOMContentLoaded", () => {
         if (cantidad) cantidad.textContent = String(total);
     });
 
+    const placa = document.getElementById("placa");
+    const placaDuplicada = document.getElementById("placaDuplicada");
+    const formularioVehiculo = placa?.form;
+    const idVehiculo = document.getElementById("id");
+    if (placa && placaDuplicada && formularioVehiculo) {
+        let temporizador;
+        let solicitud;
+        let version = 0;
+        let duplicada = false;
+        let verificando = false;
+        let envioPendiente = false;
+
+        const normalizarPlaca = valor => valor.replace(/[^a-z0-9]/gi, "").toUpperCase();
+        const verificarPlaca = async (valor, versionActual) => {
+            solicitud = new AbortController();
+            const parametros = new URLSearchParams({ placa: valor });
+            if (idVehiculo?.value) parametros.set("id", idVehiculo.value);
+            try {
+                const endpoint = formularioVehiculo.dataset.plateCheckUrl || "/vehiculos/validar-placa";
+                const respuesta = await fetch(`${endpoint}?${parametros}`, {
+                    headers: { Accept: "application/json" },
+                    signal: solicitud.signal,
+                    cache: "no-store"
+                });
+                if (!respuesta.ok) throw new Error("No se pudo verificar la placa.");
+                const resultado = await respuesta.json();
+                if (versionActual !== version || normalizarPlaca(placa.value) !== valor) return;
+                duplicada = resultado.duplicada === true;
+                placaDuplicada.hidden = !duplicada;
+                placa.setCustomValidity(duplicada ? "La placa ya está registrada." : "");
+            } catch (error) {
+                if (error.name !== "AbortError" && versionActual === version) {
+                    // El servidor vuelve a validar la placa al guardar.
+                    console.error(error);
+                }
+            } finally {
+                if (versionActual === version) {
+                    verificando = false;
+                    if (envioPendiente) {
+                        envioPendiente = false;
+                        if (duplicada) placa.reportValidity();
+                        else formularioVehiculo.requestSubmit();
+                    }
+                }
+            }
+        };
+
+        placa.addEventListener("input", () => {
+            const valor = normalizarPlaca(placa.value);
+            clearTimeout(temporizador);
+            solicitud?.abort();
+            version++;
+            duplicada = false;
+            placa.setCustomValidity("");
+            placaDuplicada.hidden = true;
+            if (!valor) {
+                verificando = false;
+                envioPendiente = false;
+                return;
+            }
+            verificando = true;
+            const versionActual = version;
+            temporizador = setTimeout(() => verificarPlaca(valor, versionActual), 400);
+        });
+
+        formularioVehiculo.addEventListener("submit", event => {
+            if (duplicada) {
+                event.preventDefault();
+                placa.reportValidity();
+            } else if (verificando) {
+                event.preventDefault();
+                envioPendiente = true;
+            }
+        });
+    }
+
     const marca = document.getElementById("idMarca");
     const modelo = document.getElementById("idModelo");
     const anio = document.getElementById("idAnio");

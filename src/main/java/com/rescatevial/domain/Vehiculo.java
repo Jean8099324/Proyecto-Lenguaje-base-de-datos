@@ -1,6 +1,7 @@
 package com.rescatevial.domain;
 
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
@@ -9,7 +10,7 @@ import lombok.Data;
 @Data
 public class Vehiculo {
     private Long id;
-    @Size(max = 10)
+    @NotBlank @Size(max = 10)
     private String placa;
     @Size(max = 17)
     private String codigoChasis;

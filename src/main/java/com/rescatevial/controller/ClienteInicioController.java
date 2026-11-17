@@ -65,6 +65,13 @@ public class ClienteInicioController {
         return formularioVehiculo(model);
     }
 
+    @GetMapping("/vehiculos/validar-placa")
+    @ResponseBody
+    public java.util.Map<String, Boolean> validarPlacaVehiculo(Authentication auth, @RequestParam String placa) {
+        portal.actual(auth);
+        return java.util.Map.of("duplicada", vehiculos.placaRegistrada(placa, null));
+    }
+
     @PostMapping("/vehiculos/guardar")
     public String guardarVehiculo(Authentication auth, @Valid @ModelAttribute("vehiculoForm") Vehiculo formulario,
                                   BindingResult errores, Model model, RedirectAttributes redirect) {

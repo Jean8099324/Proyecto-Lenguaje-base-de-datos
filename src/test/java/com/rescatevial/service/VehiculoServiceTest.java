@@ -77,6 +77,26 @@ class VehiculoServiceTest {
         service.guardar(nuevo);
         verify(repository).insertar(argThat(v->"ABC123".equals(v.getPlaca()) && Long.valueOf(9).equals(v.getIdUsuario())));
     }
+    @Test void permiteRegistrarVehiculoSinPropietario() {
+        Vehiculo nuevo=nuevoValido("abc123");nuevo.setIdUsuario(null);
+        Vehiculo creado=nuevoValido("ABC123");creado.setId(7L);creado.setIdUsuario(null);
+        when(repository.listar()).thenReturn(List.of(),List.of(creado));
+        service.guardar(nuevo);
+        verify(repository).insertar(argThat(v->"ABC123".equals(v.getPlaca()) && v.getIdUsuario()==null));
+    }
+    @Test void exigePlacaAunqueSeProporcioneCodigoDeChasis() {
+        Vehiculo nuevo=nuevoValido(" ");nuevo.setCodigoChasis("VIN123");
+        var error=assertThrows(IllegalArgumentException.class,()->service.guardar(nuevo));
+        assertEquals("La placa es obligatoria.",error.getMessage());
+        verify(repository,never()).insertar(any());
+    }
+    @Test void detectaPlacaExistenteYPermiteLaPlacaDelVehiculoEditado() {
+        Vehiculo existente=new Vehiculo();existente.setId(12L);existente.setPlaca("AB-C123");
+        when(repository.listar()).thenReturn(List.of(existente));
+        assertTrue(service.placaRegistrada("abc123",null));
+        assertFalse(service.placaRegistrada("ABC123",12L));
+        assertFalse(service.placaRegistrada("XYZ789",null));
+    }
     @Test void noMuestraExitoSiOracleSoloDevuelveRegistroDeOtroCliente() {
         Vehiculo nuevo=nuevoValido("ABC123");
         Vehiculo ajeno=nuevoValido("ABC123");ajeno.setId(7L);ajeno.setIdUsuario(99L);

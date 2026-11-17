@@ -10,8 +10,11 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import java.util.Map;
 
 @Controller
 @RequestMapping("/vehiculos")
@@ -39,6 +42,13 @@ public class VehiculoController {
         return "vehiculos/formulario";
     }
 
+    @GetMapping("/validar-placa")
+    @ResponseBody
+    public Map<String, Boolean> validarPlaca(@RequestParam String placa,
+                                             @RequestParam(required = false) Long id) {
+        return Map.of("duplicada", servicio.placaRegistrada(placa, id));
+    }
+
     @GetMapping("/editar/{id}")
     public String editar(@PathVariable Long id, Model model, RedirectAttributes redirect) {
         var vehiculo = servicio.buscar(id);
@@ -62,8 +72,6 @@ public class VehiculoController {
             return "vehiculos/formulario";
         }
         try {
-            if (vehiculo.getIdUsuario() == null)
-                throw new IllegalArgumentException("Seleccione el cliente propietario del vehículo.");
             servicio.guardar(vehiculo);
             redirect.addFlashAttribute("mensajeExito", nuevo ?
                     "Vehículo registrado correctamente." : "Vehículo actualizado correctamente.");

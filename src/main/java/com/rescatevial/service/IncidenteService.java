@@ -149,11 +149,11 @@ public class IncidenteService {
 
     @Transactional
     public OpcionIncidente registrarVehiculo(VehiculoIncidenteForm vehicle) {
-        if (vehicle.getIdUsuario() == null)
-            throw new IllegalArgumentException("No se identificó al usuario que registra el vehículo.");
-        clienteService.buscar(vehicle.getIdUsuario())
-                .filter(u -> clienteService.estadoActivoId().equals(u.getEstado()))
-                .orElseThrow(() -> new IllegalArgumentException("Seleccione un cliente activo como propietario."));
+        if (vehicle.getIdUsuario() != null) {
+            clienteService.buscar(vehicle.getIdUsuario())
+                    .filter(u -> clienteService.estadoActivoId().equals(u.getEstado()))
+                    .orElseThrow(() -> new IllegalArgumentException("Seleccione un cliente activo como propietario."));
+        }
         Optional<OpcionIncidente> existing = repository.findVehicleByPlate(vehicle.getPlaca());
         if (existing.isPresent()) {
             if (!Long.valueOf(1).equals(existing.get().getEstadoId())) {

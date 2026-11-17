@@ -129,10 +129,17 @@ class PortalClienteWebTest {
         String html=mvc.perform(get("/cliente/vehiculos/nuevo").session(session("CLIENT")))
                 .andExpect(status().isOk()).andExpect(view().name("vehiculos/formulario"))
                 .andReturn().getResponse().getContentAsString(java.nio.charset.StandardCharsets.UTF_8);
-        assertTrue(html.contains("/cliente/vehiculos/guardar"));assertTrue(html.contains("El veh&iacute;culo quedar&aacute; asociado a tu cuenta."));
+        assertTrue(html.contains("/cliente/vehiculos/guardar"));assertTrue(html.contains("data-plate-check-url=\"/cliente/vehiculos/validar-placa\""));
+        assertTrue(html.contains("El veh&iacute;culo quedar&aacute; asociado a tu cuenta."));
         assertTrue(html.contains("idMarca"));assertTrue(html.contains("/js/vehiculos.js"));assertTrue(html.contains("_csrf"));
         assertFalse(html.contains("seleccionar-cliente"));assertFalse(html.contains("name=\"idUsuario\""));
         assertFalse(html.contains("/js/cliente-propietario.js"));
+    }
+    @Test void clientePuedeConsultarSiLaPlacaYaEstaRegistrada() throws Exception {
+        when(vehiculos.placaRegistrada("ABC123", null)).thenReturn(true);
+        mvc.perform(get("/cliente/vehiculos/validar-placa").session(session("CLIENT")).param("placa", "ABC123"))
+                .andExpect(status().isOk()).andExpect(content().json("{\"duplicada\":true}"));
+        verify(vehiculos).placaRegistrada("ABC123", null);
     }
     @Test void altaVehiculoIgnoraPropietarioEstadoEIdManipulados() throws Exception {
         var s=session("CLIENT");

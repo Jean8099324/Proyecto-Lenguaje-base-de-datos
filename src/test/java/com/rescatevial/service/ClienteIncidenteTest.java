@@ -44,7 +44,10 @@ class ClienteIncidenteTest {
   var engine=new org.thymeleaf.spring6.SpringTemplateEngine();engine.setTemplateResolver(resolver);
   var context=new org.thymeleaf.context.Context();context.setVariable("actual",20L);
   String html=engine.process("fragments/cliente-propietario",context);
-  assertTrue(html.contains("data-actual=\"20\""));assertTrue(html.contains("name=\"idUsuario\""));
+   assertTrue(html.contains("data-actual=\"20\""));assertTrue(html.contains("name=\"idUsuario\""));
+   assertTrue(html.contains("Cliente dueño del vehículo (opcional)"));
+   assertTrue(html.contains("<option value=\"\">Sin propietario registrado</option>"));
+   assertFalse(html.contains("name=\"idUsuario\" class=\"seleccionar-cliente\" required"));
   assertFalse(html.contains("type=\"password\""));
  }
 }
