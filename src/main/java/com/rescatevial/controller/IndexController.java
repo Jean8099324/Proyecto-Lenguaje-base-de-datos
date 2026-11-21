@@ -55,6 +55,7 @@ public class IndexController {
         model.addAttribute("incidentesRecientes", dashboardService.obtenerIncidentesRecientes());
 
         Map<String, Long> estados = dashboardService.obtenerEstadosUnidades();
+
         long disponibles = estados.getOrDefault("DISPONIBLE", 0L);
         long enServicio = estados.getOrDefault("EN SERVICIO", 0L)
                 + estados.getOrDefault("ASIGNADA", 0L);

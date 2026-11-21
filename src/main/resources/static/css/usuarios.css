@@ -391,6 +391,17 @@ textarea {
     gap: 25px;
 }
 
+.user-list-actions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 12px;
+}
+
+.user-list-actions .search-box {
+    width: min(280px, 30vw);
+}
+
 .section-label {
     display: block;
     margin-bottom: 6px;
@@ -588,7 +599,7 @@ textarea {
 }
 
 .clients-table th {
-    padding: 12px 18px;
+    padding: 8px 14px;
     background: #fafbfc;
     border-bottom: 1px solid var(--border);
     color: #8b959f;
@@ -599,7 +610,7 @@ textarea {
 }
 
 .clients-table td {
-    padding: 14px 18px;
+    padding: 7px 14px;
     border-bottom: 1px solid #edf0f2;
     color: #56616c;
     font-size: 10px;
@@ -814,6 +825,28 @@ textarea {
     display: flex;
     align-items: center;
     gap: 5px;
+}
+
+.pagination-custom-link {
+    display: inline-flex;
+    min-height: 31px;
+    align-items: center;
+    padding: 0 10px;
+    border: 1px solid var(--border);
+    border-radius: 7px;
+    background: white;
+    color: var(--primary);
+    font-size: 10px;
+    text-decoration: none;
+}
+
+.pagination-custom-link:hover {
+    border-color: var(--primary);
+}
+
+.pagination-custom-link.disabled {
+    pointer-events: none;
+    opacity: 0.45;
 }
 
 .pagination-custom button {
@@ -1420,6 +1453,16 @@ a.action-btn {
     .page-heading {
         align-items: flex-start;
         flex-direction: column;
+    }
+
+    .user-list-actions {
+        width: 100%;
+        justify-content: flex-start;
+    }
+
+    .user-list-actions .search-box {
+        width: 100%;
+        flex: 1;
     }
 
     .client-stats {

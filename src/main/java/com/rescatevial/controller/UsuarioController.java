@@ -11,6 +11,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -34,10 +35,21 @@ public class UsuarioController {
     }
 
     @GetMapping("/listado")
-    public String inicio(Model model) {
-        var usuarios = usuarioService.getUsuarios(false);
-        model.addAttribute("usuarios", usuarios);
-        model.addAttribute("totalUsuarios", usuarios.size());
+    public String inicio(@RequestParam(defaultValue = "1") int pagina, Model model) {
+        int tamanioPagina = 10;
+        var resultado = usuarioService.getUsuariosPaginados(Math.max(1, pagina), tamanioPagina);
+        long totalUsuarios = resultado.total();
+        int totalPaginas = (int) Math.max(1, (totalUsuarios + tamanioPagina - 1) / tamanioPagina);
+        int paginaActual = Math.min(Math.max(1, pagina), totalPaginas);
+        if (paginaActual != Math.max(1, pagina)) {
+            resultado = usuarioService.getUsuariosPaginados(paginaActual, tamanioPagina);
+        }
+        model.addAttribute("usuarios", resultado.usuarios());
+        model.addAttribute("totalUsuarios", totalUsuarios);
+        model.addAttribute("paginaActual", paginaActual);
+        model.addAttribute("totalPaginas", totalPaginas);
+        model.addAttribute("inicioRegistro", totalUsuarios == 0 ? 0 : (paginaActual - 1) * tamanioPagina + 1);
+        model.addAttribute("finRegistro", Math.min((long) paginaActual * tamanioPagina, totalUsuarios));
         model.addAttribute("tiposUsuario", tipoUsuarioService.listarActivos());
         model.addAttribute("estados", estadoService.listar());
         model.addAttribute("roles", usuarioService.getRolesNombres());

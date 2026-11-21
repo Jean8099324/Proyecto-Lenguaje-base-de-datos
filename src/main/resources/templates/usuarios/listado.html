@@ -15,28 +15,33 @@
     <div class="main-content">
         <header class="topbar"><div class="topbar-left"><button class="menu-button" id="menuButton"><i class="bi bi-list"></i></button><div><h2>Usuarios</h2><span>Administración de usuarios</span></div></div><div class="topbar-right"><div class="user-divider"></div><div class="user-profile"><div class="user-avatar" th:text="${session.inicialesUsuario != null ? session.inicialesUsuario : 'U'}">U</div><div class="user-info"><strong th:text="${session.nombreUsuario != null ? session.nombreUsuario : #authentication.name}">Usuario</strong><span th:text="${session.usernameUsuario != null ? session.usernameUsuario : #authentication.name}">usuario</span></div></div><form th:action="@{/logout}" method="post" class="logout-form" style="margin: 0;"><input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"><button type="submit" class="topbar-action" title="Cerrar sesión" aria-label="Cerrar sesión"><i class="bi bi-box-arrow-right"></i><span class="visually-hidden">Cerrar sesión</span></button></form></div></header>
         <main class="page-content">
-            <section class="page-heading"><div><span class="section-label">GESTIÓN DEL SISTEMA</span><h2>Usuarios</h2><p>Registre usuarios y consulte los registros de la base de datos.</p></div><button class="btn-primary-custom" id="btnNuevoUsuario"><i class="bi bi-person-plus"></i> Nuevo usuario</button></section>
+            <section class="page-heading"><div><span class="section-label">GESTIÓN DEL SISTEMA</span><h2>Usuarios</h2><p>Registre usuarios y consulte los registros de la base de datos.</p></div><div class="user-list-actions"><div class="search-box"><i class="bi bi-search"></i><input id="buscarUsuario" type="search" placeholder="Buscar por nombre o usuario..."></div><button class="btn-primary-custom" id="btnNuevoUsuario"><i class="bi bi-person-plus"></i> Nuevo usuario</button></div></section>
             <div th:if="${mensajeExito}" class="alert alert-success" th:text="${mensajeExito}"></div><div th:if="${mensajeError}" class="alert alert-danger" th:text="${mensajeError}"></div>
             <section class="content-card">
-                <div class="content-card-header"><div><span class="section-label">REGISTROS</span><h3>Usuarios registrados</h3></div><div class="table-tools"><div class="search-box"><i class="bi bi-search"></i><input id="buscarUsuario" type="search" placeholder="Buscar por nombre o usuario..."></div></div></div>
-                <div class="table-responsive"><table class="clients-table"><thead><tr><th>ID</th><th>NOMBRE</th><th>FECHA NACIMIENTO</th><th>USERNAME</th><th>CONTRASEÑA</th><th>FECHA CREACIÓN</th><th>FECHA MODIFICACIÓN</th><th>FECHA ELIMINACIÓN</th><th>TIPO</th><th>ESTADO</th><th>ACCIÓN</th></tr></thead>
+
+                <div class="table-responsive"><table class="clients-table"><thead><tr><th>NOMBRE</th><th>FECHA NACIMIENTO</th><th>USERNAME</th><th>FECHA CREACIÓN</th><th>FECHA MODIFICACIÓN</th><th>TIPO</th><th>ESTADO</th><th>ACCIÓN</th></tr></thead>
                     <tbody id="tablaUsuarios">
                     <tr th:each="usuario : ${usuarios}">
-                        <td th:text="${usuario.id}">1</td>
+
                         <td th:text="${usuario.nombre + ' ' + usuario.primerApellido + (usuario.segundoApellido != null ? ' ' + usuario.segundoApellido : '')}">Nombre Apellido</td>
                         <td th:text="${usuario.fechaNacimiento != null ? #temporals.format(usuario.fechaNacimiento, 'dd/MM/yyyy') : '—'}">—</td>
                         <td th:text="${usuario.username}">usuario</td>
-                        <td aria-label="Contraseña oculta">••••••••</td>
                         <td th:text="${usuario.fechaCreacion != null ? #temporals.format(usuario.fechaCreacion.atZone(T(java.time.ZoneId).of('America/Costa_Rica')), 'dd/MM/yyyy HH:mm') : '—'}">—</td>
                         <td th:text="${usuario.fechaModificacion != null ? #temporals.format(usuario.fechaModificacion.atZone(T(java.time.ZoneId).of('America/Costa_Rica')), 'dd/MM/yyyy HH:mm') : '—'}">—</td>
-                        <td th:text="${usuario.fechaEliminacion != null ? #temporals.format(usuario.fechaEliminacion.atZone(T(java.time.ZoneId).of('America/Costa_Rica')), 'dd/MM/yyyy HH:mm') : '—'}">—</td>
                         <td th:text="${usuario.tipoUsuarioNombre}">CLIENTE</td>
                         <td th:text="${usuario.estadoNombre}">ACTIVO</td>
                         <td><a class="action-btn edit" title="Editar usuario" th:href="@{/usuarios/modificar/{id}(id=${usuario.id})}"><i class="bi bi-pencil-square"></i></a></td>
                     </tr>
-                    <tr th:if="${#lists.isEmpty(usuarios)}"><td colspan="11" class="text-center">No hay usuarios registrados.</td></tr></tbody>
+                    <tr th:if="${#lists.isEmpty(usuarios)}"><td colspan="8" class="text-center">No hay usuarios registrados.</td></tr></tbody>
                 </table></div>
-                <div class="table-footer"><span>Mostrando <strong id="cantidadVisible" th:text="${totalUsuarios}">0</strong> usuarios registrados</span></div>
+                <div class="table-footer">
+                    <span>Mostrando <strong th:text="${inicioRegistro}">0</strong>–<strong th:text="${finRegistro}">0</strong> de <strong id="cantidadVisible" th:text="${totalUsuarios}">0</strong> usuarios</span>
+                    <div class="pagination-custom" aria-label="Paginación de usuarios">
+                        <a class="pagination-custom-link" th:classappend="${paginaActual <= 1} ? ' disabled'" th:href="@{/usuarios/listado(pagina=${paginaActual > 1 ? paginaActual - 1 : 1})}" aria-label="Página anterior">Anterior</a>
+                        <span>Página <strong th:text="${paginaActual}">1</strong> de <strong th:text="${totalPaginas}">1</strong></span>
+                        <a class="pagination-custom-link" th:classappend="${paginaActual >= totalPaginas} ? ' disabled'" th:href="@{/usuarios/listado(pagina=${paginaActual < totalPaginas ? paginaActual + 1 : totalPaginas})}" aria-label="Página siguiente">Siguiente</a>
+                    </div>
+                </div>
             </section>
         </main>
     </div>

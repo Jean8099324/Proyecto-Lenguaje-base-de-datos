@@ -4,7 +4,6 @@ import com.rescatevial.domain.Usuario;
 import com.rescatevial.domain.Rol;
 import java.sql.Timestamp;
 import java.time.Instant;
-import java.time.OffsetDateTime;
 import java.sql.Types;
 import java.time.LocalDate;
 import java.util.List;
@@ -22,11 +21,14 @@ import org.springframework.stereotype.Repository;
 @Repository
 public class UsuarioRepository {
     private final JdbcTemplate jdbc;
+    private final TipoUsuarioRepository tipoUsuarioRepository;
     private final SimpleJdbcCall insertarUsuario;
     private final SimpleJdbcCall actualizarUsuario;
+    private final SimpleJdbcCall obtenerUsuariosPaginados;
 
-    public UsuarioRepository(JdbcTemplate jdbc) {
+    public UsuarioRepository(JdbcTemplate jdbc, TipoUsuarioRepository tipoUsuarioRepository) {
         this.jdbc = jdbc;
+        this.tipoUsuarioRepository = tipoUsuarioRepository;
         this.insertarUsuario = new SimpleJdbcCall(jdbc)
                 .withCatalogName("FIDE_PROYECTO_FINAL_RESCATE_VIAL_CR_PCK")
                 .withProcedureName("FIDE_INSERTAR_USUARIOS_SP")
@@ -40,6 +42,16 @@ public class UsuarioRepository {
                         new SqlParameter("P_PASSWORD", Types.VARCHAR),
                         new SqlParameter("P_TIPO_USUARIO", Types.NUMERIC),
                         new SqlParameter("P_ESTADO", Types.NUMERIC));
+        this.obtenerUsuariosPaginados = new SimpleJdbcCall(jdbc)
+                .withCatalogName("FIDE_PROYECTO_FINAL_RESCATE_VIAL_CR_PCK")
+                .withProcedureName("FIDE_OBTENER_USUARIOS_PAGINADOS_SP")
+                .withoutProcedureColumnMetaDataAccess()
+                .declareParameters(
+                        new SqlParameter("P_NUMERO_PAGINA", Types.NUMERIC),
+                        new SqlParameter("P_TAMANIO_PAGINA", Types.NUMERIC),
+                        new SqlOutParameter("P_TOTAL_USUARIOS", Types.NUMERIC),
+                        new SqlOutParameter("P_RESULTADO", Types.REF_CURSOR,
+                                (rs, row) -> mapUsuarioPaginado(rs)));
         this.actualizarUsuario = new SimpleJdbcCall(jdbc)
                 .withCatalogName("FIDE_PROYECTO_FINAL_RESCATE_VIAL_CR_PCK")
                 .withProcedureName("FIDE_ACTUALIZAR_USUARIO_SP")
@@ -95,7 +107,7 @@ public class UsuarioRepository {
     }
 
     public boolean esPerfilCliente(Long tipoUsuario) {
-        return new TipoUsuarioRepository(jdbc).findAllActivos().stream()
+        return tipoUsuarioRepository.findAllActivos().stream()
                 .anyMatch(tipo -> java.util.Objects.equals(tipo.getId(), tipoUsuario)
                         && "CLIENTE".equalsIgnoreCase(tipo.getNombreTipoUsuario().trim()));
     }
@@ -141,6 +153,16 @@ public class UsuarioRepository {
                         (rs, row) -> mapUsuario(rs)));
         return cursor(call.execute(new MapSqlParameterSource()));
     }
+
+    public PaginaUsuarios findAllPaginado(int numeroPagina, int tamanioPagina) {
+        Map<String, Object> salida = obtenerUsuariosPaginados.execute(new MapSqlParameterSource()
+                .addValue("P_NUMERO_PAGINA", numeroPagina)
+                .addValue("P_TAMANIO_PAGINA", tamanioPagina));
+        Number total = (Number) salida.get("P_TOTAL_USUARIOS");
+        return new PaginaUsuarios(cursor(salida), total == null ? 0L : total.longValue());
+    }
+
+    public record PaginaUsuarios(List<Usuario> usuarios, long total) {}
 
     public List<String> findAllUsernames() {
         var call = new SimpleJdbcCall(jdbc)
@@ -273,8 +295,13 @@ public class UsuarioRepository {
     }
 
     private static Instant toInstant(java.sql.ResultSet rs, String column) throws java.sql.SQLException {
-        OffsetDateTime value = rs.getObject(column, OffsetDateTime.class);
-        return value == null ? null : value.toInstant();
+        try {
+            Timestamp value = rs.getTimestamp(column);
+            return value == null ? null : value.toInstant();
+        } catch (java.sql.SQLException ex) {
+            if ("S0022".equals(ex.getSQLState()) || ex.getErrorCode() == 17006) return null;
+            throw ex;
+        }
     }
 
     private static Timestamp toTimestamp(LocalDate value) {
@@ -290,6 +317,25 @@ public class UsuarioRepository {
         usuario.setFechaNacimiento(toLocalDate(rs.getDate("FECHA_NACIMIENTO")));
         usuario.setUsername(rs.getString("USERNAME"));
         usuario.setPassword(rs.getString("PASSWORD"));
+        usuario.setFechaCreacion(toInstant(rs, "FECHA_CREACION"));
+        usuario.setFechaModificacion(toInstant(rs, "FECHA_MODIFICACION"));
+        usuario.setFechaEliminacion(toInstant(rs, "FECHA_ELIMINACION"));
+        usuario.setTipoUsuario(rs.getLong("ID_TIPO_USUARIO"));
+        usuario.setTipoUsuarioNombre(rs.getString("NOMBRE_TIPO_USUARIO"));
+        usuario.setEstado(rs.getLong("ID_ESTADO"));
+        usuario.setEstadoNombre(rs.getString("NOMBRE_ESTADO"));
+        return usuario;
+    }
+
+    /** Mapea las columnas del cursor paginado, que intencionalmente no incluye PASSWORD. */
+    private static Usuario mapUsuarioPaginado(java.sql.ResultSet rs) throws java.sql.SQLException {
+        Usuario usuario = new Usuario();
+        usuario.setId(rs.getLong("ID_USUARIO"));
+        usuario.setNombre(rs.getString("NOMBRE"));
+        usuario.setPrimerApellido(rs.getString("PRIMER_APELLIDO"));
+        usuario.setSegundoApellido(rs.getString("SEGUNDO_APELLIDO"));
+        usuario.setFechaNacimiento(toLocalDate(rs.getDate("FECHA_NACIMIENTO")));
+        usuario.setUsername(rs.getString("USERNAME"));
         usuario.setFechaCreacion(toInstant(rs, "FECHA_CREACION"));
         usuario.setFechaModificacion(toInstant(rs, "FECHA_MODIFICACION"));
         usuario.setTipoUsuario(rs.getLong("ID_TIPO_USUARIO"));

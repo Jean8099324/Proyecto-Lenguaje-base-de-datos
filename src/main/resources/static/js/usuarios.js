@@ -1,4 +1,4 @@
-﻿document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", () => {
     const sidebar = document.getElementById("sidebar");
     const overlay = document.getElementById("sidebarOverlay");
     const closeSidebar = () => { sidebar?.classList.remove("open"); overlay?.classList.remove("show"); };
@@ -45,13 +45,14 @@
             });
         });
     });
-    const rows = [...document.querySelectorAll("#tablaUsuarios tr")].filter(row => row.cells.length === 11);
+    const rows = [...document.querySelectorAll("#tablaUsuarios tr")].filter(row => row.cells.length === 8);
     const visible = document.getElementById("cantidadVisible");
+    const total = Number(visible?.textContent ?? rows.length);
     const filter = () => {
-        const query = search?.value.toLowerCase().trim() ?? "";
+        const query = search?.value.toLocaleLowerCase().trim() ?? "";
         let count = 0;
         rows.forEach(row => { const match = row.textContent.toLowerCase().includes(query); row.hidden = !match; if (match) count++; });
-        if (visible) visible.textContent = count;
+        if (visible) visible.textContent = query ? count : total;
     };
     search?.addEventListener("input", filter);
     filter();

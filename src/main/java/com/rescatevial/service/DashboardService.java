@@ -22,10 +22,6 @@ public class DashboardService {
     }
 
     @Transactional(readOnly = true)
-    public long contarUnidades() {
-        return dashboardRepository.contarUnidades();
-    }
-    @Transactional(readOnly = true)
     public long contarIncidentesEnAtencion() {
         return dashboardRepository.contarIncidentesEnAtencion();
     }
@@ -38,5 +34,12 @@ public class DashboardService {
     @Transactional(readOnly = true)
     public Map<String, Long> obtenerEstadosUnidades() {
         return dashboardRepository.obtenerEstadosUnidades();
+    }
+
+    @Transactional(readOnly = true)
+    public long contarUnidades() {
+        return dashboardRepository.obtenerEstadosUnidades().values().stream()
+                .mapToLong(Long::longValue)
+                .sum();
     }
 }
