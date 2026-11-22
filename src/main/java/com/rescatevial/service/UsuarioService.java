@@ -42,6 +42,14 @@ public class UsuarioService {
     }
 
     @Transactional(readOnly = true)
+    public UsuarioRepository.PaginaUsuarios getClientesPaginados(int numeroPagina, int tamanioPagina) {
+        if (numeroPagina < 1 || tamanioPagina < 1) {
+            throw new IllegalArgumentException("La página y su tamaño deben ser mayores que cero.");
+        }
+        return usuarioRepository.findClientesPaginado(numeroPagina, tamanioPagina);
+    }
+
+    @Transactional(readOnly = true)
     public List<String> getUsernames() {
         return usuarioRepository.findAllUsernames();
     }

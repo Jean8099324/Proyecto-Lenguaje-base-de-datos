@@ -41,9 +41,9 @@ class IncidenteDetalleControllerTest {
         assertEquals("incidentes/detalle", controller.detalle(2L, modelo, new RedirectAttributesModelMap()));
         assertNotNull(modelo.get("clienteIncidente"));
         assertEquals(List.of("cliente@ejemplo.com"), contactos(modelo, "correosCliente").stream()
-                .map(DatoContacto::getValor).toList());
+                .map(contacto -> contacto.getValor()).toList());
         assertEquals(List.of("88888888"), contactos(modelo, "telefonosCliente").stream()
-                .map(DatoContacto::getValor).toList());
+                .map(contacto -> contacto.getValor()).toList());
     }
 
     @Test

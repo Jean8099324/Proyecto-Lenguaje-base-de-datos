@@ -1,8 +1,8 @@
 <!doctype html><html xmlns:th="http://www.thymeleaf.org"><body>
 <section th:fragment="selector(actual)" class="form-group-custom full-width cliente-propietario" th:attr="data-actual=${actual}">
- <label>Cliente dueño del vehículo (opcional)</label>
+ <label>Cliente dueño del vehículo <span class="required-mark" aria-hidden="true">*</span></label>
  <input type="search" class="buscar-cliente" placeholder="Buscar cliente por nombre o número de registro" aria-label="Buscar cliente">
- <select name="idUsuario" class="seleccionar-cliente" aria-label="Cliente dueño del vehículo"><option value="">Sin propietario registrado</option></select>
+ <select name="idUsuario" class="seleccionar-cliente" aria-label="Cliente dueño del vehículo" required><option value="">Seleccione un cliente</option></select>
  <div class="cliente-resumen" hidden>
   <strong>Resumen del cliente</strong>
   <dl>

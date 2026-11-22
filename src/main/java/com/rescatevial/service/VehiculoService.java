@@ -158,7 +158,7 @@ public class VehiculoService {
             }
             // Algunos procedimientos Oracle capturan errores sin propagarlos.
             // Comprobar que el registro realmente exista antes de mostrar un exito.
-            var idsAnteriores = anteriores.stream().map(Vehiculo::getId).collect(Collectors.toSet());
+            var idsAnteriores = anteriores.stream().map(vehiculo -> vehiculo.getId()).collect(Collectors.toSet());
             boolean insertado = repository.listar().stream().anyMatch(actual ->
                     actual.getId() != null && !idsAnteriores.contains(actual.getId())
                     && java.util.Objects.equals(v.getPlaca(), placaNormalizada(actual.getPlaca()))

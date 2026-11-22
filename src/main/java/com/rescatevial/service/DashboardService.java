@@ -39,7 +39,7 @@ public class DashboardService {
     @Transactional(readOnly = true)
     public long contarUnidades() {
         return dashboardRepository.obtenerEstadosUnidades().values().stream()
-                .mapToLong(Long::longValue)
+                .mapToLong(valor -> valor.longValue())
                 .sum();
     }
 }

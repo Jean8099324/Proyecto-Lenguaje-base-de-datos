@@ -14,4 +14,5 @@ public class Unidad {
     @Size(max = 20) private String placa;
     private String tipoNombre;
     private String estadoNombre;
+    private Long incidenteAsignadoId;
 }

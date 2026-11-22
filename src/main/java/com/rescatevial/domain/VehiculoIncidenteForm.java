@@ -21,6 +21,6 @@ public class VehiculoIncidenteForm {
     @NotNull private Long idMarca;
     @NotNull private Long idModelo;
     @NotNull private Long idAnio;
-    @NotNull private Long idEstado;
+    private Long idEstado;
     private Long idUsuario;
 }

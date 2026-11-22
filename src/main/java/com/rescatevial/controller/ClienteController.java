@@ -45,10 +45,22 @@ public class ClienteController {
     }
 
     @GetMapping
-    public String listado(Model model) {
-        var clientes = clienteService.listar();
-        model.addAttribute("clientes", clientes);
-        model.addAttribute("totalClientes", clientes.size());
+    public String listado(@RequestParam(defaultValue = "1") int pagina, Model model) {
+        int tamanioPagina = 10;
+        int paginaSolicitada = Math.max(1, pagina);
+        var resultado = clienteService.listarPaginado(paginaSolicitada, tamanioPagina);
+        long totalClientes = resultado.total();
+        int totalPaginas = (int) Math.max(1, (totalClientes + tamanioPagina - 1) / tamanioPagina);
+        int paginaActual = Math.min(paginaSolicitada, totalPaginas);
+        if (paginaActual != paginaSolicitada) {
+            resultado = clienteService.listarPaginado(paginaActual, tamanioPagina);
+        }
+        model.addAttribute("clientes", resultado.usuarios());
+        model.addAttribute("totalClientes", totalClientes);
+        model.addAttribute("paginaActual", paginaActual);
+        model.addAttribute("totalPaginas", totalPaginas);
+        model.addAttribute("inicioRegistro", totalClientes == 0 ? 0 : (paginaActual - 1) * tamanioPagina + 1);
+        model.addAttribute("finRegistro", Math.min((long) paginaActual * tamanioPagina, totalClientes));
         return "clientes/listado";
     }
 
@@ -130,7 +142,7 @@ public class ClienteController {
         try {
             List<String> destinatarios = correos == null ? List.of() : correos.stream()
                     .filter(correo -> correo != null && !correo.isBlank())
-                    .map(String::trim)
+                    .map(correo -> correo.trim())
                     .collect(Collectors.toList());
             if (nuevo) {
                 if (destinatarios.isEmpty()) {
@@ -202,7 +214,7 @@ public class ClienteController {
         // falta, el propietario se obtiene del vehículo asociado.
         var vehiculosCliente = vehiculoService.listarPorCliente(clienteId);
         var idsVehiculosCliente = vehiculosCliente.stream()
-                .map(com.rescatevial.domain.Vehiculo::getId)
+                .map(vehiculo -> vehiculo.getId())
                 .collect(java.util.stream.Collectors.toSet());
         var incidentes = incidenteService.listar().stream()
                 .filter(incidente -> clienteId.equals(incidente.getIdUsuario())

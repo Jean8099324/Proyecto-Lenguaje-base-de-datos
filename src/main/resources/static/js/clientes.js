@@ -9,7 +9,7 @@ document.addEventListener("DOMContentLoaded", () => {
     overlay?.addEventListener("click", cerrar);
 
     const buscador = document.getElementById("buscarCliente");
-    const filas = [...document.querySelectorAll("#tablaClientes tr")].filter(fila => fila.cells.length === 5);
+    const filas = [...document.querySelectorAll("#tablaClientes tr")].filter(fila => fila.cells.length === 7);
     const visible = document.getElementById("cantidadVisible");
     const filtrar = () => {
         const texto = buscador?.value.toLowerCase().trim() ?? "";

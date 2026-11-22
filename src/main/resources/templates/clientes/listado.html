@@ -21,12 +21,14 @@
             <section class="content-card">
                 <div class="content-card-header"><div><span class="section-label">REGISTROS</span><h3>Clientes registrados</h3></div><div class="table-tools"><div class="search-box"><i class="bi bi-search"></i><input type="search" id="buscarCliente" placeholder="Buscar por nombre o usuario..."></div></div></div>
                 <div class="table-responsive">
-                    <table class="clients-table"><thead><tr><th>ID</th><th>NOMBRE</th><th>USERNAME</th><th>ESTADO</th><th>ACCIONES</th></tr></thead>
+                    <table class="clients-table"><thead><tr><th>NOMBRE</th><th>FECHA NACIMIENTO</th><th>USERNAME</th><th>FECHA CREACIÓN</th><th>FECHA MODIFICACIÓN</th><th>ESTADO</th><th>ACCIONES</th></tr></thead>
                         <tbody id="tablaClientes">
                         <tr th:each="cliente : ${clientes}">
-                            <td th:text="${cliente.id}">1</td>
                             <td th:text="${cliente.nombre + ' ' + cliente.primerApellido + (cliente.segundoApellido != null ? ' ' + cliente.segundoApellido : '')}">Nombre</td>
+                            <td th:text="${cliente.fechaNacimiento != null ? #temporals.format(cliente.fechaNacimiento, 'dd/MM/yyyy') : '—'}">—</td>
                             <td th:text="${cliente.usernameParaMostrar()}">usuario</td>
+                            <td th:text="${cliente.fechaCreacion != null ? #temporals.format(cliente.fechaCreacion.atZone(T(java.time.ZoneId).of('America/Costa_Rica')), 'dd/MM/yyyy HH:mm') : '—'}">—</td>
+                            <td th:text="${cliente.fechaModificacion != null ? #temporals.format(cliente.fechaModificacion.atZone(T(java.time.ZoneId).of('America/Costa_Rica')), 'dd/MM/yyyy HH:mm') : '—'}">—</td>
                             <td th:text="${cliente.estadoNombre}">ACTIVO</td>
                             <td><div class="action-buttons">
                                 <a class="action-btn view" th:href="@{/clientes/detalle/{id}(id=${cliente.id})}" title="Observar cliente"><i class="bi bi-eye"></i></a>
@@ -35,11 +37,18 @@
                                 <form th:unless="${cliente.estadoNombre == 'ACTIVO'}" th:action="@{/clientes/{id}/reactivar(id=${cliente.id})}" method="post" onsubmit="return confirm('¿Reactivar este cliente?');"><button type="submit" class="action-btn reactivate" title="Reactivar cliente"><i class="bi bi-arrow-counterclockwise"></i></button></form>
                             </div></td>
                         </tr>
-                        <tr th:if="${#lists.isEmpty(clientes)}"><td colspan="5" class="text-center">No hay clientes registrados.</td></tr>
+                        <tr th:if="${#lists.isEmpty(clientes)}"><td colspan="7" class="text-center">No hay clientes registrados.</td></tr>
                         </tbody>
                     </table>
                 </div>
-                <div class="table-footer"><span>Mostrando <strong id="cantidadVisible" th:text="${totalClientes}">0</strong> clientes</span></div>
+                <div class="table-footer">
+                    <span>Mostrando <strong th:text="${inicioRegistro}">0</strong>–<strong th:text="${finRegistro}">0</strong> de <strong th:text="${totalClientes}">0</strong> clientes</span>
+                    <div class="pagination-custom" aria-label="Paginación de clientes">
+                        <a class="pagination-custom-link" th:classappend="${paginaActual <= 1} ? ' disabled'" th:href="@{/clientes(pagina=${paginaActual > 1 ? paginaActual - 1 : 1})}" aria-label="Página anterior">Anterior</a>
+                        <span>Página <strong th:text="${paginaActual}">1</strong> de <strong th:text="${totalPaginas}">1</strong></span>
+                        <a class="pagination-custom-link" th:classappend="${paginaActual >= totalPaginas} ? ' disabled'" th:href="@{/clientes(pagina=${paginaActual < totalPaginas ? paginaActual + 1 : totalPaginas})}" aria-label="Página siguiente">Siguiente</a>
+                    </div>
+                </div>
             </section>
         </main>
     </div>

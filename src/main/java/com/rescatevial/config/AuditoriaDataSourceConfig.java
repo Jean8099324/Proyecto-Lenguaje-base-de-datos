@@ -100,6 +100,7 @@ public class AuditoriaDataSourceConfig {
                     throw exception.getCause();
                 }
             }
+
         }
     }
 }

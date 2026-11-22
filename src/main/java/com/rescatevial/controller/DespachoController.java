@@ -23,12 +23,24 @@ public class DespachoController {
     }
 
     @GetMapping
-    public String pantalla(Model model) {
-        var pendientes = despachoService.pendientes();
+    public String pantalla(@RequestParam(defaultValue = "1") int pagina, Model model) {
+        int tamanioPagina = 10;
+        int paginaSolicitada = Math.max(1, pagina);
+        var resultado = despachoService.pendientes(paginaSolicitada, tamanioPagina);
+        long totalPendientes = resultado.total();
+        int totalPaginas = (int) Math.max(1, (totalPendientes + tamanioPagina - 1) / tamanioPagina);
+        int paginaActual = Math.min(paginaSolicitada, totalPaginas);
+        if (paginaActual != paginaSolicitada) {
+            resultado = despachoService.pendientes(paginaActual, tamanioPagina);
+        }
         var unidades = despachoService.unidadesDisponibles();
-        model.addAttribute("incidentesPendientes", pendientes);
+        model.addAttribute("incidentesPendientes", resultado.incidentes());
         model.addAttribute("unidadesDisponibles", unidades);
-        model.addAttribute("totalPendientes", pendientes.size());
+        model.addAttribute("totalPendientes", totalPendientes);
+        model.addAttribute("paginaActual", paginaActual);
+        model.addAttribute("totalPaginas", totalPaginas);
+        model.addAttribute("inicioRegistro", totalPendientes == 0 ? 0 : (paginaActual - 1) * tamanioPagina + 1);
+        model.addAttribute("finRegistro", Math.min((long) paginaActual * tamanioPagina, totalPendientes));
         model.addAttribute("totalUnidades", unidades.size());
         return "despacho/listado";
     }

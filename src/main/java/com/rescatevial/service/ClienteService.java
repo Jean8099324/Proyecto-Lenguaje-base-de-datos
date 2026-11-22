@@ -26,6 +26,10 @@ public class ClienteService {
                 .toList();
     }
 
+    public com.rescatevial.repository.UsuarioRepository.PaginaUsuarios listarPaginado(int pagina, int tamanio) {
+        return usuarioService.getClientesPaginados(pagina, tamanio);
+    }
+
     public Optional<Usuario> buscar(Long id) {
         return usuarioService.getUsuarioPorId(id).filter(this::esCliente);
     }

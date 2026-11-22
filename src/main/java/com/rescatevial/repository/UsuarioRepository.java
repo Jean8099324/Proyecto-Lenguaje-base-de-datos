@@ -25,6 +25,7 @@ public class UsuarioRepository {
     private final SimpleJdbcCall insertarUsuario;
     private final SimpleJdbcCall actualizarUsuario;
     private final SimpleJdbcCall obtenerUsuariosPaginados;
+    private final SimpleJdbcCall obtenerClientesPaginados;
 
     public UsuarioRepository(JdbcTemplate jdbc, TipoUsuarioRepository tipoUsuarioRepository) {
         this.jdbc = jdbc;
@@ -50,6 +51,16 @@ public class UsuarioRepository {
                         new SqlParameter("P_NUMERO_PAGINA", Types.NUMERIC),
                         new SqlParameter("P_TAMANIO_PAGINA", Types.NUMERIC),
                         new SqlOutParameter("P_TOTAL_USUARIOS", Types.NUMERIC),
+                        new SqlOutParameter("P_RESULTADO", Types.REF_CURSOR,
+                                (rs, row) -> mapUsuarioPaginado(rs)));
+        this.obtenerClientesPaginados = new SimpleJdbcCall(jdbc)
+                .withCatalogName("FIDE_PROYECTO_FINAL_RESCATE_VIAL_CR_PCK")
+                .withProcedureName("FIDE_OBTENER_CLIENTES_PAGINADOS_SP")
+                .withoutProcedureColumnMetaDataAccess()
+                .declareParameters(
+                        new SqlParameter("P_NUMERO_PAGINA", Types.NUMERIC),
+                        new SqlParameter("P_TAMANIO_PAGINA", Types.NUMERIC),
+                        new SqlOutParameter("P_TOTAL_CLIENTES", Types.NUMERIC),
                         new SqlOutParameter("P_RESULTADO", Types.REF_CURSOR,
                                 (rs, row) -> mapUsuarioPaginado(rs)));
         this.actualizarUsuario = new SimpleJdbcCall(jdbc)
@@ -159,6 +170,14 @@ public class UsuarioRepository {
                 .addValue("P_NUMERO_PAGINA", numeroPagina)
                 .addValue("P_TAMANIO_PAGINA", tamanioPagina));
         Number total = (Number) salida.get("P_TOTAL_USUARIOS");
+        return new PaginaUsuarios(cursor(salida), total == null ? 0L : total.longValue());
+    }
+
+    public PaginaUsuarios findClientesPaginado(int numeroPagina, int tamanioPagina) {
+        Map<String, Object> salida = obtenerClientesPaginados.execute(new MapSqlParameterSource()
+                .addValue("P_NUMERO_PAGINA", numeroPagina)
+                .addValue("P_TAMANIO_PAGINA", tamanioPagina));
+        Number total = (Number) salida.get("P_TOTAL_CLIENTES");
         return new PaginaUsuarios(cursor(salida), total == null ? 0L : total.longValue());
     }
 

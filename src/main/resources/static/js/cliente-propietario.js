@@ -8,7 +8,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const renderClientes=()=>{
    const current=select.value||root.dataset.actual||"";
    const query=search.value.trim().toLocaleLowerCase("es");
-   select.replaceChildren(new Option("Sin propietario registrado",""), ...catalogo.clientes.filter(c=>String(c.id)===current||`${c.nombre} ${c.id}`.toLocaleLowerCase("es").includes(query)).map(c=>new Option(`${c.nombre} (#${c.id})`,c.id)));
+   select.replaceChildren(new Option("Seleccione un cliente",""), ...catalogo.clientes.filter(c=>String(c.id)===current||`${c.nombre} ${c.id}`.toLocaleLowerCase("es").includes(query)).map(c=>new Option(`${c.nombre} (#${c.id})`,c.id)));
    select.value=current;
   };
   const opciones=(name,rows)=>field(name).replaceChildren(new Option("Seleccione...",""),...rows.map(o=>new Option(o.nombre,o.id)));

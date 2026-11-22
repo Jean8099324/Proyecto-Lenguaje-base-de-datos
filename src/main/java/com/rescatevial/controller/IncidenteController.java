@@ -48,7 +48,7 @@ public class IncidenteController {
         var incidentes = incidenteService.listar();
         model.addAttribute("incidentes", incidentes);
         model.addAttribute("totalIncidentes", incidentes.size());
-        catalogos(model, null);
+        catalogosVacios(model);
         if (!model.containsAttribute("incidenteForm")) {
             var ahora = java.time.ZonedDateTime.now(java.time.ZoneId.of("America/Costa_Rica"));
             var formulario = new Incidente();
@@ -159,6 +159,13 @@ public class IncidenteController {
         model.addAttribute("historialServicios", incidenteService.historialServicios(id));
         model.addAttribute("facturacion", incidenteService.facturacion(id));
         return "incidentes/detalle";
+    }
+
+    @GetMapping("/vehiculos/{id}/propietario")
+    @ResponseBody
+    public ResponseEntity<java.util.Map<String, String>> propietarioVehiculo(@PathVariable Long id) {
+        String nombre = incidenteService.nombrePropietarioVehiculo(id).orElse("Sin propietario registrado");
+        return ResponseEntity.ok(java.util.Map.of("nombre", nombre));
     }
 
     public String guardar(@Valid @ModelAttribute("incidenteForm") Incidente incidente,
@@ -324,6 +331,42 @@ public class IncidenteController {
         }
     }
 
+    @GetMapping("/catalogos/{tipo}")
+    @ResponseBody
+    public ResponseEntity<?> catalogoDiferido(@PathVariable String tipo,
+                                               @RequestParam(required = false) Long padre) {
+        return switch (tipo) {
+            case "vehiculos" -> ResponseEntity.ok(incidenteService.vehiculos());
+            case "tipos" -> ResponseEntity.ok(incidenteService.tipos());
+            case "prioridades" -> ResponseEntity.ok(incidenteService.prioridades());
+            case "estados" -> ResponseEntity.ok(estadoService.listar());
+            case "provincias" -> ResponseEntity.ok(incidenteService.provincias());
+            case "cantones" -> padre == null ? ResponseEntity.badRequest().build()
+                    : ResponseEntity.ok(incidenteService.cantones(padre));
+            case "distritos" -> padre == null ? ResponseEntity.badRequest().build()
+                    : ResponseEntity.ok(incidenteService.distritos(padre));
+            case "marcas" -> ResponseEntity.ok(incidenteService.marcasVehiculo());
+            case "modelos" -> ResponseEntity.ok(incidenteService.modelosVehiculo());
+            case "anios" -> ResponseEntity.ok(incidenteService.aniosVehiculo());
+            default -> ResponseEntity.notFound().build();
+        };
+    }
+
+    private void catalogosVacios(Model model) {
+        model.addAttribute("vehiculos", java.util.List.of());
+        model.addAttribute("tiposIncidente", java.util.List.of());
+        model.addAttribute("prioridades", java.util.List.of());
+        model.addAttribute("provincias", java.util.List.of());
+        model.addAttribute("cantones", java.util.List.of());
+        model.addAttribute("distritos", java.util.List.of());
+        model.addAttribute("marcasVehiculo", java.util.List.of());
+        model.addAttribute("modelosVehiculo", java.util.List.of());
+        model.addAttribute("aniosVehiculo", java.util.List.of());
+        model.addAttribute("estados", java.util.List.of());
+        model.addAttribute("estadosIncidente", java.util.List.of());
+        model.addAttribute("estadosFiltro", java.util.List.of());
+    }
+
     private void catalogos(Model model, Long incidentId) {
         model.addAttribute("vehiculos", incidentId == null
                 ? incidenteService.vehiculos() : incidenteService.vehiculos(incidentId));
@@ -336,10 +379,6 @@ public class IncidenteController {
         model.addAttribute("modelosVehiculo", incidenteService.modelosVehiculo());
         model.addAttribute("aniosVehiculo", incidenteService.aniosVehiculo());
         var estados = estadoService.listar();
-        model.addAttribute("estadosVehiculo", estados.stream()
-                .filter(estado -> Long.valueOf(1).equals(estado.getId())
-                        || Long.valueOf(2).equals(estado.getId()))
-                .toList());
         model.addAttribute("estados", estados);
         model.addAttribute("estadosIncidente", estados.stream()
                 .filter(estado -> estado.getId() != null

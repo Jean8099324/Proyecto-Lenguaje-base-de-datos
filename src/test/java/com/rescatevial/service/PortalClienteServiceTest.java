@@ -83,7 +83,13 @@ class PortalClienteServiceTest {
         UsuarioRepository repo=mock(UsuarioRepository.class);PasswordEncoder encoder=mock(PasswordEncoder.class);
         Usuario original=new Usuario();original.setPassword("hashAnterior");
         Usuario actualizado=new Usuario();actualizado.setPassword("hashNuevo");
-        when(repo.findByUsername("ana")).thenReturn(Optional.of(original),Optional.of(actualizado));
+        when(repo.findByUsername("ana")).thenAnswer(new org.mockito.stubbing.Answer<Optional<Usuario>>() {
+            private final java.util.Iterator<Optional<Usuario>> respuestas =
+                    List.of(Optional.of(original), Optional.of(actualizado)).iterator();
+            @Override public Optional<Usuario> answer(org.mockito.invocation.InvocationOnMock invocation) {
+                return respuestas.next();
+            }
+        });
         when(encoder.matches("actual123", "hashAnterior")).thenReturn(true);
         when(encoder.encode("nueva1234")).thenReturn("hashNuevo");
         when(encoder.matches("nueva1234", "hashNuevo")).thenReturn(true);

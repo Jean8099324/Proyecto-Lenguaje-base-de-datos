@@ -44,6 +44,7 @@
 .add-vehicle-link[hidden] { display: none; }
 .picker-message { display: block; margin-top: 6px; color: var(--muted); font-size: 11px; }
 .picker-message.selected { color: var(--success); font-weight: 700; }
+.owner-picker-message { margin-top: 2px; color: var(--muted); font-weight: 500; }
 .picker-message.occupied { display: flex; align-items: flex-start; gap: 6px; color: #a96b00; font-weight: 700; }
 .picker-message.occupied::before { content: "⚠"; flex: 0 0 auto; font-size: 14px; line-height: 1; }
 .cliente-resumen { margin-top: 10px; padding: 12px 14px; border: 1px solid #cfe0ed; border-radius: 9px; background: #f5f9fc; color: var(--text); }

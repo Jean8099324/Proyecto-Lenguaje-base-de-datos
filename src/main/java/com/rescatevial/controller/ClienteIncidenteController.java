@@ -43,10 +43,16 @@ public class ClienteIncidenteController {
    "distrito",direccion.getIdDistrito(),"otrasSenas",
    direccion.getOtrasSenas() == null ? "" : direccion.getOtrasSenas()));
   respuesta.put("correos",datos.correos(id).stream()
-   .filter(d -> "ACTIVO".equalsIgnoreCase(d.getNombreEstado())).map(DatoContacto::getValor).toList());
-  respuesta.put("telefonos",datos.telefonos(id).stream()
-   .filter(d -> "ACTIVO".equalsIgnoreCase(d.getNombreEstado())).map(DatoContacto::getValor).toList());
-  return ResponseEntity.ok(respuesta);
+.filter(d -> "ACTIVO".equalsIgnoreCase(d.getNombreEstado()))
+.map(d -> d.getValor())
+.toList());
+
+respuesta.put("telefonos", datos.telefonos(id).stream()
+        .filter(d -> "ACTIVO".equalsIgnoreCase(d.getNombreEstado()))
+        .map(d -> d.getValor())
+        .toList());
+
+return ResponseEntity.ok(respuesta);
  }
  @PostMapping public ResponseEntity<?> crear(@Valid @ModelAttribute ClienteIncidenteForm f,BindingResult errores) {
   if(errores.hasErrors()) return ResponseEntity.badRequest().body(Map.of("error","Revise nombre, apellidos, dirección y formatos de teléfono o correo."));

@@ -32,6 +32,28 @@ public class IncidenteService {
     @Transactional(readOnly = true)
     public List<Incidente> listar() {
         List<Incidente> incidentes = repository.findAll();
+        if (incidentes.isEmpty() || incidentes.stream().allMatch(i -> i.getTipoEtiqueta() != null
+                && i.getPrioridadEtiqueta() != null && i.getEstadoEtiqueta() != null
+                && i.getUbicacionEtiqueta() != null && i.getVehiculoEtiqueta() != null)) {
+            return incidentes;
+        }
+        if (!incidentes.isEmpty()) {
+            Map<String, Long> tipos = repository.findIncidentTypes().stream().collect(Collectors.toMap(
+                    o -> o.getEtiqueta().trim().toUpperCase(java.util.Locale.ROOT), o -> o.getId(),
+                    (first, ignored) -> first));
+            Map<String, Long> prioridades = repository.findPriorities().stream().collect(Collectors.toMap(
+                    o -> o.getEtiqueta().trim().toUpperCase(java.util.Locale.ROOT), o -> o.getId(),
+                    (first, ignored) -> first));
+            Map<String, Long> estados = estadoService.listar().stream().collect(Collectors.toMap(
+                    e -> e.getNombreEstado().trim().toUpperCase(java.util.Locale.ROOT),
+                    e -> e.getId(), (first, ignored) -> first));
+            incidentes.forEach(i -> {
+                i.setIdTipoIncidente(tipos.get(i.getTipoEtiqueta().trim().toUpperCase(java.util.Locale.ROOT)));
+                i.setIdPrioridad(prioridades.get(i.getPrioridadEtiqueta().trim().toUpperCase(java.util.Locale.ROOT)));
+                i.setIdEstado(estados.get(i.getEstadoEtiqueta().trim().toUpperCase(java.util.Locale.ROOT)));
+            });
+            return incidentes;
+        }
         Map<Long, String> vehiculos = labels(repository.findVehicles());
         Map<Long, String> provincias = labels(repository.findProvinces());
         Map<Long, String> cantones = labels(repository.findCantons());
@@ -61,7 +83,7 @@ public class IncidenteService {
         var tipos = labels(repository.findIncidentTypes());
         var estados = estadoService.listar().stream().collect(Collectors.toMap(
                 e -> e.getId(), e -> e.getNombreEstado(), (a, b) -> a));
-        return repository.findAll().stream().filter(i -> usuarioId.equals(i.getIdUsuario()))
+        return repository.findByUserId(usuarioId).stream()
                 .peek(i -> {
                     i.setTipoEtiqueta(tipos.getOrDefault(i.getIdTipoIncidente(), "Sin tipo"));
                     i.setEstadoEtiqueta(estados.getOrDefault(i.getIdEstado(), "Sin estado"));
@@ -115,6 +137,7 @@ public class IncidenteService {
     @Transactional public void desactivar(Long id) { repository.deactivate(id); }
     @Transactional(readOnly = true) public List<ContactoIncidente> contactos(Long id) { return repository.findContactsByIncident(id); }
     @Transactional(readOnly = true) public Optional<VehiculoDetalleIncidente> vehiculoDetalle(Long id) { return repository.findVehicleDetail(id); }
+    @Transactional(readOnly = true) public Optional<String> nombrePropietarioVehiculo(Long id) { return repository.findVehicleOwnerName(id); }
     @Transactional(readOnly = true) public List<HistorialServicioIncidente> historialServicios(Long id) { return repository.findServiceHistory(id); }
     @Transactional(readOnly = true) public List<FacturacionIncidente> facturacion(Long id) { return repository.findBilling(id); }
     @Transactional(readOnly = true) public List<OpcionIncidente> vehiculos() { return repository.findVehicles(); }
@@ -142,18 +165,22 @@ public class IncidenteService {
     @Transactional(readOnly = true) public List<OpcionIncidente> prioridades() { return repository.findPriorities(); }
     @Transactional(readOnly = true) public List<OpcionIncidente> provincias() { return repository.findProvinces(); }
     @Transactional(readOnly = true) public List<OpcionIncidente> cantones() { return repository.findCantons(); }
+    @Transactional(readOnly = true) public List<OpcionIncidente> cantones(Long provinciaId) { return repository.findCantonsByProvince(provinciaId); }
     @Transactional(readOnly = true) public List<OpcionIncidente> distritos() { return repository.findDistricts(); }
+    @Transactional(readOnly = true) public List<OpcionIncidente> distritos(Long cantonId) { return repository.findDistrictsByCanton(cantonId); }
     @Transactional(readOnly = true) public List<OpcionIncidente> marcasVehiculo() { return repository.findBrands(); }
     @Transactional(readOnly = true) public List<OpcionIncidente> modelosVehiculo() { return repository.findModels(); }
     @Transactional(readOnly = true) public List<OpcionIncidente> aniosVehiculo() { return repository.findYears(); }
 
     @Transactional
     public OpcionIncidente registrarVehiculo(VehiculoIncidenteForm vehicle) {
-        if (vehicle.getIdUsuario() != null) {
-            clienteService.buscar(vehicle.getIdUsuario())
-                    .filter(u -> clienteService.estadoActivoId().equals(u.getEstado()))
-                    .orElseThrow(() -> new IllegalArgumentException("Seleccione un cliente activo como propietario."));
+        vehicle.setIdEstado(vehiculoService.estadoActivo());
+        if (vehicle.getIdUsuario() == null) {
+            throw new IllegalArgumentException("Seleccione el cliente dueño del vehículo.");
         }
+        clienteService.buscar(vehicle.getIdUsuario())
+                .filter(u -> clienteService.estadoActivoId().equals(u.getEstado()))
+                .orElseThrow(() -> new IllegalArgumentException("Seleccione un cliente activo como propietario."));
         Optional<OpcionIncidente> existing = repository.findVehicleByPlate(vehicle.getPlaca());
         if (existing.isPresent()) {
             if (!Long.valueOf(1).equals(existing.get().getEstadoId())) {

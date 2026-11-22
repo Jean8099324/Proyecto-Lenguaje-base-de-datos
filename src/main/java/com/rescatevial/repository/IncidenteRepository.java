@@ -20,9 +20,12 @@ import org.springframework.jdbc.core.SqlParameter;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.simple.SimpleJdbcCall;
 import org.springframework.stereotype.Repository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Repository
 public class IncidenteRepository {
+    private static final Logger log = LoggerFactory.getLogger(IncidenteRepository.class);
     private final JdbcTemplate jdbc;
 
     public IncidenteRepository(JdbcTemplate jdbc) {
@@ -33,8 +36,61 @@ public class IncidenteRepository {
         var call = new SimpleJdbcCall(jdbc).withCatalogName("FIDE_PROYECTO_FINAL_RESCATE_VIAL_CR_PCK")
                 .withProcedureName("FIDE_OBTENER_INCIDENTES_SP").withoutProcedureColumnMetaDataAccess()
                 .declareParameters(new SqlOutParameter("P_RESULTADO", Types.REF_CURSOR,
-                        (rs, row) -> mapIncidente(rs)));
-        return cursor(call.execute(new MapSqlParameterSource()));
+                        (rs, row) -> mapIncidenteListado(rs)));
+        return medir("FIDE_OBTENER_INCIDENTES_SP", () -> cursor(call.execute(new MapSqlParameterSource())));
+    }
+
+    private static Incidente mapIncidenteListado(java.sql.ResultSet rs) throws java.sql.SQLException {
+        Incidente incident = new Incidente();
+        incident.setId(rs.getLong("ID_INCIDENTE"));
+        incident.setPlacaVehiculo(rs.getString("PLACA"));
+        incident.setVehiculoEtiqueta(rs.getString("PLACA"));
+        incident.setFechaReporte(rs.getDate("FECHA_REPORTE") == null
+                ? null : rs.getDate("FECHA_REPORTE").toLocalDate());
+        incident.setHoraReporte(rs.getString("HORA_REPORTE"));
+        incident.setDetalles(rs.getString("DETALLES_INCIDENTE"));
+        incident.setTipoEtiqueta(rs.getString("NOMBRE_TIPO_INCIDENTE"));
+        incident.setPrioridadEtiqueta(rs.getString("NOMBRE_PRIORIDAD"));
+        incident.setEstadoEtiqueta(rs.getString("NOMBRE_ESTADO"));
+        String province = rs.getString("NOMBRE_PROVINCIA");
+        String canton = rs.getString("NOMBRE_CANTON");
+        String district = rs.getString("NOMBRE_DISTRITO");
+        String location = String.join(", ", java.util.stream.Stream.of(province, canton, district)
+                .filter(value -> value != null && !value.isBlank()).toList());
+        String otherSigns = rs.getString("OTRAS_SENAS");
+        if (otherSigns != null && !otherSigns.isBlank()) {
+            location += (location.isBlank() ? "" : " — ") + otherSigns;
+        }
+        incident.setOtrasSenas(otherSigns);
+        incident.setUbicacionEtiqueta(location);
+        return incident;
+    }
+
+    public List<Incidente> findByUserId(Long userId) {
+        var call = new SimpleJdbcCall(jdbc).withCatalogName("FIDE_PROYECTO_FINAL_RESCATE_VIAL_CR_PCK")
+                .withProcedureName("FIDE_OBTENER_INCIDENTES_POR_USUARIO_SP").withoutProcedureColumnMetaDataAccess()
+                .declareParameters(new SqlParameter("P_ID_USUARIO", Types.NUMERIC),
+                        new SqlOutParameter("P_RESULTADO", Types.REF_CURSOR, (rs, row) -> {
+                            Incidente incident = new Incidente();
+                            incident.setId(rs.getLong("ID_INCIDENTE"));
+                            incident.setIdUsuario(userId);
+                            incident.setIdCliente(userId);
+                            incident.setIdVehiculo(rs.getLong("ID_VEHICULO"));
+                            incident.setPlacaVehiculo(rs.getString("PLACA"));
+                            incident.setVehiculoEtiqueta(rs.getString("PLACA"));
+                            incident.setFechaReporte(rs.getDate("FECHA_REPORTE") == null ? null
+                                    : rs.getDate("FECHA_REPORTE").toLocalDate());
+                            incident.setHoraReporte(rs.getString("HORA_REPORTE"));
+                            incident.setDetalles(rs.getString("DETALLES_INCIDENTE"));
+                            incident.setIdTipoIncidente(rs.getLong("ID_TIPO_INCIDENTE"));
+                            incident.setIdPrioridad(rs.getLong("ID_PRIORIDAD"));
+                            incident.setIdEstado(rs.getLong("ID_ESTADO"));
+                            incident.setFechaCierre(rs.getDate("FECHA_CIERRE") == null ? null
+                                    : rs.getDate("FECHA_CIERRE").toLocalDate());
+                            incident.setHoraCierre(rs.getString("HORA_CIERRE"));
+                            return incident;
+                        }));
+        return cursor(call.execute(new MapSqlParameterSource("P_ID_USUARIO", userId)));
     }
 
     public Optional<Incidente> findById(Long id) {
@@ -95,28 +151,19 @@ public class IncidenteRepository {
                     option.setEstadoId(rs.getLong("ID_ESTADO"));
                     return option;
                 }));
-        List<OpcionIncidente> vehicles = IncidenteRepository.<OpcionIncidente>cursor(
-                call.execute(new MapSqlParameterSource())).stream()
+        List<OpcionIncidente> vehicles = medir("FIDE_OBTENER_VEHICULOS_SP", () ->
+                IncidenteRepository.<OpcionIncidente>cursor(call.execute(new MapSqlParameterSource()))).stream()
                 .filter(vehicle -> Long.valueOf(1).equals(vehicle.getEstadoId())).toList();
         java.util.Set<String> activos = java.util.Set.of("REPORTADO", "ASIGNADO",
                 "UNIDAD EN CAMINO", "EN ATENCION", "TRASLADO");
-        Map<Long, String> estados = packageRows("FIDE_OBTENER_ESTADOS_SP").stream()
-                .collect(java.util.stream.Collectors.toMap(
-                        row -> number(row.get("ID_ESTADO")),
-                        row -> text(row.get("NOMBRE_ESTADO")),
-                        (first, second) -> first));
         java.util.Set<Long> busyVehicleIds = findAll().stream()
-                .filter(incident -> activos.contains(estados.get(incident.getIdEstado())))
+                .filter(incident -> incident.getEstadoEtiqueta() != null
+                        && activos.contains(incident.getEstadoEtiqueta().trim().toUpperCase(java.util.Locale.ROOT)))
                 .filter(incident -> !java.util.Objects.equals(incidentId, incident.getId()))
-                .map(Incidente::getIdVehiculo)
+                .map(incidente -> incidente.getIdVehiculo())
                 .collect(java.util.stream.Collectors.toSet());
         vehicles.forEach(vehicle -> vehicle.setIncidenteEnProceso(busyVehicleIds.contains(vehicle.getId())));
         return vehicles;
-    }
-
-    private boolean existsVehicleForIncident(Long vehicleId, Long incidentId) {
-        return findAll().stream().anyMatch(incident -> vehicleId.equals(incident.getIdVehiculo())
-                && incidentId.equals(incident.getId()));
     }
 
     public List<OpcionIncidente> findBrands() {
@@ -168,7 +215,7 @@ public class IncidenteRepository {
                     option.setEstadoId(rs.getLong("ID_ESTADO"));
                     return option;
                 }));
-        return cursor(call.execute(new MapSqlParameterSource()));
+        return medir("FIDE_OBTENER_VEHICULOS_SP", () -> cursor(call.execute(new MapSqlParameterSource())));
     }
 
     public List<OpcionIncidente> findIncidentTypes() {
@@ -187,8 +234,37 @@ public class IncidenteRepository {
         return options("FIDE_OBTENER_CANTONES_SP", "ID_CANTON", "NOMBRE_CANTON", "ID_PROVINCIA", "ID_ESTADO");
     }
 
+    public List<OpcionIncidente> findCantonsByProvince(Long provinceId) {
+        return relatedOptions("FIDE_OBTENER_CANTONES_POR_PROVINCIA_SP", "P_ID_PROVINCIA", provinceId,
+                "ID_CANTON", "NOMBRE_CANTON", "ID_PROVINCIA", "ID_ESTADO");
+    }
+
     public List<OpcionIncidente> findDistricts() {
         return options("FIDE_OBTENER_DISTRITOS_SP", "ID_DISTRITO", "NOMBRE_DISTRITO", "ID_CANTON", "ID_ESTADO");
+    }
+
+    public List<OpcionIncidente> findDistrictsByCanton(Long cantonId) {
+        return relatedOptions("FIDE_OBTENER_DISTRITOS_POR_CANTON_SP", "P_ID_CANTON", cantonId,
+                "ID_DISTRITO", "NOMBRE_DISTRITO", "ID_CANTON", "ID_ESTADO");
+    }
+
+    private List<OpcionIncidente> relatedOptions(String procedure, String parameterName, Long parentId,
+                                                  String idColumn, String labelColumn,
+                                                  String relatedColumn, String statusColumn) {
+        var call = new SimpleJdbcCall(jdbc).withCatalogName("FIDE_PROYECTO_FINAL_RESCATE_VIAL_CR_PCK")
+                .withProcedureName(procedure).withoutProcedureColumnMetaDataAccess()
+                .declareParameters(new SqlParameter(parameterName, Types.NUMERIC),
+                        new SqlOutParameter("P_RESULTADO", Types.REF_CURSOR, (rs, row) -> {
+                            OpcionIncidente option = new OpcionIncidente();
+                            option.setId(rs.getLong(idColumn));
+                            option.setEtiqueta(rs.getString(labelColumn));
+                            option.setRelacionId(rs.getLong(relatedColumn));
+                            option.setEstadoId(rs.getLong(statusColumn));
+                            return option;
+                        }));
+        return medir(procedure, () -> IncidenteRepository.<OpcionIncidente>cursor(
+                call.execute(new MapSqlParameterSource(parameterName, parentId))))
+                .stream().filter(option -> Long.valueOf(1).equals(option.getEstadoId())).toList();
     }
 
     private void insertLocation(Incidente incidente) {
@@ -317,6 +393,22 @@ public class IncidenteRepository {
         return Optional.of(result);
     }
 
+    public Optional<String> findVehicleOwnerName(Long vehicleId) {
+        Map<String, Object> vehicle = packageRows("FIDE_OBTENER_VEHICULO_POR_ID_SP",
+                new SqlParameter("P_ID_VEHICULO", Types.NUMERIC),
+                new MapSqlParameterSource("P_ID_VEHICULO", vehicleId)).stream().findFirst().orElse(null);
+        if (vehicle == null) return Optional.empty();
+        Long clientId = number(vehicle.get("ID_USUARIO"));
+        if (clientId == null) return Optional.empty();
+        Map<String, Object> client = packageRows("FIDE_OBTENER_USUARIO_POR_ID_USUARIO_SP",
+                new SqlParameter("P_ID_USUARIO", Types.NUMERIC),
+                new MapSqlParameterSource("P_ID_USUARIO", clientId)).stream().findFirst().orElse(null);
+        if (client == null) return Optional.empty();
+        String name = fullName(text(client.get("NOMBRE")), text(client.get("PRIMER_APELLIDO")),
+                text(client.get("SEGUNDO_APELLIDO")));
+        return name.isBlank() ? Optional.empty() : Optional.of(name);
+    }
+
     public List<HistorialServicioIncidente> findServiceHistory(Long incidentId) {
         List<HistorialServicioIncidente> history = new ArrayList<>();
         Map<Long, Map<String, Object>> units = byId("FIDE_OBTENER_UNIDADES_SP", "ID_UNIDAD");
@@ -369,7 +461,7 @@ public class IncidenteRepository {
         Map<Long, String> states = names("FIDE_OBTENER_ESTADOS_SP", "ID_ESTADO", "NOMBRE_ESTADO");
         Map<Long, java.math.BigDecimal> payments = new java.util.HashMap<>();
         packageRows("FIDE_OBTENER_PAGOS_SP").forEach(row -> payments.merge(number(row.get("ID_FACTURA")),
-                decimal(row.get("MONTO_APORTADO")), java.math.BigDecimal::add));
+                decimal(row.get("MONTO_APORTADO")), (acumulado, monto) -> acumulado.add(monto)));
         return packageRows("FIDE_OBTENER_VENTAS_SP").stream()
                 .filter(row -> incidentId.equals(number(row.get("ID_INCIDENTE"))))
                 .sorted(Comparator.comparing(row -> toLocalDate(row.get("FECHA_VENTA")),
@@ -419,14 +511,24 @@ public class IncidenteRepository {
     }
 
     private List<Map<String, Object>> packageRows(String procedure) {
-        return OraclePackageSupport.rows(OraclePackageSupport.call(jdbc, procedure,
-                OraclePackageSupport.cursor()).execute(new MapSqlParameterSource()));
+        return medir(procedure, () -> OraclePackageSupport.rows(OraclePackageSupport.call(jdbc, procedure,
+                OraclePackageSupport.cursor()).execute(new MapSqlParameterSource())));
     }
 
     private List<Map<String, Object>> packageRows(String procedure, SqlParameter parameter,
                                                   MapSqlParameterSource values) {
-        return OraclePackageSupport.rows(OraclePackageSupport.call(jdbc, procedure,
-                parameter, OraclePackageSupport.cursor()).execute(values));
+        return medir(procedure, () -> OraclePackageSupport.rows(OraclePackageSupport.call(jdbc, procedure,
+                parameter, OraclePackageSupport.cursor()).execute(values)));
+    }
+
+    private <T> T medir(String procedure, java.util.function.Supplier<T> operation) {
+        long started = System.nanoTime();
+        try {
+            return operation.get();
+        } finally {
+            log.info("INCIDENTE_DB_TIMING procedure={} elapsedMs={}", procedure,
+                    (System.nanoTime() - started) / 1_000_000);
+        }
     }
 
     private String fullAddress(Map<String, Object> row, Map<Long, String> provinces,
@@ -473,7 +575,7 @@ public class IncidenteRepository {
                     if (statusColumn != null) option.setEstadoId(rs.getLong(statusColumn));
                     return option;
                 }));
-        List<OpcionIncidente> options = cursor(call.execute(new MapSqlParameterSource()));
+        List<OpcionIncidente> options = medir(procedure, () -> cursor(call.execute(new MapSqlParameterSource())));
         return statusColumn == null ? options : options.stream()
                 .filter(option -> Long.valueOf(1).equals(option.getEstadoId())).toList();
     }

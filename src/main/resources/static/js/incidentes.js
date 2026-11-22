@@ -1,5 +1,29 @@
 document.addEventListener("DOMContentLoaded", () => {
     const modal = document.getElementById("modalIncidente");
+    const catalogCache = new Map();
+    const getCatalog = async (name, parent = "") => {
+        const key = `${name}:${parent}`;
+        if (!catalogCache.has(key)) {
+            const query = parent ? `?padre=${encodeURIComponent(parent)}` : "";
+            catalogCache.set(key, fetch(`/incidentes/catalogos/${name}${query}`, {
+                headers: {Accept: "application/json"}
+            }).then(async response => {
+                if (!response.ok) throw new Error(`No se pudo cargar el catálogo ${name}.`);
+                return response.json();
+            }));
+        }
+        return catalogCache.get(key);
+    };
+    const fillOptions = (select, items, placeholder, parentKey) => {
+        const previous = select.value;
+        const options = items.map(item => {
+            const option = new Option(item.etiqueta ?? item.nombreEstado ?? item.nombre ?? "", item.id);
+            if (parentKey && item.relacionId != null) option.dataset[parentKey] = item.relacionId;
+            return option;
+        });
+        select.replaceChildren(new Option(placeholder, ""), ...options);
+        if (options.some(option => option.value === previous)) select.value = previous;
+    };
     document.querySelectorAll("#tablaIncidentes .status-pill").forEach((pill) => {
         const estado = pill.textContent.trim().toUpperCase();
         const clases = {
@@ -45,6 +69,43 @@ document.addEventListener("DOMContentLoaded", () => {
     };
     configurarDireccion("incidente");
     configurarDireccion("cliente");
+    [
+        ['#modalIncidente select[name="idTipoIncidente"]', "tipos", "Seleccione tipo"],
+        ['#modalIncidente select[name="idPrioridad"]', "prioridades", "Seleccione prioridad"],
+        ['#modalIncidente select[name="idEstado"]', "estados", "Seleccione estado"]
+    ].forEach(([selector, catalog, prompt]) => {
+        const select = document.querySelector(selector);
+        select?.addEventListener("focus", async () => {
+            try { fillOptions(select, await getCatalog(catalog), prompt); }
+            catch (error) { console.error(error); }
+        }, {once: true});
+    });
+    ["incidente", "cliente"].forEach(prefix => {
+        const province = document.getElementById(`${prefix}Provincia`);
+        const canton = document.getElementById(`${prefix}Canton`);
+        const district = document.getElementById(`${prefix}Distrito`);
+        if (!province || !canton || !district) return;
+        province.addEventListener("focus", async () => {
+            try { fillOptions(province, await getCatalog("provincias"), "Seleccione provincia"); }
+            catch (error) { console.error(error); }
+        }, {once: true});
+        province.addEventListener("change", async () => {
+            canton.replaceChildren(new Option("Seleccione cantón", ""));
+            district.replaceChildren(new Option("Seleccione distrito", ""));
+            canton.disabled = !province.value;
+            district.disabled = true;
+            if (!province.value) return;
+            try { fillOptions(canton, await getCatalog("cantones", province.value), "Seleccione cantón", "provincia"); }
+            catch (error) { console.error(error); }
+        });
+        canton.addEventListener("change", async () => {
+            district.replaceChildren(new Option("Seleccione distrito", ""));
+            district.disabled = !canton.value;
+            if (!canton.value) return;
+            try { fillOptions(district, await getCatalog("distritos", canton.value), "Seleccione distrito", "canton"); }
+            catch (error) { console.error(error); }
+        });
+    });
     const clienteIncidente = document.getElementById("clienteIncidente");
     const usernameCliente = document.getElementById("usernameCliente");
     const clientDependent = [...document.querySelectorAll(".client-dependent")];
@@ -146,6 +207,17 @@ document.addEventListener("DOMContentLoaded", () => {
     const filters = ["filtroTipo", "filtroPrioridad", "filtroEstado"]
         .map(id => document.getElementById(id)).filter(Boolean);
     const rows = [...document.querySelectorAll("#tablaIncidentes tr[data-tipo]")];
+    const optionLabels = [
+        {filter: filters[0], key: "tipoEtiqueta", prompt: "Todos los tipos"},
+        {filter: filters[1], key: "prioridadEtiqueta", prompt: "Todas las prioridades"},
+        {filter: filters[2], key: "estadoEtiqueta", prompt: "Todos los estados"}
+    ];
+    optionLabels.forEach(({filter, key, prompt}) => {
+        if (!filter) return;
+        const labels = [...new Set(rows.map(row => row.dataset[key]).filter(Boolean))]
+            .sort((a, b) => a.localeCompare(b, "es"));
+        filter.replaceChildren(new Option(prompt, ""), ...labels.map(label => new Option(label, label)));
+    });
     const noResults = document.getElementById("sinResultados");
     const dateFrom = document.getElementById("filtroFechaDesde");
     const dateTo = document.getElementById("filtroFechaHasta");
@@ -158,9 +230,9 @@ document.addEventListener("DOMContentLoaded", () => {
         rows.forEach(row => {
             const reportDate = row.dataset.fecha || "";
             const matches = row.textContent.toLocaleLowerCase("es").includes(query)
-                && (!type || row.dataset.tipo === type)
-                && (!priority || row.dataset.prioridad === priority)
-                && (!status || row.dataset.estado === status)
+                && (!type || row.dataset.tipoEtiqueta === type)
+                && (!priority || row.dataset.prioridadEtiqueta === priority)
+                && (!status || row.dataset.estadoEtiqueta === status)
                 && (!from || (reportDate && reportDate >= from))
                 && (!to || (reportDate && reportDate <= to));
             row.hidden = !matches;
@@ -227,11 +299,28 @@ document.addEventListener("DOMContentLoaded", () => {
     const suggestions = document.getElementById("vehiculosSugeridos");
     const addVehicle = document.getElementById("btnAbrirVehiculo");
     const selectedMessage = document.getElementById("vehiculoSeleccionado");
+    const ownerMessage = document.getElementById("propietarioVehiculo");
     const vehicleModal = document.getElementById("modalVehiculo");
     const vehicleForm = document.getElementById("formVehiculo");
     const vehicleError = document.getElementById("vehiculoError");
     const inputModal = document.getElementById("modalIncidente");
-    const vehicleButtons = [...document.querySelectorAll(".vehicle-suggestion")];
+    let vehicleButtons = [...document.querySelectorAll(".vehicle-suggestion")];
+    let vehiclesLoaded = vehicleButtons.length > 0;
+    const loadVehicles = async () => {
+        if (vehiclesLoaded) return;
+        const vehicles = await getCatalog("vehiculos");
+        vehicleButtons = vehicles.map(vehicle => {
+            const button = document.createElement("button");
+            button.type = "button";
+            button.className = "vehicle-suggestion";
+            button.dataset.id = vehicle.id;
+            button.dataset.placa = vehicle.etiqueta;
+            button.dataset.ocupado = String(vehicle.incidenteEnProceso);
+            button.textContent = vehicle.etiqueta;
+            return button;
+        });
+        vehiclesLoaded = true;
+    };
     const normalize = value => value.replace(/[^a-zA-Z0-9]/g, "").toUpperCase();
     const cleanPlateInput = input => {
         const caret = input.selectionStart;
@@ -252,6 +341,21 @@ document.addEventListener("DOMContentLoaded", () => {
             : `Vehículo seleccionado: ${plate}`;
         selectedMessage.classList.add("selected");
         selectedMessage.classList.toggle("occupied", ocupado);
+        if (ownerMessage) {
+            ownerMessage.hidden = false;
+            ownerMessage.textContent = "Cargando cliente propietario...";
+            fetch(`/incidentes/vehiculos/${id}/propietario`, {headers: {Accept: "application/json"}})
+                .then(async response => {
+                    if (!response.ok) throw new Error("No se pudo cargar el propietario del vehículo.");
+                    return response.json();
+                })
+                .then(data => {
+                    if (vehicleId.value === String(id)) ownerMessage.textContent = `Cliente propietario: ${data.nombre}`;
+                })
+                .catch(() => {
+                    if (vehicleId.value === String(id)) ownerMessage.textContent = "No se pudo cargar el propietario del vehículo.";
+                });
+        }
     };
     const findById = id => vehicleButtons.find(button => button.dataset.id === id);
     const matchPlate = plate => vehicleButtons.find(button => normalize(button.dataset.placa) === normalize(plate));
@@ -272,6 +376,7 @@ document.addEventListener("DOMContentLoaded", () => {
         if (plateConfirmed) plateConfirmed.hidden = true;
         cleanPlateInput(plateInput);
         vehicleId.value = "";
+        if (ownerMessage) { ownerMessage.hidden = true; ownerMessage.textContent = ""; }
         selectedMessage.textContent = "";
         selectedMessage.classList.remove("selected");
         selectedMessage.classList.remove("occupied");
@@ -290,9 +395,14 @@ document.addEventListener("DOMContentLoaded", () => {
                 : `La placa ${query} no aparece entre los vehículos activos. Puede registrarla.`;
         selectedMessage.classList.toggle("occupied", exactMatch?.dataset.ocupado === "true");
     };
-    plateInput?.addEventListener("input", updatePlateSearch);
-    plateInput?.addEventListener("change", updatePlateSearch);
-    plateInput?.addEventListener("focus", () => {
+    plateInput?.addEventListener("input", async () => {
+        try { await loadVehicles(); updatePlateSearch(); } catch (error) { console.error(error); }
+    });
+    plateInput?.addEventListener("change", async () => {
+        try { await loadVehicles(); updatePlateSearch(); } catch (error) { console.error(error); }
+    });
+    plateInput?.addEventListener("focus", async () => {
+        try { await loadVehicles(); } catch (error) { console.error(error); return; }
         if (!plateInput.value.trim()) {
             suggestions.replaceChildren(...vehicleButtons.slice(0, 8));
             suggestions.hidden = vehicleButtons.length === 0;
@@ -302,10 +412,18 @@ document.addEventListener("DOMContentLoaded", () => {
         const button = event.target.closest(".vehicle-suggestion");
         if (button) chooseVehicle(button.dataset.id, button.dataset.placa, button.dataset.ocupado === "true");
     });
-    addVehicle?.addEventListener("click", () => {
+    addVehicle?.addEventListener("click", async () => {
         document.getElementById("nuevaPlaca").value = plateInput.value.trim().toLocaleUpperCase("es");
         vehicleError.hidden = true;
         vehicleError.textContent = "";
+        try {
+            const [brands, models, years] = await Promise.all([
+                getCatalog("marcas"), getCatalog("modelos"), getCatalog("anios")
+            ]);
+            fillOptions(document.getElementById("idMarca"), brands, "Seleccione marca");
+            fillOptions(document.getElementById("idModelo"), models, "Seleccione modelo", "marca");
+            fillOptions(document.getElementById("idAnio"), years, "Seleccione año", "modelo");
+        } catch (error) { console.error(error); }
         vehicleModal.classList.add("show");
     });
     const closeVehicleModal = () => {

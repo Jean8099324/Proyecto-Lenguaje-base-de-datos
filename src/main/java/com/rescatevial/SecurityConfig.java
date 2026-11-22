@@ -11,6 +11,8 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
+import com.rescatevial.config.RequestTimingFilter;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
 public class SecurityConfig {
@@ -20,7 +22,8 @@ public class SecurityConfig {
     }
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain securityFilterChain(HttpSecurity http,
+                                                   RequestTimingFilter requestTimingFilter) throws Exception {
         http.authorizeHttpRequests(authorize -> authorize
                 .requestMatchers("/", "/login", "/error", "/css/**", "/js/**", "/img/**", "/fav/**",
                         "/webjars/**", "/favicon.ico", "/error/**")
@@ -51,6 +54,7 @@ public class SecurityConfig {
                         .successHandler(authenticationSuccessHandler())
                         .failureUrl("/login?error=true")
                         .permitAll())
+                .addFilterBefore(requestTimingFilter, UsernamePasswordAuthenticationFilter.class)
                 .logout(logout -> logout
                         .logoutUrl("/logout")
                         .logoutSuccessUrl("/login?logout=true")

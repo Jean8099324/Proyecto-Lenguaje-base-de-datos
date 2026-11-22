@@ -1,6 +1,5 @@
 package com.rescatevial.service;
 
-import com.rescatevial.domain.IncidentePendienteDespacho;
 import com.rescatevial.domain.UnidadDisponibleDespacho;
 import com.rescatevial.repository.DespachoRepository;
 import java.util.List;
@@ -16,8 +15,11 @@ public class DespachoService {
     }
 
     @Transactional(readOnly = true)
-    public List<IncidentePendienteDespacho> pendientes() {
-        return repository.findPendingIncidents();
+    public DespachoRepository.PaginaIncidentes pendientes(int pagina, int tamanio) {
+        if (pagina < 1 || tamanio < 1) {
+            throw new IllegalArgumentException("La página y su tamaño deben ser mayores que cero.");
+        }
+        return repository.findPendingIncidents(pagina, tamanio);
     }
 
     @Transactional(readOnly = true)

@@ -73,14 +73,24 @@ class VehiculoServiceTest {
     @Test void normalizaPlacaYConfirmaRegistroNuevoConTodosSusDatos() {
         Vehiculo nuevo=nuevoValido(" abc-123 ");
         Vehiculo creado=nuevoValido("ABC123");creado.setId(7L);
-        when(repository.listar()).thenReturn(List.of(),List.of(creado));
+        when(repository.listar()).thenAnswer(new org.mockito.stubbing.Answer<List<Vehiculo>>() {
+            private final java.util.Iterator<List<Vehiculo>> respuestas = List.of(List.<Vehiculo>of(), List.of(creado)).iterator();
+            @Override public List<Vehiculo> answer(org.mockito.invocation.InvocationOnMock invocation) {
+                return respuestas.next();
+            }
+        });
         service.guardar(nuevo);
         verify(repository).insertar(argThat(v->"ABC123".equals(v.getPlaca()) && Long.valueOf(9).equals(v.getIdUsuario())));
     }
     @Test void permiteRegistrarVehiculoSinPropietario() {
         Vehiculo nuevo=nuevoValido("abc123");nuevo.setIdUsuario(null);
         Vehiculo creado=nuevoValido("ABC123");creado.setId(7L);creado.setIdUsuario(null);
-        when(repository.listar()).thenReturn(List.of(),List.of(creado));
+        when(repository.listar()).thenAnswer(new org.mockito.stubbing.Answer<List<Vehiculo>>() {
+            private final java.util.Iterator<List<Vehiculo>> respuestas = List.of(List.<Vehiculo>of(), List.of(creado)).iterator();
+            @Override public List<Vehiculo> answer(org.mockito.invocation.InvocationOnMock invocation) {
+                return respuestas.next();
+            }
+        });
         service.guardar(nuevo);
         verify(repository).insertar(argThat(v->"ABC123".equals(v.getPlaca()) && v.getIdUsuario()==null));
     }
@@ -100,7 +110,12 @@ class VehiculoServiceTest {
     @Test void noMuestraExitoSiOracleSoloDevuelveRegistroDeOtroCliente() {
         Vehiculo nuevo=nuevoValido("ABC123");
         Vehiculo ajeno=nuevoValido("ABC123");ajeno.setId(7L);ajeno.setIdUsuario(99L);
-        when(repository.listar()).thenReturn(List.of(),List.of(ajeno));
+        when(repository.listar()).thenAnswer(new org.mockito.stubbing.Answer<List<Vehiculo>>() {
+            private final java.util.Iterator<List<Vehiculo>> respuestas = List.of(List.<Vehiculo>of(), List.of(ajeno)).iterator();
+            @Override public List<Vehiculo> answer(org.mockito.invocation.InvocationOnMock invocation) {
+                return respuestas.next();
+            }
+        });
         assertThrows(IllegalStateException.class,()->service.guardar(nuevo));
     }
     @Test void traduceDuplicadoConcurrenteDeOracleEnErrorDeValidacion() {
