@@ -156,14 +156,21 @@ public class IncidenteRepository {
                 .filter(vehicle -> Long.valueOf(1).equals(vehicle.getEstadoId())).toList();
         java.util.Set<String> activos = java.util.Set.of("REPORTADO", "ASIGNADO",
                 "UNIDAD EN CAMINO", "EN ATENCION", "TRASLADO");
-        java.util.Set<Long> busyVehicleIds = findAll().stream()
+        java.util.Set<String> busyPlates = findAll().stream()
                 .filter(incident -> incident.getEstadoEtiqueta() != null
                         && activos.contains(incident.getEstadoEtiqueta().trim().toUpperCase(java.util.Locale.ROOT)))
                 .filter(incident -> !java.util.Objects.equals(incidentId, incident.getId()))
-                .map(incidente -> incidente.getIdVehiculo())
+                .map(Incidente::getPlacaVehiculo)
+                .filter(java.util.Objects::nonNull)
+                .map(IncidenteRepository::normalizePlate)
                 .collect(java.util.stream.Collectors.toSet());
-        vehicles.forEach(vehicle -> vehicle.setIncidenteEnProceso(busyVehicleIds.contains(vehicle.getId())));
+        vehicles.forEach(vehicle -> vehicle.setIncidenteEnProceso(
+                busyPlates.contains(normalizePlate(vehicle.getEtiqueta()))));
         return vehicles;
+    }
+
+    private static String normalizePlate(String plate) {
+        return plate.replaceAll("[^a-zA-Z0-9]", "").toUpperCase(java.util.Locale.ROOT);
     }
 
     public List<OpcionIncidente> findBrands() {

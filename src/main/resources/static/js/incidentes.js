@@ -370,7 +370,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     if (vehicleId?.value) {
         const current = findById(vehicleId.value);
-        if (current) chooseVehicle(current.dataset.id, current.dataset.placa);
+        if (current) chooseVehicle(current.dataset.id, current.dataset.placa, current.dataset.ocupado === "true");
     }
     const updatePlateSearch = () => {
         if (plateConfirmed) plateConfirmed.hidden = true;
