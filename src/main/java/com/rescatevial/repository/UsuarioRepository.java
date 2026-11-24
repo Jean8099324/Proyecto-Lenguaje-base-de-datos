@@ -95,6 +95,7 @@ public class UsuarioRepository {
                             usuario.setUsername(rs.getString("USERNAME"));
                             usuario.setPassword(rs.getString("PASSWORD"));
                             usuario.setTipoUsuario(rs.getLong("ID_TIPO_USUARIO"));
+                            usuario.setTipoUsuarioNombre(rs.getString("NOMBRE_TIPO_USUARIO"));
                             return usuario;
                         }));
         List<Usuario> resultado = cursor(call.execute(new MapSqlParameterSource("P_USERNAME", username)));

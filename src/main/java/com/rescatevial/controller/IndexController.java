@@ -1,9 +1,7 @@
 package com.rescatevial.controller;
 
-import com.rescatevial.service.UsuarioService;
 import com.rescatevial.service.DashboardService;
 import java.util.Locale;
-import java.util.Map;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -11,14 +9,9 @@ import org.springframework.web.bind.annotation.GetMapping;
 @Controller
 public class IndexController {
 
-    private final UsuarioService usuarioService;
     private final DashboardService dashboardService;
 
-    public IndexController(
-            UsuarioService usuarioService,
-            DashboardService dashboardService) {
-
-        this.usuarioService = usuarioService;
+    public IndexController(DashboardService dashboardService) {
         this.dashboardService = dashboardService;
     }
 
@@ -35,44 +28,35 @@ public class IndexController {
     @GetMapping("/dashboard")
     public String dashboard(Model model) {
 
-        long clientesRegistrados = usuarioService.getUsuarios(false)
-                .stream()
-                .filter(usuario -> "CLIENTE".equalsIgnoreCase(
-                        usuario.getTipoUsuarioNombre()))
-                .count();
-
-        model.addAttribute("clientesRegistrados", clientesRegistrados);
-
-        model.addAttribute(
-                "incidentesRegistrados",
-                dashboardService.contarIncidentes()
-        );
-
-        long totalUnidades = dashboardService.contarUnidades();
+        var datos = dashboardService.cargarDashboard();
+        long totalUnidades = datos.totalUnidades();
+        long disponibles = datos.unidadesDisponibles();
+        long asignadas = datos.unidadesAsignadas();
+        long enServicio = datos.unidadesEnServicio();
+        model.addAttribute("clientesRegistrados", datos.totalClientes());
+        model.addAttribute("incidentesRegistrados", datos.totalIncidentes());
         model.addAttribute("unidadesRegistradas", totalUnidades);
-
-        model.addAttribute("incidentesEnAtencion", dashboardService.contarIncidentesEnAtencion());
-        model.addAttribute("incidentesRecientes", dashboardService.obtenerIncidentesRecientes());
-
-        Map<String, Long> estados = dashboardService.obtenerEstadosUnidades();
-
-        long disponibles = estados.getOrDefault("DISPONIBLE", 0L);
-        long enServicio = estados.getOrDefault("EN SERVICIO", 0L)
-                + estados.getOrDefault("ASIGNADA", 0L);
-        long fueraOperacion = estados.getOrDefault("FUERA DE OPERACION", 0L);
+        model.addAttribute("incidentesEnAtencion", datos.incidentesEnAtencion());
+        model.addAttribute("incidentesRecientes", datos.incidentesRecientes());
+        long fueraOperacion = datos.unidadesFueraOperacion();
 
         model.addAttribute("unidadesDisponibles", disponibles);
+        model.addAttribute("unidadesAsignadas", asignadas);
         model.addAttribute("unidadesEnServicio", enServicio);
         model.addAttribute("unidadesFueraOperacion", fueraOperacion);
 
         // Conserva los tres colores originales; solo calcula proporciones reales.
         double anguloDisponible = totalUnidades > 0 ? 360.0 * disponibles / totalUnidades : 0;
+        double anguloAsignadas = totalUnidades > 0
+                ? 360.0 * (disponibles + asignadas) / totalUnidades : 0;
         double anguloServicio = totalUnidades > 0
-                ? 360.0 * (disponibles + enServicio) / totalUnidades : 0;
+                ? 360.0 * (disponibles + asignadas + enServicio) / totalUnidades : 0;
         String estiloGrafico = String.format(Locale.ROOT,
                 "background: conic-gradient(#2c9b5f 0deg %.3fdeg, "
-                + "#e2a526 %.3fdeg %.3fdeg, #d9dee3 %.3fdeg 360deg)",
-                anguloDisponible, anguloDisponible, anguloServicio, anguloServicio);
+                + "#e2a526 %.3fdeg %.3fdeg, #3979c5 %.3fdeg %.3fdeg, "
+                + "#d9dee3 %.3fdeg 360deg)",
+                anguloDisponible, anguloDisponible, anguloAsignadas, anguloAsignadas,
+                anguloServicio, anguloServicio);
         model.addAttribute("estiloGraficoUnidades", estiloGrafico);
 
         return "dashboard/index";

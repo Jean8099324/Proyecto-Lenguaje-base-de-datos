@@ -1,6 +1,7 @@
 
 package com.rescatevial.service;
 
+import com.rescatevial.domain.DashboardData;
 import com.rescatevial.repository.DashboardRepository;
 import java.util.List;
 import java.util.Map;
@@ -14,6 +15,11 @@ public class DashboardService {
 
     public DashboardService(DashboardRepository dashboardRepository) {
         this.dashboardRepository = dashboardRepository;
+    }
+
+    @Transactional(readOnly = true)
+    public DashboardData cargarDashboard() {
+        return dashboardRepository.cargarDashboard();
     }
 
     @Transactional(readOnly = true)

@@ -40,6 +40,24 @@ public class IncidenteRepository {
         return medir("FIDE_OBTENER_INCIDENTES_SP", () -> cursor(call.execute(new MapSqlParameterSource())));
     }
 
+    public PaginaIncidentes findPage(int page, int pageSize) {
+        var call = new SimpleJdbcCall(jdbc).withCatalogName("FIDE_PROYECTO_FINAL_RESCATE_VIAL_CR_PCK")
+                .withProcedureName("FIDE_OBTENER_INCIDENTES_PAGINADOS_SP").withoutProcedureColumnMetaDataAccess()
+                .declareParameters(new SqlParameter("P_NUMERO_PAGINA", Types.NUMERIC),
+                        new SqlParameter("P_TAMANIO_PAGINA", Types.NUMERIC),
+                        new SqlOutParameter("P_TOTAL_INCIDENTES", Types.NUMERIC),
+                        new SqlOutParameter("P_RESULTADO", Types.REF_CURSOR,
+                                (rs, row) -> mapIncidenteListado(rs)));
+        Map<String, Object> result = medir("FIDE_OBTENER_INCIDENTES_PAGINADOS_SP", () -> call.execute(
+                new MapSqlParameterSource().addValue("P_NUMERO_PAGINA", page, Types.NUMERIC)
+                        .addValue("P_TAMANIO_PAGINA", pageSize, Types.NUMERIC)));
+        List<Incidente> rows = IncidenteRepository.cursor(result);
+        Number total = (Number) result.get("P_TOTAL_INCIDENTES");
+        return new PaginaIncidentes(rows, total == null ? 0 : total.intValue());
+    }
+
+    public record PaginaIncidentes(List<Incidente> incidentes, int total) {}
+
     private static Incidente mapIncidenteListado(java.sql.ResultSet rs) throws java.sql.SQLException {
         Incidente incident = new Incidente();
         incident.setId(rs.getLong("ID_INCIDENTE"));

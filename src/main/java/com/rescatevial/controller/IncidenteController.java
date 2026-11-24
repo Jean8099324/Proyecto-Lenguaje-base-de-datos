@@ -44,10 +44,13 @@ public class IncidenteController {
     }
 
     @GetMapping("/listado")
-    public String listado(@RequestParam(defaultValue = "false") boolean nuevo, Model model) {
-        var incidentes = incidenteService.listar();
-        model.addAttribute("incidentes", incidentes);
-        model.addAttribute("totalIncidentes", incidentes.size());
+    public String listado(@RequestParam(defaultValue = "false") boolean nuevo,
+                          @RequestParam(defaultValue = "1") int pagina, Model model) {
+        var resultado = incidenteService.listarPagina(pagina, 10);
+        model.addAttribute("incidentes", resultado.incidentes());
+        model.addAttribute("totalIncidentes", resultado.total());
+        model.addAttribute("paginaActual", resultado.pagina());
+        model.addAttribute("totalPaginas", resultado.totalPaginas());
         catalogosVacios(model);
         if (!model.containsAttribute("incidenteForm")) {
             var ahora = java.time.ZonedDateTime.now(java.time.ZoneId.of("America/Costa_Rica"));

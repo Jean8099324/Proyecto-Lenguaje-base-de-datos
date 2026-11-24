@@ -135,9 +135,6 @@
 
                             <strong th:text="${incidentesRegistrados}">0</strong>
 
-                            <small class="neutral">
-                                Total registrado en Oracle
-                            </small>
 
                         </div>
 
@@ -156,9 +153,6 @@
 
                             <strong th:text="${unidadesRegistradas}">0</strong>
 
-                            <small class="neutral">
-                                Total registrado en Oracle
-                            </small>
 
                         </div>
 
@@ -198,9 +192,6 @@
 
                             <strong th:text="${clientesRegistrados}">0</strong>
 
-                            <small class="neutral">
-                                Registrados en Oracle
-                            </small>
 
                         </div>
 
@@ -242,6 +233,7 @@
                                         <th>UBICACIÓN</th>
                                         <th>TIPO</th>
                                         <th>ESTADO</th>
+                                        <th>FECHA</th>
                                         <th>HORA</th>
                                     </tr>
 
@@ -263,10 +255,11 @@
                                             <span class="status-badge" th:classappend="${incidente.claseEstado}"
                                                 th:text="${incidente.estado}">Reportado</span>
                                         </td>
+                                        <td th:text="${incidente.fecha}">24/11/2026</td>
                                         <td th:text="${incidente.hora}">21:04</td>
                                     </tr>
                                     <tr th:if="${#lists.isEmpty(incidentesRecientes)}">
-                                        <td colspan="5">No hay incidentes registrados.</td>
+                                        <td colspan="6">No hay incidentes registrados.</td>
                                     </tr>
 
                                 </tbody>
@@ -321,10 +314,22 @@
 
                                 <div class="legend-item">
 
-                                    <span class="legend-color busy"></span>
+                                    <span class="legend-color assigned"></span>
 
                                     <span>
-                                        Asignadas / en servicio
+                                        Asignadas
+                                    </span>
+
+                                    <strong th:text="${unidadesAsignadas}">0</strong>
+
+                                </div>
+
+                                <div class="legend-item">
+
+                                    <span class="legend-color in-service"></span>
+
+                                    <span>
+                                        En servicio
                                     </span>
 
                                     <strong th:text="${unidadesEnServicio}">0</strong>

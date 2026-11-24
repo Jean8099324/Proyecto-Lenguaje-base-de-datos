@@ -24,6 +24,7 @@ public class RequestTimingFilter extends OncePerRequestFilter {
     protected boolean shouldNotFilter(HttpServletRequest request) {
         String path = request.getRequestURI();
         return !("/login".equals(path)
+                || "/dashboard".equals(path)
                 || "/incidentes/listado".equals(path)
                 || "/vehiculos".equals(path));
     }

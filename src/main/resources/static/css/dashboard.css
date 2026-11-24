@@ -775,6 +775,14 @@ a {
     background: #e2a526;
 }
 
+.legend-color.assigned {
+    background: #e2a526;
+}
+
+.legend-color.in-service {
+    background: #3979c5;
+}
+
 .legend-color.maintenance {
     background: #d9dee3;
 }

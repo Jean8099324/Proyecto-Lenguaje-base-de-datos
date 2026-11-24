@@ -77,6 +77,38 @@ public class IncidenteService {
         });
         return incidentes;
     }
+
+    @Transactional(readOnly = true)
+    public IncidentesPaginados listarPagina(int pagina, int tamanio) {
+        int paginaSegura = Math.max(1, pagina);
+        int tamanioSeguro = Math.max(1, tamanio);
+        IncidenteRepository.PaginaIncidentes resultado = repository.findPage(paginaSegura, tamanioSeguro);
+        int totalPaginas = Math.max(1, (int) Math.ceil(resultado.total() / (double) tamanioSeguro));
+        if (paginaSegura > totalPaginas) {
+            paginaSegura = totalPaginas;
+            resultado = repository.findPage(paginaSegura, tamanioSeguro);
+        }
+        List<Incidente> incidentes = resultado.incidentes();
+        if (!incidentes.isEmpty()) {
+            Map<String, Long> tipos = repository.findIncidentTypes().stream().collect(Collectors.toMap(
+                    o -> o.getEtiqueta().trim().toUpperCase(java.util.Locale.ROOT), OpcionIncidente::getId,
+                    (first, ignored) -> first));
+            Map<String, Long> prioridades = repository.findPriorities().stream().collect(Collectors.toMap(
+                    o -> o.getEtiqueta().trim().toUpperCase(java.util.Locale.ROOT), OpcionIncidente::getId,
+                    (first, ignored) -> first));
+            Map<String, Long> estados = estadoService.listar().stream().collect(Collectors.toMap(
+                    e -> e.getNombreEstado().trim().toUpperCase(java.util.Locale.ROOT),
+                    e -> e.getId(), (first, ignored) -> first));
+            incidentes.forEach(i -> {
+                i.setIdTipoIncidente(tipos.get(i.getTipoEtiqueta().trim().toUpperCase(java.util.Locale.ROOT)));
+                i.setIdPrioridad(prioridades.get(i.getPrioridadEtiqueta().trim().toUpperCase(java.util.Locale.ROOT)));
+                i.setIdEstado(estados.get(i.getEstadoEtiqueta().trim().toUpperCase(java.util.Locale.ROOT)));
+            });
+        }
+        return new IncidentesPaginados(incidentes, resultado.total(), paginaSegura, totalPaginas);
+    }
+
+    public record IncidentesPaginados(List<Incidente> incidentes, int total, int pagina, int totalPaginas) {}
     @Transactional(readOnly = true) public Optional<Incidente> buscar(Long id) { return repository.findById(id); }
     @Transactional(readOnly = true)
     public List<Incidente> listarPorCliente(Long usuarioId) {

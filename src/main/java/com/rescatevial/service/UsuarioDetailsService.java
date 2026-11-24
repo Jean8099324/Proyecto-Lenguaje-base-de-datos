@@ -34,7 +34,8 @@ public class UsuarioDetailsService implements UserDetailsService {
                 .collect(java.util.stream.Collectors.toSet());
 
         // El perfil CLIENTE nunca hereda permisos superiores de asignaciones antiguas.
-        if (usuarioRepository.esPerfilCliente(usuario.getTipoUsuario())) {
+        if ("CLIENTE".equalsIgnoreCase(usuario.getTipoUsuarioNombre() == null
+                ? "" : usuario.getTipoUsuarioNombre().trim())) {
             roles = java.util.Set.of(new SimpleGrantedAuthority("ROLE_CLIENT"));
         }
 
