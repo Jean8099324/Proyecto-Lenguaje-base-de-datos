@@ -3,6 +3,7 @@
 
     const warningWindowMs = 24 * 60 * 60 * 1000;
     const pollIntervalMs = 60 * 1000;
+    const requestTimeoutMs = 4000;
     const aboutPanel = document.querySelector("[data-certificate-about]");
     let expiresAt = null;
     let unavailable = false;
@@ -87,8 +88,13 @@
     }
 
     async function refreshCertificateStatus() {
+        const controller = new AbortController();
+        const timeoutId = window.setTimeout(() => controller.abort(), requestTimeoutMs);
         try {
-            const response = await fetch("/api/certificate-status", { cache: "no-store" });
+            const response = await fetch("/api/certificate-status", {
+                cache: "no-store",
+                signal: controller.signal
+            });
             if (!response.ok) throw new Error("Certificate status unavailable");
             const status = await response.json();
             const parsedExpiry = Date.parse(status.expiresAt);
@@ -97,6 +103,8 @@
             unavailable = false;
         } catch {
             if (expiresAt === null) unavailable = true;
+        } finally {
+            window.clearTimeout(timeoutId);
         }
         render();
     }
