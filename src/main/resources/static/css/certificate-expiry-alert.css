@@ -1,3 +1,50 @@
+.about-info-card {
+    margin-top: 24px;
+}
+
+.about-info-card__body {
+    padding: 30px 34px;
+}
+
+.about-info-card__body h1 {
+    margin: 0 0 8px;
+    color: #17202a;
+    font-size: clamp(28px, 4vw, 40px);
+    font-weight: 700;
+    line-height: 1.15;
+}
+
+.about-info-card__body p {
+    max-width: 900px;
+    margin: 0;
+    color: #34414e;
+    font-size: clamp(16px, 2vw, 22px);
+    line-height: 1.45;
+}
+
+.about-course-card .about-info-card__body h2 {
+    margin: 0 0 28px;
+    color: #17202a;
+    font-size: clamp(23px, 3vw, 32px);
+    font-weight: 700;
+    line-height: 1.25;
+}
+
+.about-course-card .about-info-card__body h3 {
+    margin: 0 0 12px;
+    color: #536170;
+    font-size: 20px;
+    font-weight: 700;
+}
+
+.about-course-card ul {
+    margin: 0;
+    padding-left: 24px;
+    color: #34414e;
+    font-size: clamp(16px, 2vw, 22px);
+    line-height: 1.55;
+}
+
 .certificate-status-panel {
     display: grid;
     gap: 10px;
@@ -158,6 +205,18 @@
 }
 
 @media (max-width: 600px) {
+    .about-info-card__body {
+        padding: 22px 20px;
+    }
+
+    .about-info-card__body h1 {
+        font-size: 28px;
+    }
+
+    .about-info-card__body p {
+        font-size: 16px;
+    }
+
     .certificate-about-page .topbar {
         height: auto;
         min-height: 76px;
