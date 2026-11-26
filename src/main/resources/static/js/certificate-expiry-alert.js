@@ -1,6 +1,9 @@
 (() => {
-    if (window.location.protocol !== "https:") return;
-
+    const instanceCertificateUrl = "https://163.192.131.49/api/certificate-status";
+    const localHosts = new Set(["localhost", "127.0.0.1", "::1"]);
+    const certificateStatusUrl = localHosts.has(window.location.hostname)
+        ? instanceCertificateUrl
+        : "/api/certificate-status";
     const warningWindowMs = 24 * 60 * 60 * 1000;
     const pollIntervalMs = 60 * 1000;
     const requestTimeoutMs = 4000;
@@ -91,7 +94,7 @@
         const controller = new AbortController();
         const timeoutId = window.setTimeout(() => controller.abort(), requestTimeoutMs);
         try {
-            const response = await fetch("/api/certificate-status", {
+            const response = await fetch(certificateStatusUrl, {
                 cache: "no-store",
                 signal: controller.signal
             });

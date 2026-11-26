@@ -12,10 +12,12 @@ import javax.net.ssl.X509TrustManager;
 import org.springframework.http.CacheControl;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RestController;
 
 /** Provides the expiration time of the HTTPS certificate served by the local Nginx. */
 @RestController
+@CrossOrigin(origins = "*")
 public class CertificateStatusController {
     private static final String LOCAL_TLS_HOST = "127.0.0.1";
     private static final int TLS_PORT = 443;
