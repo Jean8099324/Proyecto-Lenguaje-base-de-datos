@@ -20,6 +20,13 @@
                 </button>
                 <div><h2>Acerca de</h2><span>Información de la aplicación</span></div>
             </div>
+            <section class="certificate-status-panel certificate-status-panel--unavailable"
+                     data-certificate-about role="status" aria-live="polite">
+                <span class="certificate-status-panel__eyebrow">Seguridad de conexión</span>
+                <strong class="certificate-status-panel__state" data-certificate-state>Consultando certificado HTTPS…</strong>
+                <span class="certificate-status-panel__countdown" data-certificate-countdown>—</span>
+                <span class="certificate-status-panel__note">El contador se actualiza automáticamente con la vigencia del certificado que entrega el servidor.</span>
+            </section>
         </header>
         <main class="dashboard-content">
             <section class="page-heading">
@@ -41,13 +48,6 @@
                 </ul>
             </section>
 
-            <section class="certificate-status-panel certificate-status-panel--unavailable"
-                     data-certificate-about role="status" aria-live="polite">
-                <span class="certificate-status-panel__eyebrow">Seguridad de conexión</span>
-                <strong class="certificate-status-panel__state" data-certificate-state>Consultando certificado HTTPS…</strong>
-                <span class="certificate-status-panel__countdown" data-certificate-countdown>—</span>
-                <span class="certificate-status-panel__note">El contador se actualiza automáticamente con la vigencia del certificado que entrega el servidor.</span>
-            </section>
         </main>
     </div>
 </div>
