@@ -9,7 +9,7 @@
 .about-info-card__body h1 {
     margin: 0 0 8px;
     color: #17202a;
-    font-size: clamp(28px, 4vw, 40px);
+    font-size: clamp(26px, 2.2vw, 30px);
     font-weight: 700;
     line-height: 1.15;
 }
@@ -18,14 +18,14 @@
     max-width: 900px;
     margin: 0;
     color: #34414e;
-    font-size: clamp(16px, 2vw, 22px);
+    font-size: clamp(15px, 1.2vw, 18px);
     line-height: 1.45;
 }
 
 .about-course-card .about-info-card__body h2 {
     margin: 0 0 28px;
     color: #17202a;
-    font-size: clamp(23px, 3vw, 32px);
+    font-size: clamp(19px, 1.6vw, 21px);
     font-weight: 700;
     line-height: 1.25;
 }
@@ -33,7 +33,7 @@
 .about-course-card .about-info-card__body h3 {
     margin: 0 0 12px;
     color: #536170;
-    font-size: 20px;
+    font-size: 16px;
     font-weight: 700;
 }
 
@@ -41,7 +41,7 @@
     margin: 0;
     padding-left: 24px;
     color: #34414e;
-    font-size: clamp(16px, 2vw, 22px);
+    font-size: clamp(15px, 1.1vw, 17px);
     line-height: 1.55;
 }
 
@@ -183,16 +183,24 @@
     box-shadow: 0 4px 14px rgba(11, 31, 51, 0.035);
 }
 
+.certificate-about-page .page-heading h1 {
+    font-size: 30px;
+}
+
+.certificate-about-page .page-heading p {
+    font-size: 16px;
+}
+
 .about-academic-card h2 {
     margin: 0 0 18px;
     color: #17202a;
-    font-size: 20px;
+    font-size: 18px;
 }
 
 .about-academic-card h3 {
     margin: 0 0 10px;
     color: #617181;
-    font-size: 13px;
+    font-size: 14px;
 }
 
 .about-academic-card ul {
@@ -202,6 +210,8 @@
     margin: 0;
     padding-left: 20px;
     color: #344454;
+    font-size: 16px;
+    line-height: 1.5;
 }
 
 @media (max-width: 600px) {
@@ -248,7 +258,7 @@
     }
 
     .about-academic-card h2 {
-        font-size: 18px;
+        font-size: 17px;
     }
 
     .about-academic-card ul {
