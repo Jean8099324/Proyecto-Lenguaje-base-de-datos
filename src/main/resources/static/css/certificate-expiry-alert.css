@@ -87,6 +87,36 @@
     font-size: 12px;
 }
 
+.about-academic-card {
+    margin: 22px 0;
+    padding: 22px 24px;
+    border: 1px solid #d8e1e8;
+    border-radius: 12px;
+    background: #fff;
+    box-shadow: 0 4px 14px rgba(11, 31, 51, 0.035);
+}
+
+.about-academic-card h2 {
+    margin: 0 0 18px;
+    color: #17202a;
+    font-size: 20px;
+}
+
+.about-academic-card h3 {
+    margin: 0 0 10px;
+    color: #617181;
+    font-size: 13px;
+}
+
+.about-academic-card ul {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 24px;
+    margin: 0;
+    padding-left: 20px;
+    color: #344454;
+}
+
 @media (max-width: 600px) {
     .certificate-status-panel {
         padding: 18px;
@@ -97,5 +127,17 @@
         padding-left: 14px;
         font-size: 12px;
         text-align: center;
+    }
+
+    .about-academic-card {
+        padding: 18px;
+    }
+
+    .about-academic-card h2 {
+        font-size: 18px;
+    }
+
+    .about-academic-card ul {
+        display: block;
     }
 }
