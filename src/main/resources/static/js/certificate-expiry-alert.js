@@ -14,7 +14,7 @@
 
     const stylesheet = document.createElement("link");
     stylesheet.rel = "stylesheet";
-    stylesheet.href = "/css/certificate-expiry-alert.css";
+    stylesheet.href = "/css/certificate-expiry-alert.css?v=20261126-2";
     document.head.appendChild(stylesheet);
 
     if (!aboutPanel) {

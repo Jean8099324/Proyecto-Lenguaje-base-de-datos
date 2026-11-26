@@ -167,11 +167,16 @@
 .login-footer .deployment-version {
     margin: 5px 0 0;
     color: #919ba5;
-    font-size: 12px;
+    font-size: 11px;
 }
 
 .login-footer + .certificate-status-footer {
-    font-size: 12px;
+    margin-top: 6px;
+    padding: 6px 4px 0;
+    color: #919ba5;
+    font-size: 11px;
+    line-height: 1.45;
+    text-align: center;
 }
 
 .about-academic-card {
