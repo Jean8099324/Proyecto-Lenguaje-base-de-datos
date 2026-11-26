@@ -64,7 +64,7 @@
     padding: 9px 22px;
     border-top: 1px solid #e3e8ed;
     color: #84909a;
-    font-size: 11px;
+    font-size: 12px;
     line-height: 1.4;
     text-align: right;
 }
@@ -73,7 +73,7 @@
     display: block;
     margin: 9px 11px 0;
     color: rgba(255, 255, 255, 0.68);
-    font-size: 11px;
+    font-size: 12px;
     line-height: 1.45;
 }
 
@@ -95,7 +95,7 @@
     .certificate-status-footer {
         padding-right: 14px;
         padding-left: 14px;
-        font-size: 10px;
+        font-size: 12px;
         text-align: center;
     }
 }
