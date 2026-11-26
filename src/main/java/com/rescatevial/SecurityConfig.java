@@ -25,10 +25,11 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http,
                                                    RequestTimingFilter requestTimingFilter) throws Exception {
         http.authorizeHttpRequests(authorize -> authorize
-                .requestMatchers("/", "/login", "/error", "/css/**", "/js/**", "/img/**", "/fav/**",
+                .requestMatchers("/", "/login", "/error", "/api/certificate-status", "/css/**", "/js/**", "/img/**", "/fav/**",
                         "/webjars/**", "/favicon.ico", "/error/**")
                 .permitAll()
                 .requestMatchers("/incidentes/clientes/asociar/**").hasRole("ADMIN")
+                .requestMatchers("/acerca-de").hasAnyRole("ADMIN", "CLIENT")
                 .requestMatchers("/cliente/**").hasAnyRole("ADMIN", "CLIENT")
                 .requestMatchers("/incidentes/clientes/**", "/incidentes/clientes").hasRole("ADMIN")
                 .requestMatchers("/usuarios/**").hasRole("ADMIN")

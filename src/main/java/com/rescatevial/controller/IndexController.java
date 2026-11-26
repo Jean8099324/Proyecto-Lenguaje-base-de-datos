@@ -2,6 +2,7 @@ package com.rescatevial.controller;
 
 import com.rescatevial.service.DashboardService;
 import java.util.Locale;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -23,6 +24,15 @@ public class IndexController {
     @GetMapping("/login")
     public String login() {
         return "auth/login";
+    }
+
+    @GetMapping("/acerca-de")
+    public String acercaDe(Authentication authentication, Model model) {
+        boolean administrador = authentication.getAuthorities().stream()
+                .anyMatch(authority -> "ROLE_ADMIN".equals(authority.getAuthority()));
+        model.addAttribute("esAdministrador", administrador);
+        model.addAttribute("portalCliente", !administrador);
+        return "acerca-de/index";
     }
 
     @GetMapping("/dashboard")

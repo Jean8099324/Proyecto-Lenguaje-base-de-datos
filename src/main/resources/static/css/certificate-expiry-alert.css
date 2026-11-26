@@ -1,0 +1,83 @@
+.certificate-status-panel {
+    display: grid;
+    gap: 10px;
+    margin-top: 22px;
+    padding: 22px 24px;
+    border: 1px solid #d8e1e8;
+    border-left: 6px solid #16834a;
+    border-radius: 12px;
+    background: #fff;
+    color: #17202a;
+}
+
+.certificate-status-panel__eyebrow {
+    color: #617181;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+}
+
+.certificate-status-panel__state {
+    font-size: 18px;
+    font-weight: 700;
+}
+
+.certificate-status-panel__countdown {
+    font-size: clamp(24px, 4vw, 36px);
+    font-variant-numeric: tabular-nums;
+    font-weight: 750;
+    letter-spacing: .02em;
+}
+
+.certificate-status-panel__note {
+    color: #617181;
+    font-size: 13px;
+}
+
+.certificate-status-panel--valid {
+    border-left-color: #16834a;
+    background: #edf8f1;
+    color: #145c37;
+}
+
+.certificate-status-panel--warning {
+    border-left-color: #d69200;
+    background: #fff6df;
+    color: #755000;
+}
+
+.certificate-status-panel--expired {
+    border-left-color: #b42332;
+    background: #fff0f0;
+    color: #842029;
+}
+
+.certificate-status-panel--unavailable {
+    border-left-color: #687684;
+    background: #f2f4f6;
+    color: #3d4b58;
+}
+
+.certificate-status-footer {
+    margin: 14px 0 0;
+    padding: 9px 22px;
+    border-top: 1px solid #e3e8ed;
+    color: #84909a;
+    font-size: 11px;
+    line-height: 1.4;
+    text-align: right;
+}
+
+@media (max-width: 600px) {
+    .certificate-status-panel {
+        padding: 18px;
+    }
+
+    .certificate-status-footer {
+        padding-right: 14px;
+        padding-left: 14px;
+        font-size: 10px;
+        text-align: center;
+    }
+}
