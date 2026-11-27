@@ -6,17 +6,20 @@ import java.security.NoSuchAlgorithmException;
 import java.util.HexFormat;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
+import org.springframework.security.web.csrf.CsrfFilter;
 import com.rescatevial.config.RequestTimingFilter;
-import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import org.springframework.security.web.csrf.CsrfException;
 
 @Configuration
 public class SecurityConfig {
+    private static final Logger authLog = LoggerFactory.getLogger("AUTH_FLOW");
+
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new LegacyCompatiblePasswordEncoder();
@@ -54,28 +57,37 @@ public class SecurityConfig {
                         .loginPage("/login")
                         .loginProcessingUrl("/login")
                         .successHandler(authenticationSuccessHandler())
-                        .failureUrl("/login?error=true")
+                        .failureHandler((request, response, exception) -> {
+                            authLog.warn("event=authentication-failure traceId={} exceptionType={} redirect=/login?error=true",
+                                    request.getAttribute(RequestTimingFilter.TRACE_ID_ATTRIBUTE),
+                                    exception.getClass().getSimpleName());
+                            response.sendRedirect(request.getContextPath() + "/login?error=true");
+                        })
                         .permitAll())
-                .addFilterBefore(requestTimingFilter, UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(requestTimingFilter, CsrfFilter.class)
                 .logout(logout -> logout
                         .logoutUrl("/logout")
-                        .logoutSuccessUrl("/login?logout=true")
+                        .logoutSuccessHandler((request, response, authentication) -> {
+                            authLog.info("event=logout-success traceId={} authenticated={} redirect=/login?logout=true",
+                                    request.getAttribute(RequestTimingFilter.TRACE_ID_ATTRIBUTE),
+                                    authentication != null && authentication.isAuthenticated());
+                            response.sendRedirect(request.getContextPath() + "/login?logout=true");
+                        })
                         .invalidateHttpSession(true)
                         .deleteCookies("JSESSIONID")
                         .permitAll())
                 .exceptionHandling(exception -> exception
                         .accessDeniedHandler((request, response, denied) -> {
-                            if (denied instanceof CsrfException
+                            boolean loginCsrf = denied instanceof org.springframework.security.web.csrf.CsrfException
                                     && "POST".equalsIgnoreCase(request.getMethod())
-                                    && "/login".equals(request.getServletPath())) {
-                                response.sendRedirect(request.getContextPath() + "/login?csrfError=true");
-                            } else {
-                                response.sendRedirect(request.getContextPath() + "/error/403");
-                            }
-                        }))
-                .sessionManagement(session -> session
-                        .maximumSessions(1)
-                        .maxSessionsPreventsLogin(false));
+                                    && "/login".equals(request.getServletPath());
+                            String destino = loginCsrf ? "/login?csrfError=true" : "/error/403";
+                            authLog.warn("event={} traceId={} path={} method={} exceptionType={} redirect={}",
+                                    loginCsrf ? "csrf-rejected" : "access-denied",
+                                    request.getAttribute(RequestTimingFilter.TRACE_ID_ATTRIBUTE),
+                                    request.getServletPath(), request.getMethod(), denied.getClass().getSimpleName(), destino);
+                            response.sendRedirect(request.getContextPath() + destino);
+                        }));
         return http.build();
     }
 
@@ -86,13 +98,19 @@ public class SecurityConfig {
                     .anyMatch(authority -> "ROLE_ADMIN".equals(authority.getAuthority()));
             boolean cliente = authentication.getAuthorities().stream()
                     .anyMatch(authority -> "ROLE_CLIENT".equals(authority.getAuthority()));
+            String destino;
             if (administrador) {
-                response.sendRedirect("/dashboard");
+                destino = "/dashboard";
             } else if (cliente) {
-                response.sendRedirect("/cliente/inicio");
+                destino = "/cliente/inicio";
             } else {
-                response.sendRedirect("/error/403");
+                destino = "/error/403";
             }
+            authLog.info("event=authentication-success traceId={} roles={} redirect={}",
+                    request.getAttribute(RequestTimingFilter.TRACE_ID_ATTRIBUTE),
+                    authentication.getAuthorities().stream()
+                            .map(authority -> authority.getAuthority()).sorted().toList(), destino);
+            response.sendRedirect(request.getContextPath() + destino);
         };
     }
 
