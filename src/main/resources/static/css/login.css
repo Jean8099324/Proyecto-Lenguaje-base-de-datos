@@ -398,6 +398,31 @@ body {
     opacity: 0.82;
 }
 
+.login-spinner {
+    display: none;
+    width: 15px;
+    height: 15px;
+    flex: 0 0 15px;
+    border: 2px solid rgba(147, 197, 253, 0.32);
+    border-top-color: #93c5fd;
+    border-radius: 50%;
+}
+
+.btn-login[aria-busy="true"] .login-spinner {
+    display: inline-block;
+    animation: login-spinner-rotate 0.8s linear infinite;
+}
+
+@keyframes login-spinner-rotate {
+    to { transform: rotate(360deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .btn-login[aria-busy="true"] .login-spinner {
+        animation-duration: 1.8s;
+    }
+}
+
 .btn-login i {
     font-size: 17px;
     transition: transform 0.2s ease;
