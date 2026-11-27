@@ -13,6 +13,7 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import com.rescatevial.config.RequestTimingFilter;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.csrf.CsrfException;
 
 @Configuration
 public class SecurityConfig {
@@ -63,7 +64,15 @@ public class SecurityConfig {
                         .deleteCookies("JSESSIONID")
                         .permitAll())
                 .exceptionHandling(exception -> exception
-                        .accessDeniedPage("/error/403"))
+                        .accessDeniedHandler((request, response, denied) -> {
+                            if (denied instanceof CsrfException
+                                    && "POST".equalsIgnoreCase(request.getMethod())
+                                    && "/login".equals(request.getServletPath())) {
+                                response.sendRedirect(request.getContextPath() + "/login?csrfError=true");
+                            } else {
+                                response.sendRedirect(request.getContextPath() + "/error/403");
+                            }
+                        }))
                 .sessionManagement(session -> session
                         .maximumSessions(1)
                         .maxSessionsPreventsLogin(false));

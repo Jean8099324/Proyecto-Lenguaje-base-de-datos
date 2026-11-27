@@ -112,6 +112,10 @@
                     Usuario o contraseña incorrectos, o cuenta inactiva.
                 </div>
 
+                <div th:if="${param.csrfError}" class="alert alert-warning" role="alert">
+                    La sesión del formulario venció. Vuelve a ingresar tus datos.
+                </div>
+
                 <!-- Mensaje de cierre de sesión -->
                 <div th:if="${param.logout}" class="alert alert-success" role="status">
                     <i class="bi bi-check-circle-fill"></i>
