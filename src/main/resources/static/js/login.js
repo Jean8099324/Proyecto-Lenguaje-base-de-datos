@@ -2,6 +2,7 @@ document.addEventListener("DOMContentLoaded", function () {
     // Elementos del formulario
     const passwordInput = document.getElementById("password");
     const togglePassword = document.getElementById("togglePassword");
+    const loginForm = document.getElementById("loginForm");
 
     // ==========================================
     // MOSTRAR / OCULTAR CONTRASEÑA
@@ -18,6 +19,26 @@ document.addEventListener("DOMContentLoaded", function () {
             if (icon) {
                 icon.classList.toggle("bi-eye", !isPassword);
                 icon.classList.toggle("bi-eye-slash", isPassword);
+            }
+        });
+    }
+
+    // Evita que un doble toque o Enter repetido envíe dos autenticaciones
+    // concurrentes con el mismo identificador de sesión.
+    if (loginForm) {
+        loginForm.addEventListener("submit", function (event) {
+            if (loginForm.dataset.submitting === "true") {
+                event.preventDefault();
+                return;
+            }
+
+            loginForm.dataset.submitting = "true";
+            const submitButton = loginForm.querySelector('button[type="submit"]');
+            if (submitButton) {
+                submitButton.disabled = true;
+                submitButton.setAttribute("aria-busy", "true");
+                const label = submitButton.querySelector("span");
+                if (label) label.textContent = "Ingresando...";
             }
         });
     }

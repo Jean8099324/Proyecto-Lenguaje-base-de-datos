@@ -393,6 +393,11 @@ body {
     box-shadow: 0 10px 25px rgba(11, 31, 51, 0.16);
 }
 
+.btn-login:disabled {
+    cursor: wait;
+    opacity: 0.82;
+}
+
 .btn-login i {
     font-size: 17px;
     transition: transform 0.2s ease;
